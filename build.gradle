@@ -32,6 +32,10 @@ dependencies {
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.1.Final'
 }
 
+jar {
+	enabled = false
+}
+
 tasks.named('javadoc') {
 	source = sourceSets.main.allJava
 	options.memberLevel = JavadocMemberLevel.PRIVATE
