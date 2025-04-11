@@ -45,3 +45,7 @@ tasks.named('javadoc') {
 test {
     useJUnitPlatform()
 }
+
+bootJar {
+	archiveFileName = "app.jar"
+}
