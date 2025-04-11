@@ -1,18 +1,15 @@
 plugins {
-	id 'org.springframework.boot' version '2.7.0'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	id 'org.springframework.boot' version '2.7.0'
+	id 'io.spring.dependency-management' version '1.1.7'
 }
 
-javadoc.options.encoding = 'UTF-8'
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
 
-tasks.withType(JavaCompile) {
-	options.encoding = 'UTF-8'
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(11)
 	}
 }
 
@@ -30,22 +27,22 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.mapstruct:mapstruct:1.5.1.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.1.Final'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'com.google.code.gson:gson'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly	'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+//	implementation 'mysql:mysql-connector-java:8.0.33'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
 }
 
 jar {
 	enabled = false
-}
-
-tasks.named('javadoc') {
-	source = sourceSets.main.allJava
-	options.memberLevel = JavadocMemberLevel.PRIVATE
-	destinationDir = file("build/docs/javadoc")
-}
-
-test {
-    useJUnitPlatform()
-}
-
-bootJar {
-	archiveFileName = "app.jar"
 }
