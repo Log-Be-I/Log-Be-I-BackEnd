@@ -37,4 +37,4 @@ jobs:
             docker pull 6feetlife/log_be_i:${GITHUB_SHA::7}
             docker stop logbei-container || true
             docker rm logbei-container || true
-            docker run -d --name logbei-container -p 8080:8080 6feetlife/log_be_i:${GITHUB_SHA::7}
+            docker run -d --name logbei-container -p 8080:8080 6feetlife/log_be_i:$IMAGE_TAG
