@@ -26,18 +26,6 @@ jobs:
           docker build -t log_be_i .
           docker tag log_be_i 6feetlife/logbei:${GITHUB_SHA::7}
           docker push 6feetlife/logbei:${GITHUB_SHA::7}
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
-            docker pull 6feetlife/logbei:${GITHUB_SHA::7}
-            docker stop logbei-container || true
-            docker rm logbei-container || true
-            docker run -d --name logbei-container -p 8080:8080 6feetlife/log_be_i:${GITHUB_SHA::7}
       #위 내용은 지속적 통합을 위한 스크립트입니다.
       #지속적 통합을 위한 스크립트 아래에 작성합니다.
       - name: Configure AWS credentials
@@ -63,7 +51,7 @@ jobs:
               '  sudo docker rm server',
               'fi',
               'sudo docker pull 6feetlife/logbei:${GITHUB_SHA::7}',
-              'sudo docker tag 6feetlife/logbei:${GITHUB_SHA::7} log_be_i',
-              'sudo docker run -d --name server -p 8080:8080 log_be_i'
+              'sudo docker tag 6feetlife/logbei:${GITHUB_SHA::7} logbei',
+              'sudo docker run -d --name server -p 8080:8080 logbei'
             ]" \
             --output text
