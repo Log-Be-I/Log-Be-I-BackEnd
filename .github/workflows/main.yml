@@ -24,8 +24,8 @@ jobs:
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
           docker build -t log_be_i .
-          docker tag log_be_i 6feetlife/log_be_i:${GITHUB_SHA::7}
-          docker push 6feetlife/log_be_i:${GITHUB_SHA::7}
+          docker tag log_be_i 6feetlife/log_be_i:$IMAGE_TAG
+          docker push 6feetlife/log_be_i:$IMAGE_TAG
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -34,7 +34,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
-            docker pull 6feetlife/log_be_i:${GITHUB_SHA::7}
+            docker pull 6feetlife/log_be_i:$IMAGE_TAG
             docker stop logbei-container || true
             docker rm logbei-container || true
             docker run -d --name logbei-container -p 8080:8080 6feetlife/log_be_i:$IMAGE_TAG
