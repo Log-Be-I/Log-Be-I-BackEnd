@@ -1,5 +1,6 @@
 package com.springboot.report.entity;
 
+import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class MonthlyReport {
+public class MonthlyReport extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
