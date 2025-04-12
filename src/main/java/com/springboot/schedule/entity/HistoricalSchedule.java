@@ -18,7 +18,7 @@ public class HistoricalSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long HistoricalScheduleId;
+    private Long hScheduleId;
 
     @Column(nullable = false)
     private String title;
@@ -32,9 +32,8 @@ public class HistoricalSchedule {
     @Enumerated(value = EnumType.STRING)
     private ScheduleStatus scheduleStatus = ScheduleStatus.SCHEDULE_REGISTERED;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @Column
+    private Long memberId;
 
     public enum ScheduleStatus {
         SCHEDULE_REGISTERED("일정 등록"),
