@@ -33,4 +33,12 @@ public class Answer {
         NOT_ANSWER,
         DONE_ANSWER
     }
+
+    // question 영속성
+    public void setQuestion(Question question){
+        this.question = question;
+        if(question != null && question.getAnswer() != this){
+            question.setAnswer(this);
+        }
+    }
 }

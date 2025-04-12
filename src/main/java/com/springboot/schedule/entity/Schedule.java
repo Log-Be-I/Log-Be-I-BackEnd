@@ -48,4 +48,12 @@ public class Schedule extends BaseEntity {
             this.status = status;
         }
     }
+
+    // member 영속성
+    public void setMember(Member member) {
+        this.member = member;
+        if(!member.getSchedules().contains(this)) {
+            member.setSchedule(this);
+        }
+    }
 }

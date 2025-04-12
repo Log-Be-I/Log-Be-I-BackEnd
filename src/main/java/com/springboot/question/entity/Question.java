@@ -54,4 +54,22 @@ public class Question extends BaseEntity {
             this.message = message;
         }
     }
+
+    // Member 영속성
+    public void setMember(Member member) {
+        this.member = member;
+        if(!member.getQuestions().contains(this)) {
+            member.setQuestion(this);
+        }
+    }
+
+    // answer 영속성
+    public void setAnswer(Answer answer){
+        this.answer = answer;
+        if(answer != null){
+            answer.setQuestion(this);
+            this.questionStatus = QuestionStatus.QUESTION_ANSWERED;
+        }
+    }
+
 }

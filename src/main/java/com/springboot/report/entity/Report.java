@@ -48,4 +48,11 @@ public class Report extends BaseEntity {
         }
     }
 
+    // monthlyReport 영속성
+    public void setMonthlyReport(MonthlyReport monthlyReport) {
+        this.monthlyReport = monthlyReport;
+        if(monthlyReport.getReports().contains(this)) {
+            monthlyReport.setReport(this);
+        }
+    }
 }

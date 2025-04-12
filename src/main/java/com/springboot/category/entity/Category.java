@@ -35,4 +35,22 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "record")
     private List<Record> records = new ArrayList<>();
+
+    // member 영속성
+    public void setMember(Member member) {
+        this.member = member;
+        if(!member.getCategories().contains(this)) {
+            member.setCategory(this);
+        }
+    }
+
+    // record 영속성
+    public void setRecord(Record record) {
+        if(record.getCategory() != this) {
+            record.setCategory(this);
+        }
+        if(!this.records.contains(record)) {
+            records.add(record);
+        }
+    }
 }

@@ -42,4 +42,11 @@ public class Keyword extends BaseEntity {
         }
     }
 
+    // member 영속성
+    public void setMember(Member member) {
+        this.member = member;
+        if(!member.getKeywords().contains(this)) {
+            member.setKeyword(this);
+        }
+    }
 }

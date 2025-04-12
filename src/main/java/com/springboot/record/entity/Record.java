@@ -1,6 +1,8 @@
 package com.springboot.record.entity;
 
 import com.springboot.audit.BaseEntity;
+import com.springboot.category.entity.Category;
+import com.springboot.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +32,14 @@ public class Record extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private RecordStatus recordStatus = RecordStatus.RECORD_REGISTERED;
 
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     public enum RecordStatus{
         RECORD_REGISTERED("기록 등록"),
         RECORD_UPDATED("기록 수정"),
@@ -40,6 +50,22 @@ public class Record extends BaseEntity {
 
         RecordStatus(String status) {
             this.status = status;
+        }
+    }
+
+    // member 영속성
+    public void setMember(Member member) {
+        this.member = member;
+        if(!member.getRecords().contains(this)) {
+            member.setRecord(this);
+        }
+    }
+
+    // category 영속성
+    public void setCategory(Category category) {
+        this.category = category;
+        if(!category.getRecords().contains(this)) {
+            category.setRecord(this);
         }
     }
 }
