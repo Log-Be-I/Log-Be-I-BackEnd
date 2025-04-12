@@ -34,7 +34,7 @@ public class Record {
         RECORD_UPDATED("기록 수정"),
         RECORD_DELETED("기록 삭제");
 
-        @Setter
+        @Getter
         private String status;
 
         RecordStatus(String status) {

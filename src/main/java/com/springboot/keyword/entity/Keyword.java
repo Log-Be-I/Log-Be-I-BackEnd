@@ -33,7 +33,7 @@ public class Keyword {
         KEYWORD_REGISTERED("키워드 등록"),
         KEYWORD_DELETED("키워드 삭제");
 
-        @Setter
+        @Getter
         private String status;
 
         KeywordStatus(String status) {

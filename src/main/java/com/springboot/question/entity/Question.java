@@ -46,13 +46,11 @@ public class Question {
         QUESTION_DELETED("질문 삭제"),
         QUESTION_DEACTIVED("질문 비활성화");
 
-        private final String message;
+        @Getter
+        private String message;
 
         QuestionStatus(String message) {
             this.message = message;
-        }
-        public String getMessage() {
-            return message;
         }
     }
 }

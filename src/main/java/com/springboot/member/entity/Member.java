@@ -51,7 +51,7 @@ public class Member {
         MEMBER_SLEEP("휴면 상태"),
         MEMBER_DELETEED("탈퇴 상태");
 
-        @Setter
+        @Getter
         private String status;
 
         MemberStatus(String status) {
