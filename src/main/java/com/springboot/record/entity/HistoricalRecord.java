@@ -27,6 +27,9 @@ public class HistoricalRecord {
     @Column(nullable = false)
     private String recordTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
+    @Column
+    private Long memberId;
+
     @Enumerated(value = EnumType.STRING)
     private RecordStatus recordStatus = RecordStatus.RECORD_REGISTERED;
 
