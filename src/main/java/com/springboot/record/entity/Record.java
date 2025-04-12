@@ -26,7 +26,7 @@ public class Record {
     @Column(nullable = false)
     private String recordTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private RecordStatus recordStatus = RecordStatus.RECORD_REGISTERED;
 
     public enum RecordStatus{
