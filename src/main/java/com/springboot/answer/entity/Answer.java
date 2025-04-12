@@ -1,5 +1,6 @@
 package com.springboot.answer.entity;
 
+import com.springboot.member.entity.Member;
 import com.springboot.question.entity.Question;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,15 +20,19 @@ public class Answer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long answerId;
 
-    @OneToOne
-    @JoinColumn(name = "question_id")
-    private Question question;
-
     @Column(nullable = false, length = 800)
     private String content;
 
     @Enumerated(value = EnumType.STRING)
     private AnswerStatus answerStatus = AnswerStatus.DONE_ANSWER;
+
+    @OneToOne
+    @JoinColumn(name = "question_id")
+    private Question question;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     public enum AnswerStatus {
         NOT_ANSWER,
@@ -37,7 +42,7 @@ public class Answer {
     // question 영속성
     public void setQuestion(Question question){
         this.question = question;
-        if(question != null && question.getAnswer() != this){
+        if(question != null && question.getAnswer() != this) {
             question.setAnswer(this);
         }
     }
