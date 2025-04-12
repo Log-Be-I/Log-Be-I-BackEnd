@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import javax.websocket.server.ServerEndpoint;
 import java.time.LocalDateTime;
 
 @Entity
