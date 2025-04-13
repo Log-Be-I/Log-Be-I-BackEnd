@@ -11,10 +11,27 @@ spring:
     hibernate:
       ddl-auto: create  # (1) 스키마 자동 생성
     show-sql: true      # (2) SQL 쿼리 출력
+  sql:
+    init:
+      data-locations: classpath*:db/h2/data.sql
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
 mail:
   address:
     admin: admin@gmail.com
-    password: 123456789
   data:
     redis:
       host: 127.0.0.1  #Redis 서버 주소 지정
