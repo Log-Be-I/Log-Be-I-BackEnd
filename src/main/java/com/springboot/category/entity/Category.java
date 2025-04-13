@@ -33,7 +33,7 @@ public class Category extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @OneToMany(mappedBy = "record")
+    @OneToMany(mappedBy = "category")
     private List<Record> records = new ArrayList<>();
 
     // member 영속성
