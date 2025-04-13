@@ -32,8 +32,12 @@ public class Question extends BaseEntity {
     private Member member;
 
 
-    @OneToOne(mappedBy = "question")
+    @OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private Answer answer;
+
+    public void deactivate(){
+        this.questionStatus = QuestionStatus.QUESTION_DEACTIVED;
+    }
 
     @Enumerated(value = EnumType.STRING)
     private QuestionStatus questionStatus = QuestionStatus.QUESTION_REGISTERED;

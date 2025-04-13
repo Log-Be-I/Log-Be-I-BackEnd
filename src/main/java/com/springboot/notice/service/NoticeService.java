@@ -1,4 +1,4 @@
-package com.springboot.notice;
+package com.springboot.notice.service;
 
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
@@ -75,6 +75,7 @@ public class NoticeService {
                 () -> new BusinessLogicException(ExceptionCode.NOTICE_NOT_EXIST)
         );
     }
+
 
 
 }

@@ -1,4 +1,6 @@
 spring:
+  application:
+    name:  log-be-i
   h2:
     console:
       enabled: true
@@ -9,3 +11,33 @@ spring:
     hibernate:
       ddl-auto: create  # (1) 스키마 자동 생성
     show-sql: true      # (2) SQL 쿼리 출력
+  data:
+    redis:
+      host: 127.0.0.1  #Redis 서버 주소 지정
+      port: 6379        # Redis 서버 포트 지정
+server:
+  servlet:
+    multipart:      #파일 업로드 활성화
+      enabled: true
+      max-file-size: 10MB     #최대 파일 크기 설정
+      file-size-threshold: 2KB    #임계값 설정
+jwt:
+  key: ${JWT_SECRET_KEY}
+  access-token-expiration-minutes: 40
+  refresh-token-expiration-minutes: 420
+springdoc:
+  api-docs:
+    enabled: true
+    version: openapi_3_0 #사용하는 버전을 명시
+    packagesToScan: mokindang.jubging #api-docs 의 스캔 범위를 지정
+    path: /v3/api-docs #api 문서 확인 경로, localhost:8080/v3/api-docs 로 접근
+
+  default-consumes-media-type: application/json #기본으로 설정되는 미디어타입 지정
+  auto-tag-classes: true #오토 태그 기능 활성화
+  groups:
+    enabled: false #api 그룹 기능, default는 true 이나 당장 사용하지 않기에 false 로 지정
+
+  swagger-ui:
+    operationsSorter: method #method 기준으로 정렬, 그외 alpha 로 정렬 가능
+    path: /swagger-ui.html #swagger ui 의 api 문서 확인 경로 defalut 는 /swagger-ui.html 이다.
+6ㅅ
