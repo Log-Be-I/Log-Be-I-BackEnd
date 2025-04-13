@@ -53,6 +53,9 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private boolean notification;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> roles = new ArrayList<>();
+
     @Enumerated(value = EnumType.STRING)
     private MemberStatus memberStatus = MemberStatus.MEMBER_ACTIVE;
 
