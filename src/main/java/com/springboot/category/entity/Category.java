@@ -33,6 +33,7 @@ public class Category extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+
     @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
     private List<Record> records = new ArrayList<>();
 

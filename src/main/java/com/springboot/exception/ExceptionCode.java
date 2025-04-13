@@ -17,6 +17,10 @@ public enum ExceptionCode {
     REPORT_NOT_FOUND(404, "Report Not found"),
     CANNOT_CANCEL(400, "Cannot cancel log"),
     LOG_TYPE_INVALID(400, "LogType invalid"),
+    EXISTING_MEMBER(409, "This MEMBER already exists"),
+    FORBIDDEN(403, "Access not allowed"),
+    MEMBER_DEACTIVATED(403,"This account deactivated"),
+    NICKNAME_ALREADY_USED(409, "This nickname already used"),
     UNAUTHORIZED(401, "Unauthorized");
 
     @Getter

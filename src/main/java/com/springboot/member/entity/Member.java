@@ -6,7 +6,6 @@ import com.springboot.keyword.entity.Keyword;
 import com.springboot.question.entity.Question;
 import com.springboot.record.entity.Record;
 import com.springboot.report.entity.MonthlyReport;
-import com.springboot.report.entity.Report;
 import com.springboot.schedule.entity.Schedule;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -52,6 +51,9 @@ public class Member extends BaseEntity {
 
     @Column(nullable = false)
     private boolean notification;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> roles = new ArrayList<>();
 
     @Enumerated(value = EnumType.STRING)
     private MemberStatus memberStatus = MemberStatus.MEMBER_ACTIVE;
