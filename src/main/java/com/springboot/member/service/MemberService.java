@@ -222,11 +222,11 @@ public class MemberService {
         }
     }
 
-//    // 구글 인증 정보로 유저 유무 확인
-//    public boolean googleOAuthValidateMember(String email) {
-//        // 이메일로 존재하는 회원인지 찾기
-//        Optional<Member> findMember = memberRepository.findByEmail(email);
-//        // 존재하는 유저라면 true 존재하지 않는다면 false 리턴
-//        return findMember.isPresent();
-//    }
+    // 구글 인증 정보로 유저 유무 확인
+    public boolean googleOAuthValidateMember(String email) {
+        // 이메일로 존재하는 회원인지 찾기
+        Optional<Member> findMember = memberRepository.findByEmail(email);
+        // 존재하는 유저라면 true 존재하지 않는다면 false 리턴
+        return findMember.isPresent();
+    }
 }

@@ -18,7 +18,7 @@ public class MemberPatchDto {
 
     private String region;
 
-    private String brith;
+    private String birth;
 
     private String profile;
 

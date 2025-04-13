@@ -25,7 +25,7 @@ public class MemberPostDto {
     private String region;
 
     @NotBlank
-    private String brith;
+    private String birth;
 
     @NotBlank
     private String profile;
