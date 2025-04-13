@@ -2,18 +2,21 @@ package com.springboot.member.service;
 
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.entity.DeletedMember;
 import com.springboot.member.entity.Member;
+import com.springboot.member.repository.DeletedMemberRepository;
 import com.springboot.member.repository.MemberRepository;
 import com.springboot.question.entity.Question;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,12 +24,18 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final CustomAuthorityUtils authorityUtils;
+    private final DeletedMemberRepository deletedMemberRepository;
+
+    @Value("${mail.address.admin}")
+    private String adminEmail;
 
     public Member createMember(Member member) {
         // 중복된 회원인지 이메일로 검증
         isMemberAlreadyRegistered(member.getEmail());
         // 중복된 닉네임인지 검증
         isNicknameAlreadyUsed(member);
+        // 탈퇴한 내역이 있는지 있다면 재가입 가능한지 검증
+        validateRejoinableMember(member);
 
         List<String> roles = authorityUtils.createRoles(member.getEmail());
         member.setRoles(roles);
@@ -47,13 +56,28 @@ public class MemberService {
             findMember.setNickname(
                     Optional.ofNullable(member.getNickname())
                             .orElse(findMember.getNickname()));
+            findMember.setProfile(
+                    Optional.ofNullable(member.getProfile())
+                            .orElse(findMember.getProfile()));
             findMember.setName(
                     Optional.ofNullable(member.getName())
                             .orElse(findMember.getName()));
+            findMember.setRegion(
+                    Optional.ofNullable(member.getRegion())
+                            .orElse(findMember.getRegion()));
+            findMember.setName(
+                    Optional.ofNullable(member.getName())
+                            .orElse(findMember.getName()));
+            findMember.setBirth(
+                    Optional.ofNullable(member.getBirth())
+                            .orElse(findMember.getBirth()));
+            findMember.setNotification(
+                    // Lombok 은 boolean 타입을 get 이 아닌 Is로 호출한다
+                    Optional.ofNullable(member.isNotification())
+                            .orElse(findMember.isNotification()));
             findMember.setMemberStatus(
                     Optional.ofNullable(member.getMemberStatus())
                             .orElse(findMember.getMemberStatus()));
-
         } else {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
         }
@@ -81,14 +105,43 @@ public class MemberService {
     }
 
     // 전체 조회는 관리자만 가능하다.
-    public Page<Member> findMembers(int page, int size) {
-        Page<Member> members = memberRepository.findAll(PageRequest.of(page, size, Sort.by("MemberId").ascending()));
+    public Page<Member> findMembers(int page, int size, String sortBy, String order, Map<String, String> filters) {
+        // 정렬 조건 (삼항연산자로 내림, 오름차순 선택)
+        Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
 
+        // 페이지네이션 양식 생성
+        Pageable pageable =  PageRequest.of(page, size, Sort.by(direction, sortBy));;
+
+        // 값이 존재하는 값의 키로 벨류를 조회하여 설정
+        Page<Member> members;
+        if (!filters.isEmpty()) {
+            String key = filters.keySet().iterator().next();
+            String value = filters.get(key);
+
+            switch (key) {
+                case "birth":
+                    members = memberRepository.findByBirth(value, pageable);
+                    break;
+                case "email":
+                    members = memberRepository.findByEmail(value, pageable);
+                    break;
+                case "name":
+                    members = memberRepository.findByName(value, pageable);
+                    break;
+                case "memberStatus":
+                    members = memberRepository.findByMemberStatus(Member.MemberStatus.valueOf(value), pageable);
+                    break;
+                default:
+                    members = memberRepository.findAll(pageable);
+            }
+        } else {
+            members = memberRepository.findAll(pageable);
+        }
         return members;
     }
 
     // 회원 삭제는 관리자와 유저 본인만 가능
-    public void deleteMember(int memberId, MemberDetails memberDetails) {
+    public void deleteMember(int memberId, MemberDetails memberDetails, String response) {
         // 존재하는 회원인지 검증
         Member member = validateExistingMember(memberId);
 
@@ -109,14 +162,18 @@ public class MemberService {
         if(value){
             // 회원 상태 변경
             member.setMemberStatus(Member.MemberStatus.MEMBER_DELETEED);
+            memberRepository.save(member);
             // 회원이 작성한 질문글 상태 변경
             member.getQuestions().stream()
                     .forEach(question -> question.setQuestionStatus(Question.QuestionStatus.QUESTION_DELETED));
+            // DeletedMember 에 post
+            DeletedMember deletedMember = new DeletedMember();
+            deletedMember.setMemberId(member.getMemberId());
+            deletedMember.setReason(response);
+            deletedMemberRepository.save(deletedMember);
         } else {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
         }
-
-        memberRepository.save(member);
     }
 
     // 이미 가입된 회원인지 중복 가입 예외처리
@@ -151,18 +208,29 @@ public class MemberService {
 
     // 회원 상태 검증
     public void validateMemberStatus(Member member) {
-        if (member.getMemberStatus() == Member.MemberStatus.MEMBER_SLEEP) {
-            throw new BusinessLogicException(ExceptionCode.MEMBER_DEACTIVATED);
-        } else if(member.getMemberStatus() == Member.MemberStatus.MEMBER_DELETEED) {
+        if (member.getMemberStatus() != Member.MemberStatus.MEMBER_ACTIVE) {
             throw new BusinessLogicException(ExceptionCode.MEMBER_DEACTIVATED);
         }
     }
 
-    // 구글 인증 정보로 유저 유무 확인
-    public boolean googleOAuthValidateMember(String email) {
-        // 이메일로 존재하는 회원인지 찾기
-        Optional<Member> findMember = memberRepository.findByEmail(email);
-        // 존재하는 유저라면 true 존재하지 않는다면 false 리턴
-        return findMember.isPresent();
+    // 탈퇴 회원 재가입 가능한지 검증
+    public void validateRejoinableMember (Member member) {
+        // 회원 id 로 탈퇴 내역있는지 조회
+        Optional<DeletedMember> deletedMember = deletedMemberRepository.findByMemberId(member.getMemberId());
+        // 탈퇴한 내역이 있다면
+        if(deletedMember.isPresent()) {
+            //탈퇴 후 6개월이 지나지 않았다면 회원가입 불가
+            if (LocalDateTime.now().isBefore(deletedMember.get().getCreatedAt().plusMonths(6))) {
+                throw new IllegalStateException("탈퇴 후 6개월 이내에는 재가입할 수 없습니다.");
+            }
+        }
     }
+
+//    // 구글 인증 정보로 유저 유무 확인
+//    public boolean googleOAuthValidateMember(String email) {
+//        // 이메일로 존재하는 회원인지 찾기
+//        Optional<Member> findMember = memberRepository.findByEmail(email);
+//        // 존재하는 유저라면 true 존재하지 않는다면 false 리턴
+//        return findMember.isPresent();
+//    }
 }
