@@ -20,6 +20,7 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final CustomAuthorityUtils authorityUtils;
 
     public Member createMember(Member member) {
         // 중복된 회원인지 이메일로 검증
@@ -32,7 +33,6 @@ public class MemberService {
 
         return memberRepository.save(member);
     }
-
 
     public Member updateMember(Member member, int memberId, MemberDetails memberDetails) {
         // MemberId 로 존재하는 회원인지 검증
@@ -94,7 +94,7 @@ public class MemberService {
 
         // 회원 상태가 활동중인지 검증
         // 활동중인 경우에만 삭제 가능 ( 보통 휴면계정 또한 휴면을 풀어야 삭제든 뭐든 가능)
-        if(member.getMemberStatus() != Member.MemberStatus.ACTIVE_MEMBER){
+        if(member.getMemberStatus() != Member.MemberStatus.MEMBER_ACTIVE){
             throw new BusinessLogicException(ExceptionCode.MEMBER_DEACTIVATED);
         }
 
@@ -108,7 +108,7 @@ public class MemberService {
 
         if(value){
             // 회원 상태 변경
-            member.setMemberStatus(Member.MemberStatus.DEACTIVATED_MEMBER);
+            member.setMemberStatus(Member.MemberStatus.MEMBER_DELETEED);
             // 회원이 작성한 질문글 상태 변경
             member.getQuestions().stream()
                     .forEach(question -> question.setQuestionStatus(Question.QuestionStatus.QUESTION_DELETED));
@@ -151,9 +151,9 @@ public class MemberService {
 
     // 회원 상태 검증
     public void validateMemberStatus(Member member) {
-        if (member.getMemberStatus() == Member.MemberStatus.DORMANT_MEMBER) {
-            throw new BusinessLogicException(ExceptionCode.MEMBER_DORMANT);
-        } else if(member.getMemberStatus() == Member.MemberStatus.DEACTIVATED_MEMBER) {
+        if (member.getMemberStatus() == Member.MemberStatus.MEMBER_SLEEP) {
+            throw new BusinessLogicException(ExceptionCode.MEMBER_DEACTIVATED);
+        } else if(member.getMemberStatus() == Member.MemberStatus.MEMBER_DELETEED) {
             throw new BusinessLogicException(ExceptionCode.MEMBER_DEACTIVATED);
         }
     }

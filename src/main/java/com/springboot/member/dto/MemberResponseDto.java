@@ -7,11 +7,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MemberResponseDto {
 
-    private String nickname;
-
     private String name;
 
-    private String phone;
+    private String nickname;
 
     private String email;
+
+    private String region;
+
 }
