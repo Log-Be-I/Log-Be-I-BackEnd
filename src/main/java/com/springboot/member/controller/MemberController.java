@@ -1,5 +1,6 @@
 package com.springboot.member.controller;
 
+import com.springboot.auth.utils.MemberDetails;
 import com.springboot.member.dto.MemberPatchDto;
 import com.springboot.member.dto.MemberPostDto;
 import com.springboot.member.entity.Member;
