@@ -18,7 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,10 +63,21 @@ public class MemberController {
 
     // 회원 전체 조회
     @GetMapping
-    public ResponseEntity getMembers(@Positive @RequestParam("page") int page,
-                                     @Positive @RequestParam("size") int size) {
+    public ResponseEntity getMembers(@Positive @RequestParam(value = "page") int page,
+                                     @Positive @RequestParam(value = "size") int size,
+                                     @RequestParam(value = "sortBy") String sortBy,
+                                     @RequestParam(value = "order") String order,
+                                     @RequestParam(value = "member_Status", required = false) String memberStatus,
+                                     @RequestParam(value = "birth", required = false) String birth,
+                                     @RequestParam(value = "email", required = false) String email,
+                                     @RequestParam(value =  "name", required = false) String name) {
+        Map<String, String> filters = new HashMap<>();
+        if (birth != null) filters.put("birth", birth);
+        if (email != null) filters.put("email", email);
+        if (name != null) filters.put("name", name);
+        if (memberStatus != null) filters.put("memberStatus", memberStatus);
 
-        Page<Member> pageMember = memberService.findMembers(page-1, size);
+        Page<Member> pageMember = memberService.findMembers(page-1, size, sortBy, order, filters);
 
         List<Member> members = pageMember.getContent();
 
@@ -75,9 +89,10 @@ public class MemberController {
     // 회원 삭제
     @DeleteMapping("/{memberId}")
     public ResponseEntity deleteMember(@Valid @PathVariable("memberId") int memberId,
-                                       @AuthenticationPrincipal MemberDetails memberDetails) {
-        memberService.deleteMember(memberId, memberDetails);
+                                       @AuthenticationPrincipal MemberDetails memberDetails,
+                                       @RequestBody String request) {
+        memberService.deleteMember(memberId, memberDetails, request);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
