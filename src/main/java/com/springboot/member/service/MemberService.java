@@ -1,5 +1,7 @@
 package com.springboot.member.service;
 
+import com.springboot.auth.utils.CustomAuthorityUtils;
+import com.springboot.auth.utils.MemberDetails;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.DeletedMember;
