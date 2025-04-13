@@ -6,7 +6,6 @@ import com.springboot.keyword.entity.Keyword;
 import com.springboot.question.entity.Question;
 import com.springboot.record.entity.Record;
 import com.springboot.report.entity.MonthlyReport;
-import com.springboot.report.entity.Report;
 import com.springboot.schedule.entity.Schedule;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
