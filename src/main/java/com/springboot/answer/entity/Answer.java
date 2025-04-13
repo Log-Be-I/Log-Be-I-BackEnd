@@ -26,13 +26,13 @@ public class Answer {
     @Enumerated(value = EnumType.STRING)
     private AnswerStatus answerStatus = AnswerStatus.DONE_ANSWER;
 
-    @OneToOne
-    @JoinColumn(name = "question_id")
-    private Question question;
-
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    @OneToOne
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
 
     public enum AnswerStatus {
         NOT_ANSWER,
