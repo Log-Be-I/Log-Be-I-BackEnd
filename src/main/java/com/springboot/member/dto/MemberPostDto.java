@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 @Getter
@@ -23,4 +24,12 @@ public class MemberPostDto {
     @NotBlank
     private String region;
 
+    @NotBlank
+    private String brith;
+
+    @NotBlank
+    private String profile;
+
+    @NotNull
+    private Boolean notification;
 }
