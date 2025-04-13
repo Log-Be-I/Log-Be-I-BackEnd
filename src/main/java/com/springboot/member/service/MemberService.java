@@ -61,15 +61,9 @@ public class MemberService {
             findMember.setProfile(
                     Optional.ofNullable(member.getProfile())
                             .orElse(findMember.getProfile()));
-            findMember.setName(
-                    Optional.ofNullable(member.getName())
-                            .orElse(findMember.getName()));
             findMember.setRegion(
                     Optional.ofNullable(member.getRegion())
                             .orElse(findMember.getRegion()));
-            findMember.setName(
-                    Optional.ofNullable(member.getName())
-                            .orElse(findMember.getName()));
             findMember.setBirth(
                     Optional.ofNullable(member.getBirth())
                             .orElse(findMember.getBirth()));
