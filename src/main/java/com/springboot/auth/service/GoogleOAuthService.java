@@ -109,7 +109,7 @@ public class GoogleOAuthService {
         // 응답에서 액세스 토큰 추출
         if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
             String accessToken = response.getBody().get("access_token").toString();
-//            String refreshToken = response.getBody().get("refresh_token").toString();
+            String refreshToken = response.getBody().get("refresh_token").toString();
 
             // 사용자 정보 조회 요청
             HttpHeaders userInfoHeaders = new HttpHeaders();
@@ -130,8 +130,8 @@ public class GoogleOAuthService {
                         .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
 
                 // refreshToken 저장
-//                member.setRefreshToken(refreshToken);
-//                memberRepository.save(member);
+                member.setRefreshToken(refreshToken);
+                memberRepository.save(member);
 
                 // Redis 저장 예시 (실제 RedisTemplate 주입 필요)
                 redisTemplate.opsForValue().set("google:" + email, accessToken,
