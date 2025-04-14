@@ -33,6 +33,9 @@ public class Category extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    //기본 카테고리 여부 등록(수정 및 삭제 금지)
+    @Column(nullable = false)
+    private boolean isDefault = false;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
     private List<Record> records = new ArrayList<>();

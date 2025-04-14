@@ -106,7 +106,7 @@ public class MemberService {
         Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
 
         // 페이지네이션 양식 생성
-        Pageable pageable =  PageRequest.of(page, size, Sort.by(direction, sortBy));;
+        Pageable pageable =  PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         // 값이 존재하는 값의 키로 벨류를 조회하여 설정
         Page<Member> members;

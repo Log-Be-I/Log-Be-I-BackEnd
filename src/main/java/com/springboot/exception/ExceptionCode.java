@@ -22,7 +22,9 @@ public enum ExceptionCode {
     MEMBER_DEACTIVATED(403,"This account deactivated"),
     NICKNAME_ALREADY_USED(409, "This nickname already used"),
     UNAUTHORIZED(401, "Unauthorized"),
-    SECURITY_EXCEPTION(401, "Security token is invalid or expired");
+    SECURITY_EXCEPTION(401, "Security token is invalid or expired"),
+    CATEGORY_EXISTS(409, "Category exists"),
+    CATEGORY_NOT_FOUND(404, "Category not found");
 
     @Getter
     private int status;
