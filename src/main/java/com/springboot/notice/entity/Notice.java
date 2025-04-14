@@ -1,6 +1,7 @@
 package com.springboot.notice.entity;
 
 import com.springboot.audit.BaseEntity;
+import com.springboot.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,11 @@ public class Notice extends BaseEntity {
 
     @Enumerated(value = EnumType.STRING)
     private IsPinned isPinned = IsPinned.NONE;
+
+    //관리자 페이지 구현시 적용
+    @ManyToOne
+    @JoinColumn(name =  "member_id")
+    private Member member;
 
     public enum IsPinned {
         NONE("고정되지 않음"),

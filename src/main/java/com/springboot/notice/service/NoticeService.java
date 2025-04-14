@@ -2,8 +2,10 @@ package com.springboot.notice.service;
 
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.service.MemberService;
 import com.springboot.notice.entity.Notice;
 import com.springboot.notice.repository.NoticeRepository;
+import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,17 +19,24 @@ import java.util.Optional;
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final MemberService memberService;
 
     //notice 등록
-    public Notice createNotice(Notice notice) {
+    public Notice createNotice(Notice notice, Long adminId) {
+        memberService.validateExistingMember(adminId);
+        //작성자가 관리자인지 확인하고 아니면 예외
+        AuthorizationUtils.verifyAuthorIsAdmin(notice.getMember().getMemberId(), adminId);
         //notice 등록 후 반환
         return noticeRepository.save(notice);
     }
-    //notice 수정 -> 수정 전 원본데이터 저장X
-    public Notice updateNotice(Notice notice) {
+    //notice 수정 -> 덮어씌워 저장
+    public Notice updateNotice(Notice notice, long adminId) {
        //기존 등록된 데이터
         Notice findNotice = findVerifiedNotice(notice.getNoticeId());
-
+       //등록된 회원인지 확인
+        memberService.validateExistingMember(adminId);
+        //관리자인지 확인
+       AuthorizationUtils.verifyAuthorIsAdmin(findNotice.getMember().getMemberId(), adminId);
         //변경가능한 필드 확인 후 변경
         Optional.ofNullable(notice.getNoticeType())
                 .ifPresent(noticeType -> findNotice.setNoticeType(noticeType));
@@ -62,8 +71,11 @@ public class NoticeService {
     }
 
     //notice 삭제: 상태변경
-    public void deleteNotice(long noticeId) {
+    public void deleteNotice(long noticeId, long adminId) {
         Notice findNotice = findVerifiedNotice(noticeId);
+        //회원인지 확인
+        memberService.validateExistingMember(adminId);
+        AuthorizationUtils.verifyAuthorIsAdmin(findNotice.getMember().getMemberId(), adminId);
         findNotice.setNoticeStatus(Notice.NoticeStatus.NOTICE_DELTETED);
         //변경사항 저장
         noticeRepository.save(findNotice);
