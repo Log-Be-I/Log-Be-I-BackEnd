@@ -212,7 +212,7 @@ public class MemberService {
     // 탈퇴 회원 재가입 가능한지 검증
     public void validateRejoinableMember (Member member) {
         // 회원 id 로 탈퇴 내역있는지 조회
-        Optional<DeletedMember> deletedMember = deletedMemberRepository.findByMemberId(member.getMemberId());
+        Optional<DeletedMember> deletedMember = deletedMemberRepository.findByEmail(member.getEmail());
         // 탈퇴한 내역이 있다면
         if(deletedMember.isPresent()) {
             //탈퇴 후 6개월이 지나지 않았다면 회원가입 불가

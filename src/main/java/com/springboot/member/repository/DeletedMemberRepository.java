@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface DeletedMemberRepository extends JpaRepository<DeletedMember, Long> {
     Optional<DeletedMember> findByMemberId(long memberId);
+    Optional<DeletedMember> findByEmail(String email);
 }
