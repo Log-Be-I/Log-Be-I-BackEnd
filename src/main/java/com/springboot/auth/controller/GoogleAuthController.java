@@ -6,10 +6,7 @@ import com.springboot.oauth.GoogleInfoDto;
 import com.springboot.oauth.OAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -49,6 +46,37 @@ public class GoogleAuthController {
             );
             // 유저 정보와 상태코드 반환
             return new ResponseEntity<>(payload, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/google/code")
+    public ResponseEntity<?> loginWithGoogleCode(@RequestBody Map<String, String> body) {
+        String code = body.get("code");
+        if (code == null || code.isBlank()) {
+            return ResponseEntity.badRequest().body("code is required");
+        }
+
+        try {
+            // 1. code -> access_token 교환
+            String accessToken = googleOAuthService.getAccessTokenFromCode(code);
+
+            // 2. access_token -> 사용자 정보 요청
+            GoogleInfoDto userInfo = oAuthService.authenticate(accessToken);
+
+            // 3. 기존 회원인지 확인
+            boolean isExisting = memberService.googleOAuthValidateMember(userInfo.getEmail());
+
+            if (isExisting) {
+                Map<String, String> tokens = googleOAuthService.processUserLogin(userInfo);
+                return ResponseEntity.ok(tokens);
+            } else {
+                return new ResponseEntity<>(
+                        Map.of("email", userInfo.getEmail(), "name", userInfo.getName()),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("구글 인증 실패: " + e.getMessage());
         }
     }
 }

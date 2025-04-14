@@ -52,6 +52,9 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private boolean notification;
 
+    @Column
+    private String refreshToken;
+
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();
 
