@@ -106,7 +106,7 @@ public class QuestionService {
 
     // 답변은 하나밖에 못하기 때문에 있는지 검증
     public void isAnswered(Long questionId){
-        if(findVerifiedQuestion(questionId).getQuestionStatus() == Question.QuestionStatus.QUESTION_ANSWERED){
+        if(findVerifiedQuestion(questionId).getQuestionAnswerStatus() == Question.QuestionAnswerStatus.DONE_ANSWER){
             throw new BusinessLogicException(ExceptionCode.CANNOT_CHANGE_QUESTION);
         }
     }
@@ -132,6 +132,9 @@ public class QuestionService {
 
     // 답변 삭제 시 질문의 answer null로 만드는 메서드
     public void setAnswerNull(long questionId){
-        findVerifiedQuestion(questionId).setAnswer(null);
+        Question findQuestion = findVerifiedQuestion(questionId);
+        findQuestion.setAnswer(null);
+        findQuestion.setQuestionAnswerStatus(Question.QuestionAnswerStatus.NONE_ANSWER);
+
     }
 }

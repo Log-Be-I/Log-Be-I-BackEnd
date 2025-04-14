@@ -24,26 +24,36 @@ public class AnswerService {
 
     public Answer createAnswer(Answer answer){
         memberService.validateExistingMember(answer.getMember().getMemberId());
+        //로그인한 회원이 관리자인지 확인
         AuthorizationUtils.verifyAdmin();
         Question question = verifyExistsAnswerInQuestion(answer);
-        question.setQuestionStatus(Question.QuestionStatus.QUESTION_ANSWERED);
+        question.setQuestionAnswerStatus(Question.QuestionAnswerStatus.DONE_ANSWER);
         return answerRepository.save(answer);
     }
 
-    public Answer updateAnswer(Answer answer){
-        AuthorizationUtils.verifyAdmin();
+    public Answer updateAnswer(Answer answer, long adminId){
         Answer findAnswer = findVerifiedAnswer(answer.getAnswerId());
+        //수정 하려는 사람이 관리자인지 확인
+        AuthorizationUtils.verifyAuthorIsAdmin(findAnswer.getMember().getMemberId(), adminId);
+
         Optional.ofNullable(answer.getContent())
                 .ifPresent(content -> findAnswer.setContent(answer.getContent()));
+        findAnswer.setAnswerStatus(Answer.AnswerStatus.ANSWER_UPDATED);
+
         return answerRepository.save(findAnswer);
     }
 
     @Transactional
-    public void deleteAnswer(long answerId){
-        AuthorizationUtils.verifyAdmin();
+    public void deleteAnswer(long answerId, long adminId){
+        //답변 존재 여부 확인
         Answer answer = findVerifiedAnswer(answerId);
+        //사용자가 관리자인지 확인
+        AuthorizationUtils.verifyAuthorIsAdmin(answer.getMember().getMemberId(), adminId);
+        //해당 답변이 달린 Question의 답변 상태 변경
         questionService.setAnswerNull(answer.getQuestion().getQuestionId());
-        answerRepository.deleteById(answerId);
+        //답변의 상태 반환
+        answer.setAnswerStatus(Answer.AnswerStatus.ANSWER_DELETED);
+        answerRepository.save(answer);
     }
 
     // 질문에 답변이 있는지 검증 후 질문 객체 반환

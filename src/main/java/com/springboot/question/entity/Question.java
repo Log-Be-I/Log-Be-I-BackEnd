@@ -35,19 +35,21 @@ public class Question extends BaseEntity {
     @OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private Answer answer;
 
-    public void deactivate(){
-        this.questionStatus = QuestionStatus.QUESTION_DEACTIVED;
-    }
-
     @Enumerated(value = EnumType.STRING)
-    private QuestionStatus questionStatus = QuestionStatus.QUESTION_REGISTERED;
+    private QuestionAnswerStatus questionAnswerStatus = QuestionAnswerStatus.NONE_ANSWER;
 
     @Column
     private String image;
 
+    @Enumerated(value = EnumType.STRING)
+    private QuestionStatus questionStatus = QuestionStatus.QUESTION_REGISTERED;
+
+    public void deactivate(){
+        this.questionStatus = QuestionStatus.QUESTION_DEACTIVED;
+    }
+
     public enum QuestionStatus {
         QUESTION_REGISTERED("질문 등록"),
-        QUESTION_ANSWERED("답변 완료"),
         QUESTION_DELETED("질문 삭제"),
         QUESTION_DEACTIVED("질문 비활성화");
 
@@ -59,6 +61,17 @@ public class Question extends BaseEntity {
         }
     }
 
+    public enum QuestionAnswerStatus{
+        NONE_ANSWER("답변 없음"),
+        DONE_ANSWER("답변 있음");
+
+        @Getter
+        private String status;
+
+        QuestionAnswerStatus(String status) {
+            this.status = status;
+        }
+    }
     // Member 영속성
     public void setMember(Member member) {
         this.member = member;
@@ -72,7 +85,7 @@ public class Question extends BaseEntity {
         this.answer = answer;
         if(answer != null){
             answer.setQuestion(this);
-            this.questionStatus = QuestionStatus.QUESTION_ANSWERED;
+            this.questionAnswerStatus = QuestionAnswerStatus.DONE_ANSWER;
         }
     }
 

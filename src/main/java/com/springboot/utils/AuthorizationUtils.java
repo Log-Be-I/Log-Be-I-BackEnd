@@ -43,6 +43,7 @@ public class AuthorizationUtils {
         }
         return true;
     }
+
     //작성자가 관리자인지 확인하고 아니라면 예외 던지는 메서드
     public static void verifyAuthorIsAdmin(long memberId, long adminId){
 

@@ -44,13 +44,14 @@ public class AnswerController {
                                       @Valid @RequestBody AnswerDto.Patch patchDto,
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         patchDto.setAnswerId(answerId);
-        Answer updatedAnswer = answerService.updateAnswer(mapper.answerPatchToAnswer(patchDto));
+        Answer updatedAnswer = answerService.updateAnswer(mapper.answerPatchToAnswer(patchDto), customPrincipal.getMemberId());
         return new ResponseEntity<>(new SingleResponseDto<>(updatedAnswer), HttpStatus.OK);
     }
 
     @DeleteMapping("/{answer-id}")
-    public ResponseEntity deleteAnswer(@PathVariable("answer-id") long answerId) {
-        answerService.deleteAnswer(answerId);
+    public ResponseEntity deleteAnswer(@PathVariable("answer-id") long answerId,
+                                       @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        answerService.deleteAnswer(answerId, customPrincipal.getMemberId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
