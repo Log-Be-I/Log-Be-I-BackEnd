@@ -54,4 +54,11 @@ public class Category extends BaseEntity {
             records.add(record);
         }
     }
+
+    public Category(String name, String image, Member member, List<Record> records) {
+        this.name = name;
+        this.image = image;
+        this.member = member;
+        this.records = records;
+    }
 }

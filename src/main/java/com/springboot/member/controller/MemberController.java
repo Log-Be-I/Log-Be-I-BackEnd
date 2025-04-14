@@ -40,6 +40,14 @@ public class MemberController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PatchMapping("/notification/{member-id}")
+    //앱 푸쉬 알림 수신동의 여부 저장
+    public ResponseEntity setNotificationConsent(@PathVariable("member-id") @Positive long memberId,
+                                                 @Valid  @RequestParam boolean notification){
+        memberService.updateNotificationConsent(memberId, notification);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     // 회원 수정
     @PatchMapping("/{memberId}")
     public ResponseEntity patchMember(@Valid @RequestBody MemberPatchDto requestBody,

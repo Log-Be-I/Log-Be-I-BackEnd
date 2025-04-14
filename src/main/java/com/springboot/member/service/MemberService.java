@@ -2,6 +2,8 @@ package com.springboot.member.service;
 
 import com.springboot.auth.utils.CustomAuthorityUtils;
 import com.springboot.auth.utils.MemberDetails;
+import com.springboot.category.entity.Category;
+import com.springboot.category.repository.CategoryRepository;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.DeletedMember;
@@ -9,6 +11,7 @@ import com.springboot.member.entity.Member;
 import com.springboot.member.repository.DeletedMemberRepository;
 import com.springboot.member.repository.MemberRepository;
 import com.springboot.question.entity.Question;
+import com.springboot.record.entity.Record;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final CustomAuthorityUtils authorityUtils;
     private final DeletedMemberRepository deletedMemberRepository;
+    private final CategoryRepository categoryRepository;
 
     @Value("${mail.address.admin}")
     private String adminEmail;
@@ -41,6 +46,14 @@ public class MemberService {
 
         List<String> roles = authorityUtils.createRoles(member.getEmail());
         member.setRoles(roles);
+        List<Record> records = new ArrayList<>();
+        List<String> categoryNames = List.of("일상", "소비", "건강", "할 일", "기타");
+        List<Category> categoryList = categoryNames.stream()
+                .map(categoryName -> new Category(categoryName, "url", member,records))
+                        .collect(Collectors.toList());
+        categoryList.stream().map(category -> categoryRepository.save(category));
+
+        member.setCategories(categoryList);
 
         return memberRepository.save(member);
     }
@@ -228,5 +241,14 @@ public class MemberService {
         Optional<Member> findMember = memberRepository.findByEmail(email);
         // 존재하는 유저라면 true 존재하지 않는다면 false 리턴
         return findMember.isPresent();
+    }
+
+    //검증 로직 : 회원가입 직후에 사용자에게 앱 푸쉬알림 허용 여부 받기
+    public void updateNotificationConsent(long memberId, boolean notification) {
+        Member findMember = validateExistingMember(memberId);
+
+        findMember.setNotification(notification);
+        //저장
+        memberRepository.save(findMember);
     }
 }
