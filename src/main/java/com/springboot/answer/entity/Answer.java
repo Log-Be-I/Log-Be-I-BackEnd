@@ -24,7 +24,7 @@ public class Answer {
     private String content;
 
     @Enumerated(value = EnumType.STRING)
-    private AnswerStatus answerStatus = AnswerStatus.DONE_ANSWER;
+    private AnswerStatus answerStatus = AnswerStatus.ANSWER_REGISTERED;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
@@ -35,8 +35,16 @@ public class Answer {
     private Question question;
 
     public enum AnswerStatus {
-        NOT_ANSWER,
-        DONE_ANSWER
+        ANSWER_REGISTERED("답변 등록"),
+        ANSWER_UPDATED("답변 수정"),
+        ANSWER_DELETED("답변 삭제");
+
+        @Getter
+        private String status;
+
+        AnswerStatus (String status) {
+            this.status = status;
+        }
     }
 
     // question 영속성

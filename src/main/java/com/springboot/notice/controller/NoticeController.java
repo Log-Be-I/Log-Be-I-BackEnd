@@ -1,5 +1,6 @@
 package com.springboot.notice.controller;
 
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.notice.service.NoticeService;
 import com.springboot.notice.dto.NoticeDto;
 import com.springboot.notice.entity.Notice;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,15 +48,17 @@ public class NoticeController {
     })
 
     @PostMapping
-    public ResponseEntity postNotice(@Valid @RequestBody NoticeDto.Post post){
-        Notice createdNotice = noticeService.createNotice(mapper.noticePostToNotice(post));
+    public ResponseEntity postNotice(@Valid @RequestBody NoticeDto.Post post,
+                                     @AuthenticationPrincipal CustomPrincipal customPrincipal){
+        long memberId = customPrincipal.getMemberId();
+        Notice createdNotice = noticeService.createNotice(mapper.noticePostToNotice(post), memberId);
         URI location = UriCreator.createUri(NOTICE_DEFAULT_URL, createdNotice.getNoticeId());
 
         return ResponseEntity.created(location).build();
     }
 
     //swagger API - 수정
-    @Operation(summary = "공지사항 등록", description = "기존에 등록된 공지 글을 수정합니다.")
+    @Operation(summary = "공지사항 수정", description = "기존에 등록된 공지 글을 수정합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "기존에 등록된 공지 글 수정 성공",
                     content = @Content(mediaType = "application/json",
@@ -69,10 +73,12 @@ public class NoticeController {
 
     @PatchMapping("/{notice-id}")
     public ResponseEntity patchNotice(@Valid @RequestBody NoticeDto.Patch patch,
-                                      @PathVariable("notice-id") @Positive long noticeId) {
+                                      @PathVariable("notice-id") @Positive long noticeId,
+                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        long memberId = customPrincipal.getMemberId();
         //수정할 notice
         patch.setNoticeId(noticeId);
-        Notice updateNotice = noticeService.updateNotice(mapper.noticePatchToNotice(patch));
+        Notice updateNotice = noticeService.updateNotice(mapper.noticePatchToNotice(patch), memberId);
         return new ResponseEntity<>(new SingleResponseDto<>(
                 mapper.noticeToNoticeResponse(updateNotice)), HttpStatus.OK);
     }
@@ -84,7 +90,7 @@ public class NoticeController {
                             schema = @Schema(implementation =  NoticeDto.Response.class))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"UNAUTHORIZED.\"}"))),
+                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
@@ -99,14 +105,14 @@ public class NoticeController {
     }
 
     //swagger API - 상세 조회
-    @Operation(summary = "공지사항 상세 조회", description = "등록된 공지 글을 상세 조회합니다.")
+    @Operation(summary = "공지사항 전체 목록 조회", description = "등록된 공지 목록을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "공지 글 조회",
+            @ApiResponse(responseCode = "200", description = "공지 글 전체 조회",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation =  NoticeDto.Response.class))),
-            @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
+            @ApiResponse(responseCode = "401", description =  "유효한 인증 자격 증명이 없습니다",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
+                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
@@ -123,19 +129,23 @@ public class NoticeController {
 
 
     //swagger API - 삭제
-    @Operation(summary = "공지사항 상세 조회", description = "등록된 공지 글을 상세 조회합니다.")
+    @Operation(summary = "공지사항 삭제", description = "등록된 공지 글을 삭제 합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "공지 글 삭제"),
+            @ApiResponse(responseCode = "204", description = "공지 글 삭제 성공"),
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
+                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"삭제 권한이 없습니다.\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
     })
+
     @DeleteMapping("/{notice-id}")
-    public ResponseEntity deleteNotice(@PathVariable("notice-id") @Positive long noticeId){
-        noticeService.deleteNotice(noticeId);
+    public ResponseEntity deleteNotice(@PathVariable("notice-id") @Positive long noticeId,
+                                       @AuthenticationPrincipal CustomPrincipal customPrincipal){
+
+        long memberId = customPrincipal.getMemberId();
+        noticeService.deleteNotice(noticeId, memberId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

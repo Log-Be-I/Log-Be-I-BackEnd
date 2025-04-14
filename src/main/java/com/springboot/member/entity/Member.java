@@ -76,6 +76,7 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     private List<Keyword> keywords = new ArrayList<>();
 
+
     public enum MemberStatus {
         MEMBER_ACTIVE("활동 중"),
         MEMBER_SLEEP("휴면 상태"),
