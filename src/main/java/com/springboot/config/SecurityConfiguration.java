@@ -90,7 +90,7 @@ public class SecurityConfiguration {
                 // 모든 요청에 대해 인증 없이 접근 가능
                 // 여러개의 요청에 대한 권한 정의가 가능하다
                 .authorizeHttpRequests(authorize -> authorize
-                        .antMatchers("/jwt/login", "/oauth/login").permitAll()
+                        .antMatchers("/auth/login", "/oauth/login").permitAll()
                         .antMatchers("/logout").permitAll()
                         // 접근 권한과 상관없이 post 요청이라면 허용한다
                         .antMatchers(HttpMethod.POST, "/*/members").permitAll()
@@ -166,8 +166,8 @@ public class SecurityConfiguration {
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
             // 인증 과정에서 RedisTemplate을 사용하기 위해 RedisTemplate 생성자에 전달
             JwtVerificationFilter jwtVerificationFilter = new JwtVerificationFilter(jwtTokenizer, authorityUtils, redisTemplate, memberDetailService);
-            JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, jwtTokenizer, redisTemplate);
-            jwtAuthenticationFilter.setFilterProcessesUrl("/jwt/login");
+            JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, jwtTokenizer, redisTemplate, memberRepository);
+            jwtAuthenticationFilter.setFilterProcessesUrl("/auth/login");
 
             // OAuthAuthenticationFilter 등록
             OAuthAuthenticationFilter oAuthAuthenticationFilter = new OAuthAuthenticationFilter("/oauth/login", authenticationManager);

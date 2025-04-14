@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.auth.dto.LoginDto;
 import com.springboot.auth.jwt.JwtTokenizer;
 import com.springboot.member.entity.Member;
+import com.springboot.member.repository.MemberRepository;
 import com.springboot.oauth.OAuthAuthenticationToken;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,20 +24,23 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenizer jwtTokenizer;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final MemberRepository memberRepository;
 
     @Value("${jwt.refresh-token-expiration-minutes}")
     private long refreshTokenExpiration;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtTokenizer jwtTokenizer, RedisTemplate<String, Object> redisTemplate) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtTokenizer jwtTokenizer, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenizer = jwtTokenizer;
         this.redisTemplate = redisTemplate;
+        this.memberRepository = memberRepository;
     }
 
     // Checked Exception 을 자동으로 처리해주는 역할
@@ -76,7 +80,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             Authentication authResult) throws ServletException, IOException {
         // .getPrincipal() = 인증된 사용자 정보를 가져와서 member 에 할당
         // 이때 UserDetails 타입으로 반환하는데 이때 member 클래스로 다운캐스팅 해야한다.
-        Member member = (Member) authResult.getPrincipal();
+
+        Optional<Member> findMember = memberRepository.findByEmail((String) authResult.getPrincipal());
+        Member member = findMember.orElse(null);
 
         // accessToken 생성
         String accessToken = delegateAccessToken(member);

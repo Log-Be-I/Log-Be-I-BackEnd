@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
-@RequestMapping("/v11/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class RedisController {
     private final RedisTemplate<String, Object> redisTemplate;
