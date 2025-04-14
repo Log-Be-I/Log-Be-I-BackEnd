@@ -121,9 +121,4 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             throw new IllegalStateException("Redis Key Does Not Exist for username: " + username);
         }
     }
-
-
-
-
-
 }

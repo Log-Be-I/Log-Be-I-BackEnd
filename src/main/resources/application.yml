@@ -1,4 +1,8 @@
 spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
   application:
     name:  log-be-i
   h2:
@@ -11,10 +15,27 @@ spring:
     hibernate:
       ddl-auto: create  # (1) 스키마 자동 생성
     show-sql: true      # (2) SQL 쿼리 출력
+  sql:
+    init:
+      data-locations: classpath*:db/h2/data.sql
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
 mail:
   address:
     admin: admin@gmail.com
-    password: 123456789
   data:
     redis:
       host: 127.0.0.1  #Redis 서버 주소 지정
@@ -26,7 +47,7 @@ server:
       max-file-size: 10MB     #최대 파일 크기 설정
       file-size-threshold: 2KB    #임계값 설정
 jwt:
-  key: ${JWT_SECRET_KEY}
+  key: 8789384784901348578909855909385jdhviwhwehuh2ur1031jrlngkjbagj02igerhgvn28u12843yt87iernuhg7834923084494283578932857893285489
   access-token-expiration-minutes: 40
   refresh-token-expiration-minutes: 420
 springdoc:
@@ -44,4 +65,6 @@ springdoc:
   swagger-ui:
     operationsSorter: method #method 기준으로 정렬, 그외 alpha 로 정렬 가능
     path: /swagger-ui.html #swagger ui 의 api 문서 확인 경로 defalut 는 /swagger-ui.html 이다.
-
+logging:
+  level:
+    org.springframework.security: DEBUG

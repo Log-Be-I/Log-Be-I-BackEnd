@@ -21,7 +21,8 @@ public enum ExceptionCode {
     FORBIDDEN(403, "Access not allowed"),
     MEMBER_DEACTIVATED(403,"This account deactivated"),
     NICKNAME_ALREADY_USED(409, "This nickname already used"),
-    UNAUTHORIZED(401, "Unauthorized");
+    UNAUTHORIZED(401, "Unauthorized"),
+    SECURITY_EXCEPTION(401, "Security token is invalid or expired");
 
     @Getter
     private int status;

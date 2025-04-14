@@ -26,7 +26,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/")
+@RequestMapping("/members")
 public class MemberController {
 
     private final MemberService memberService;
@@ -34,8 +34,8 @@ public class MemberController {
 
     // 회원가입
     @PostMapping
-    public ResponseEntity postMember(@Valid @RequestBody MemberPostDto requestBody) {
-        Member member = memberMapper.memberPostDtoToMember(requestBody);
+    public ResponseEntity postMember(@Valid @RequestBody MemberPostDto memberPostDto) {
+        Member member = memberMapper.memberPostDtoToMember(memberPostDto);
         memberService.createMember(member);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

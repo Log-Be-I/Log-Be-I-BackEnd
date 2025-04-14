@@ -37,6 +37,9 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.14'
+	// 구글 OAuth
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'com.google.api-client:google-api-client:1.34.1'
 //	implementation 'mysql:mysql-connector-java:8.0.33'
 }
 

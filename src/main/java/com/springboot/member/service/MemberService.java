@@ -212,7 +212,7 @@ public class MemberService {
     // 탈퇴 회원 재가입 가능한지 검증
     public void validateRejoinableMember (Member member) {
         // 회원 id 로 탈퇴 내역있는지 조회
-        Optional<DeletedMember> deletedMember = deletedMemberRepository.findByMemberId(member.getMemberId());
+        Optional<DeletedMember> deletedMember = deletedMemberRepository.findByEmail(member.getEmail());
         // 탈퇴한 내역이 있다면
         if(deletedMember.isPresent()) {
             //탈퇴 후 6개월이 지나지 않았다면 회원가입 불가
@@ -222,11 +222,11 @@ public class MemberService {
         }
     }
 
-//    // 구글 인증 정보로 유저 유무 확인
-//    public boolean googleOAuthValidateMember(String email) {
-//        // 이메일로 존재하는 회원인지 찾기
-//        Optional<Member> findMember = memberRepository.findByEmail(email);
-//        // 존재하는 유저라면 true 존재하지 않는다면 false 리턴
-//        return findMember.isPresent();
-//    }
+    // 구글 인증 정보로 유저 유무 확인
+    public boolean googleOAuthValidateMember(String email) {
+        // 이메일로 존재하는 회원인지 찾기
+        Optional<Member> findMember = memberRepository.findByEmail(email);
+        // 존재하는 유저라면 true 존재하지 않는다면 false 리턴
+        return findMember.isPresent();
+    }
 }

@@ -21,6 +21,10 @@ public class DeletedMember extends BaseEntity {
     @Column(nullable = false)
     private Long memberId;
 
+    // 생성될때 검증해야하는데 memberId가 없음 그래서 email 보조키로 들고있게함
+    @Column(nullable = false)
+    private String email;
+
     @Column(nullable = false)
     private String reason;
 }
