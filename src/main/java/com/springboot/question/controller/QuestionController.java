@@ -78,7 +78,7 @@ public class QuestionController {
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
+                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
     })
 
 
@@ -124,8 +124,9 @@ public class QuestionController {
         return new ResponseEntity<>(new MultiResponseDto<>
                 (questionMapper.questionsToQuestionResponses(questions), questionPage), HttpStatus.OK);
     }
+
     //swagger API - 회원의 문의글 전체 조회
-    @Operation(summary = "문의 글 상세 조회", description = "등록된 문의 글을 상세 조회합니다.")
+    @Operation(summary = "문의 글 목록 조회", description = "등록된 문의 글을 상세 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "문의 글 상세 조회",
                     content = @Content(mediaType = "application/json",
@@ -137,6 +138,7 @@ public class QuestionController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}")))
     })
+
     // 회원용 질문 목록 조회
     @GetMapping("/my")
     public ResponseEntity getMyQuestions(@Positive @RequestParam int page, @Positive @RequestParam int size,
@@ -161,9 +163,9 @@ public class QuestionController {
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
-            @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
+            @ApiResponse(responseCode = "404", description = "찾을 수 없는 문의 글",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
+                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
     })
     //질문 글 상세조회
     @GetMapping("/{question-id}")
@@ -176,17 +178,15 @@ public class QuestionController {
     }
 
     //swagger API - 삭제
-    @Operation(summary = "문의 글 상세 조회", description = "등록된 문의 글을 상세 조회합니다.")
+    @Operation(summary = "문의 글 삭제", description = "등록된 문의 글을 삭제 합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "문의 글 상세 조회",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = QuestionDto.Response.class))),
+            @ApiResponse(responseCode = "204", description = "문의 글 삭제"),
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
-            @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
+            @ApiResponse(responseCode = "404", description = "찾을 수 없는 문의 글",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
+                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
     })
 
     // 문의글 삭제
