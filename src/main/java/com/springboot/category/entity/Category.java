@@ -34,6 +34,8 @@ public class Category extends BaseEntity {
     private Member member;
 
     //기본 카테고리 여부 등록(수정 및 삭제 금지)
+    // ture = 기본 카테고리(삭제&수정 불가)
+    // false = 커스텀 카테고리 (삭제&수정 가능)
     @Column(nullable = false)
     private boolean isDefault = false;
 
@@ -46,11 +48,11 @@ public class Category extends BaseEntity {
         }
     }
 
-    public Category(String name, String image, Member member, List<Record> records) {
+    public Category(String name, String image, Member member, boolean isDefault) {
         this.name = name;
         this.image = image;
         this.member = member;
-        this.records = records;
+        this.isDefault = isDefault;
     }
 
 }

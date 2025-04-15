@@ -49,7 +49,7 @@ public class MemberService {
         List<Record> records = new ArrayList<>();
         List<String> categoryNames = List.of("일상", "소비", "건강", "할 일", "기타");
         List<Category> categoryList = categoryNames.stream()
-                .map(categoryName -> new Category(categoryName, "url", member,records))
+                .map(categoryName -> new Category(categoryName, "url", member,true))
                         .collect(Collectors.toList());
         categoryList.stream().map(category -> categoryRepository.save(category));
 
