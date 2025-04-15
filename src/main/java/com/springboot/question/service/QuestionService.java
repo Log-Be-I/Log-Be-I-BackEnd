@@ -30,12 +30,13 @@ public class QuestionService {
     }
 
     public Question updateQuestion(Question question, Long memberId){
+        Question findQuestion = findVerifiedQuestion(question.getQuestionId());
         // 작성자인지 확인
-        AuthorizationUtils.isOwner(question.getMember().getMemberId(), memberId);
+        AuthorizationUtils.isOwner(findQuestion.getMember().getMemberId(), memberId);
         // 답변 완료시 수정 불가능
         isAnswered(question.getQuestionId());
         // 제목, 내용, visibility
-        Question findQuestion = findVerifiedQuestion(question.getQuestionId());
+
         Optional.ofNullable(question.getTitle())
                 .ifPresent(title -> findQuestion.setTitle(title));
         Optional.ofNullable(question.getContent())
