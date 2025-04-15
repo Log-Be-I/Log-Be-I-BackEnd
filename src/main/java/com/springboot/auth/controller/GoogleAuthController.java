@@ -27,6 +27,7 @@ public class GoogleAuthController {
     }
 
     @PostMapping("/google")
+    // idToken 으로 email 과 name 파싱 및 존재하는 회원인지 검증
     public ResponseEntity<?> loginWithGoogle(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         GoogleInfoDto authenticate = oAuthService.authenticate(token);
