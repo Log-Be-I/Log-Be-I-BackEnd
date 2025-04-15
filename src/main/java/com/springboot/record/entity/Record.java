@@ -61,11 +61,4 @@ public class Record extends BaseEntity {
         }
     }
 
-    // category 영속성
-    public void setCategory(Category category) {
-        this.category = category;
-        if(!category.getRecords().contains(this)) {
-            category.setRecord(this);
-        }
-    }
 }
