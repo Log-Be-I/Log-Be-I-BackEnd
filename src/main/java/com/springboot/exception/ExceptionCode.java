@@ -24,7 +24,8 @@ public enum ExceptionCode {
     UNAUTHORIZED(401, "Unauthorized"),
     SECURITY_EXCEPTION(401, "Security token is invalid or expired"),
     CATEGORY_EXISTS(409, "Category exists"),
-    CATEGORY_NOT_FOUND(404, "Category not found");
+    CATEGORY_NOT_FOUND(404, "Category not found"),
+    RECORD_NOT_FOUND(404, "Record not found");
 
     @Getter
     private int status;

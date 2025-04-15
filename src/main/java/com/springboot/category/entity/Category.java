@@ -37,8 +37,6 @@ public class Category extends BaseEntity {
     @Column(nullable = false)
     private boolean isDefault = false;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
-    private List<Record> records = new ArrayList<>();
 
     // member 영속성
     public void setMember(Member member) {
@@ -48,13 +46,4 @@ public class Category extends BaseEntity {
         }
     }
 
-    // record 영속성
-    public void setRecord(Record record) {
-        if(record.getCategory() != this) {
-            record.setCategory(this);
-        }
-        if(!this.records.contains(record)) {
-            records.add(record);
-        }
-    }
 }

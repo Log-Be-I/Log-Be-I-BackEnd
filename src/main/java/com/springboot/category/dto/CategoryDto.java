@@ -24,7 +24,6 @@ public class CategoryDto {
         @Schema(name = "카테고리 아이콘", example = "일상.uri")
         @NotBlank
         private String image;
-        private Long memberId;
 
     }
 
@@ -54,7 +53,6 @@ public class CategoryDto {
         private String name;
         private String image;
         private Long memberId;
-        private List<Record> records;
     }
 
 }

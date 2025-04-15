@@ -1,7 +1,6 @@
 package com.springboot.record.dto;
 
 import com.springboot.category.dto.CategoryDto;
-import com.springboot.category.entity.Category;
 import com.springboot.record.entity.Record;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

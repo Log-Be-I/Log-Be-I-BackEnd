@@ -50,7 +50,6 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity postCategory(@RequestBody CategoryDto.Post post,
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        post.setMemberId(customPrincipal.getMemberId());
         Category category = categoryService.createCategory(mapper.categoryPostToCategory(post), customPrincipal.getMemberId());
         URI location = UriCreator.createUri(CATEGORY_DEFAULT_URL, category.getCategoryId());
 
@@ -75,7 +74,7 @@ public class CategoryController {
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}")))
     })
 
-    @PatchMapping("/{category-id")
+    @PatchMapping("/{category-id}")
     public ResponseEntity patchCategory(@Positive @PathVariable("category-id") long categoryId,
                                         @RequestBody CategoryDto.Patch patch,
                                         @AuthenticationPrincipal CustomPrincipal customPrincipal) {
