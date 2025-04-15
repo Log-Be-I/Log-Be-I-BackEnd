@@ -1,0 +1,33 @@
+package com.springboot.report.controller;
+
+import com.springboot.report.dto.ReportDto;
+import com.springboot.report.entity.Report;
+import com.springboot.report.mapper.ReportMapper;
+import com.springboot.report.service.ReportService;
+import com.springboot.utils.UriCreator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
+
+@RestController
+@RequestMapping("/reports")
+@RequiredArgsConstructor
+@Validated
+public class ReportController {
+    private final static String REPORT_DEFAULT_URL = "/reports";
+    private final ReportService reportService;
+    private final ReportMapper mapper;
+
+    @PostMapping
+    public ResponseEntity postReport(@RequestBody ReportDto.Post post) {
+        Report report = reportService.createReport(mapper.reportPostToReport(post));
+        URI location = UriCreator.createUri(REPORT_DEFAULT_URL, report.getReportId());
+        return ResponseEntity.created(location).build();
+    }
+}

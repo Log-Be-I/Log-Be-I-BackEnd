@@ -97,7 +97,7 @@ public class RecordService {
         }
 
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("recordTime"));
-        //특정 회원이 작성한 질문 목록조 회
+        //특정 회원이 작성한 질문 목록 조회
         return repository.findAllByMember_MemberId(memberId, pageable);
     }
 
