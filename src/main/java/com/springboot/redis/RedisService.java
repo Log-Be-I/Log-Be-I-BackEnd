@@ -20,6 +20,7 @@ public class RedisService {
 
      // 로그아웃 처리 - 토큰을 Redis 블랙리스트에 추가
     public boolean logout(String username) {
+        jwtTokenizer.deleteRegisterToken("google:" + username);
         return jwtTokenizer.deleteRegisterToken(username);
     }
 }

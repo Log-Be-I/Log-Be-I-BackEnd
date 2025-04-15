@@ -47,7 +47,7 @@ server:
       max-file-size: 10MB     #최대 파일 크기 설정
       file-size-threshold: 2KB    #임계값 설정
 jwt:
-  key: 8789384784901348578909855909385jdhviwhwehuh2ur1031jrlngkjbagj02igerhgvn28u12843yt87iernuhg7834923084494283578932857893285489
+  key: ${JWT_SECRET_KEY}
   access-token-expiration-minutes: 40
   refresh-token-expiration-minutes: 420
 springdoc:
