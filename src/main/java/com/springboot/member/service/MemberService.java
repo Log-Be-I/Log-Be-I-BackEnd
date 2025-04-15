@@ -1,5 +1,6 @@
 package com.springboot.member.service;
 
+import com.springboot.auth.service.GoogleOAuthService;
 import com.springboot.auth.utils.CustomAuthorityUtils;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.category.entity.Category;
@@ -10,6 +11,7 @@ import com.springboot.member.entity.DeletedMember;
 import com.springboot.member.entity.Member;
 import com.springboot.member.repository.DeletedMemberRepository;
 import com.springboot.member.repository.MemberRepository;
+import com.springboot.oauth.GoogleInfoDto;
 import com.springboot.question.entity.Question;
 import com.springboot.record.entity.Record;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +34,12 @@ public class MemberService {
     private final CustomAuthorityUtils authorityUtils;
     private final DeletedMemberRepository deletedMemberRepository;
     private final CategoryRepository categoryRepository;
+    private final GoogleOAuthService googleOAuthService;
 
     @Value("${mail.address.admin}")
     private String adminEmail;
 
-    public Member createMember(Member member) {
+    public Map<String, String> createMember(Member member) {
         // 중복된 회원인지 이메일로 검증
         isMemberAlreadyRegistered(member.getEmail());
         // 중복된 닉네임인지 검증
@@ -54,8 +57,9 @@ public class MemberService {
         categoryList.stream().map(category -> categoryRepository.save(category));
 
         member.setCategories(categoryList);
+        memberRepository.save(member);
 
-        return memberRepository.save(member);
+        return googleOAuthService.processUserLogin(new GoogleInfoDto(member.getEmail(),member.getName()));
     }
 
     public Member updateMember(Member member, int memberId, MemberDetails memberDetails) {

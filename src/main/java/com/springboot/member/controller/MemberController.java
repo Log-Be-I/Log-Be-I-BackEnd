@@ -10,7 +10,9 @@ import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,8 +38,26 @@ public class MemberController {
     @PostMapping
     public ResponseEntity postMember(@Valid @RequestBody MemberPostDto memberPostDto) {
         Member member = memberMapper.memberPostDtoToMember(memberPostDto);
-        memberService.createMember(member);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        Map<String, String> tokens = memberService.createMember(member);
+        // accessToken을 헤더에 추가
+        HttpHeaders headers = new HttpHeaders();
+        // refreshToken 쿠키 생성
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", tokens.get("refreshToken"))
+                // javaScript 에서 접근 불가능
+                .httpOnly(true)
+                // HTTPS 에서만 전송
+                .secure(false)
+                .domain("localhost")
+                // 모든 도메인 접근 허용
+                .path("/")
+                .sameSite("Lax")
+                // refreshToken 수명
+                .maxAge(7 * 24 * 60 * 60)
+                .build();
+        headers.set("Authorization", "Bearer " + tokens.get("accessToken"));
+        headers.set(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
     @PatchMapping("/notification/{member-id}")
