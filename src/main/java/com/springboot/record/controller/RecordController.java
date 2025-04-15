@@ -1,19 +1,79 @@
 package com.springboot.record.controller;
 
+import com.springboot.auth.utils.CustomPrincipal;
+import com.springboot.record.dto.RecordDto;
+import com.springboot.record.entity.Record;
 import com.springboot.record.mapper.RecordMapper;
 import com.springboot.record.service.RecordService;
+import com.springboot.responsedto.MultiResponseDto;
+import com.springboot.responsedto.SingleResponseDto;
+import com.springboot.utils.UriCreator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+
+import javax.validation.constraints.Positive;
+import java.net.URI;
+import java.util.List;
 
 @RestController
-@RequestMapping("/records")
+@RequestMapping
 @RequiredArgsConstructor
+@Validated
 public class RecordController {
     private final static String RECORD_DEFAULT_URL = "/records";
     private final RecordService recordService;
     private final RecordMapper mapper;
 
+    @PostMapping("/text-record")
+    public ResponseEntity postRecord(@RequestBody RecordDto.Post post,
+                                     @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        post.setMemberId(customPrincipal.getMemberId());
+        Record record = recordService.createRecord(mapper.recordPostDtoToRecord(post), customPrincipal.getMemberId());
+        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
+        return ResponseEntity.created(location).build();
+    }
 
+    @PatchMapping("/records/{record-id}")
+    public ResponseEntity patchRecord(@Positive @PathVariable("record-id") long recordId,
+                                      @RequestBody RecordDto.Patch patch,
+                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
+        patch.setMemberId(customPrincipal.getMemberId());
+        Record record = recordService.updateRecord(mapper.recordPatchDtoToRecord(patch), customPrincipal.getMemberId());
+        return new ResponseEntity<>( new SingleResponseDto<>(mapper.recordToRecordResponse(record)), HttpStatus.OK);
+
+    }
+
+    @GetMapping("/records/{record-id}")
+    public ResponseEntity getRecord(@Positive @PathVariable("record-id") long recordId,
+                                    @AuthenticationPrincipal CustomPrincipal customPrincipal){
+        Record record = recordService.findRecord(recordId, customPrincipal.getMemberId());
+
+        return new ResponseEntity<>( new SingleResponseDto<>(
+                mapper.recordToRecordResponse(record)), HttpStatus.OK);
+    }
+
+    @GetMapping("/records")
+    public ResponseEntity getRecords(@Positive @RequestParam("page") int page,
+                                     @Positive @RequestParam("size") int size,
+                                     @AuthenticationPrincipal CustomPrincipal customPrincipal){
+        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId());
+        List<Record> records = recordPage.getContent();
+
+        return new ResponseEntity<>( new MultiResponseDto<>(
+                mapper.recordsToRecordResponses(records), recordPage), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/records/{record-id}")
+    public ResponseEntity deleteRecord(@Positive @PathVariable("record-id") long recordId,
+                                       @AuthenticationPrincipal CustomPrincipal customPrincipal){
+        recordService.deleteRecord(recordId, customPrincipal.getMemberId());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 }

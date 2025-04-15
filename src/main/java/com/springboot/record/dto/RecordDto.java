@@ -50,8 +50,11 @@ public class RecordDto {
         @NotBlank(message = "내용을 작성해주세요.")
         private String content;
 
-        @Schema(description = "기록 분류", example = "1")
-        private long categoryId;
+        @Schema(description = "기록 작성 회원번호", example = "1")
+        private Long memberId;
+
+        @Schema(description = "기록 분류 번호", example = "1")
+        private Long categoryId;
 
     }
 

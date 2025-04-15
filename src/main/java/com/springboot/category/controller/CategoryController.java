@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Positive;
@@ -30,6 +31,7 @@ import java.util.List;
 @RequestMapping("/categories")
 @RequiredArgsConstructor
 @Tag(name = "Category API", description = "카테고리 API")
+@Validated
 public class CategoryController {
     private final static String CATEGORY_DEFAULT_URL = "/categories";
     private final CategoryService categoryService;
@@ -104,7 +106,7 @@ public class CategoryController {
     public ResponseEntity getMyCategory(@Positive @RequestParam("page") int page,
                                         @Positive @RequestParam("size") int size,
                                         @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Page<Category> categoryPage = categoryService.getCategories(page, size, customPrincipal.getMemberId());
+        Page<Category> categoryPage = categoryService.findCategories(page, size, customPrincipal.getMemberId());
         List<Category> categories = categoryPage.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>(
                 mapper.categoriesToCategoryResponses(categories), categoryPage), HttpStatus.OK
@@ -128,7 +130,7 @@ public class CategoryController {
     @GetMapping("/{category-id}")
     public ResponseEntity getCategory(@Positive @PathVariable("category-id") Long categoryId,
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Category getCategory = categoryService.getCategory(categoryId, customPrincipal.getMemberId());
+        Category getCategory = categoryService.findCategory(categoryId, customPrincipal.getMemberId());
         return new ResponseEntity<>(new SingleResponseDto<>(
                 mapper.categoryToCategoryResponse(getCategory)), HttpStatus.OK
         );
