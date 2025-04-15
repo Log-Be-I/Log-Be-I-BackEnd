@@ -42,6 +42,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ap-northeast-2
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: |
           aws ssm send-command \
             --instance-ids i-0b18f5134cc5231ad \
@@ -55,6 +57,8 @@ jobs:
               'sudo docker tag 6feetlife/logbei:${GITHUB_SHA::7} logbei',
               'sudo docker run -d --name server -p 8080:8080 \\
                   -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \\
+                  -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \\
+                  -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \\
                   logbei'
             ]" \
             --output text
