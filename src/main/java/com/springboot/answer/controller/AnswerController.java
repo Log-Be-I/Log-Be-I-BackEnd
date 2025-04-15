@@ -5,7 +5,6 @@ import com.springboot.answer.entity.Answer;
 import com.springboot.answer.mapper.AnswerMapper;
 import com.springboot.answer.service.AnswerService;
 import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.question.dto.QuestionDto;
 import com.springboot.responsedto.SingleResponseDto;
 import com.springboot.utils.UriCreator;
 import io.swagger.v3.oas.annotations.Operation;

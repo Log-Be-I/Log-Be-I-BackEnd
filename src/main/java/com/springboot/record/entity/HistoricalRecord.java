@@ -23,15 +23,20 @@ public class HistoricalRecord {
 
     @Column(nullable = false)
     private String content;
-
-    @Column(nullable = false)
-    private String recordTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+//    @Column(nullable = false)
+//    private String recordTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
     @Column
     private Long memberId;
+    //데이터 이관 시점
+    @Column(nullable = false)
+    private LocalDateTime operationTime = LocalDateTime.now();
+
+    @Column
+    private Long originalRecordId;
 
     @Enumerated(value = EnumType.STRING)
-    private RecordStatus recordStatus = RecordStatus.RECORD_REGISTERED;
+    private RecordStatus recordStatus = RecordStatus.RECORD_UPDATED;
 
     public enum RecordStatus{
         RECORD_REGISTERED("기록 등록"),

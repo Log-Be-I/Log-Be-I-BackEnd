@@ -10,6 +10,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RecordMapper {
+    @Mapping(target = "member.memberId", source = "memberId")
     @Mapping(target = "category.categoryId", source = "categoryId")
     Record recordPostDtoToRecord(RecordDto.Post post);
     @Mapping(target = "category.categoryId", source = "categoryId")
