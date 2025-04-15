@@ -52,6 +52,8 @@ jobs:
               'fi',
               'sudo docker pull 6feetlife/logbei:${GITHUB_SHA::7}',
               'sudo docker tag 6feetlife/logbei:${GITHUB_SHA::7} logbei',
-              'sudo docker run -d --name server -p 8080:8080 logbei'
+              'sudo docker run -d --name server -p 8080:8080 \\
+                  -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \\
+                  logbei'
             ]" \
             --output text
