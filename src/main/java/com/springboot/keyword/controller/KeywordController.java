@@ -33,7 +33,7 @@ public class KeywordController {
     @PostMapping
     public ResponseEntity postKeyword(@Valid @RequestBody List<String> keywordStringList,
                                       @AuthenticationPrincipal MemberDetails memberDetails) {
-
+        // 키워드 생성
         keywordService.createKeyword(keywordStringList, memberDetails);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
