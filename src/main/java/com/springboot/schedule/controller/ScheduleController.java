@@ -40,6 +40,7 @@ public class ScheduleController {
     public ResponseEntity postAudioSchedule(@Valid @RequestBody SchedulePostDto schedulePostDto,
                                             @AuthenticationPrincipal MemberDetails memberDetails) {
 
+
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
