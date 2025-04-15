@@ -56,7 +56,7 @@ public class CategoryService {
     }
 
     //특정 회원의 카테고리 전체 조회
-    public Page<Category> getCategories (int page, int size, long memberId) {
+    public Page<Category> findCategories (int page, int size, long memberId) {
         memberService.validateExistingMember(memberId);
 
         if(page < 1){
@@ -70,7 +70,7 @@ public class CategoryService {
     }
 
     //카테고리 단일 조회
-    public Category getCategory (Long categoryId, Long memberId) {
+    public Category findCategory (Long categoryId, Long memberId) {
         Category findCategory = findVerifiedCategory(categoryId);
         //조회자가 작성자 or 관리자 인지 확인, 아니라면 예외처리
         AuthorizationUtils.isAdminOrOwner(findCategory.getCategoryId(), memberId);

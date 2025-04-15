@@ -106,7 +106,7 @@ public class CategoryController {
     public ResponseEntity getMyCategory(@Positive @RequestParam("page") int page,
                                         @Positive @RequestParam("size") int size,
                                         @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Page<Category> categoryPage = categoryService.getCategories(page, size, customPrincipal.getMemberId());
+        Page<Category> categoryPage = categoryService.findCategories(page, size, customPrincipal.getMemberId());
         List<Category> categories = categoryPage.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>(
                 mapper.categoriesToCategoryResponses(categories), categoryPage), HttpStatus.OK
@@ -130,7 +130,7 @@ public class CategoryController {
     @GetMapping("/{category-id}")
     public ResponseEntity getCategory(@Positive @PathVariable("category-id") Long categoryId,
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Category getCategory = categoryService.getCategory(categoryId, customPrincipal.getMemberId());
+        Category getCategory = categoryService.findCategory(categoryId, customPrincipal.getMemberId());
         return new ResponseEntity<>(new SingleResponseDto<>(
                 mapper.categoryToCategoryResponse(getCategory)), HttpStatus.OK
         );
