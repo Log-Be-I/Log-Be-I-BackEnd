@@ -23,7 +23,7 @@ public interface RecordMapper {
     default RecordDto.Response recordToRecordResponse(Record record) {
         return new RecordDto.Response(
                 record.getRecordId(),
-                record.getRecordTime(),
+                record.getRecordDateTime(),
                 record.getContent(),
                 record.getRecordStatus(),
                 record.getMember().getMemberId(),

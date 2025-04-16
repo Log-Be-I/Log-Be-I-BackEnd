@@ -8,6 +8,7 @@ import com.springboot.monthlyreport.entity.MonthlyReport;
 import com.springboot.monthlyreport.repository.MonthlyReportRepository;
 import com.springboot.report.entity.Report;
 import com.springboot.report.service.ReportService;
+import com.springboot.utils.AuthorizationUtils;
 import com.springboot.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,6 @@ public class MonthlyReportService {
     //새로운 Report 생성 시 추가하는 로직
     @Transactional
     public void addReportToMonthlyReport(Report report, long memberId) {
-
         //존재하는 회원인지 검증
         Member member = memberService.validateExistingMember(memberId);
         //Report.title 문자열 -> yyyy년 MM월
@@ -61,7 +61,26 @@ public class MonthlyReportService {
 
     }
 
-    //
+    //상세 조회
+    public MonthlyReport findMonthlyReport(long monthlyId, long memberId){
+        //존재하는 회원인지 확인
+        memberService.validateExistingMember(memberId);
+        //이미 등록된 monthlyReport인지 확인
+        MonthlyReport monthlyReport = findVerifiedMonthlyReport(monthlyId);
+        //작성자 본인 또는 관리자 인지 확인
+        AuthorizationUtils.isAdminOrOwner(monthlyReport.getMember().getMemberId(), memberId);
+        return monthlyReport;
+    }
+
+    //연도별 전체 조회
+    public List<MonthlyReport> findMonthlyReports(int year, long memberId) {
+        //존재하는 회원인지 확인
+        memberService.validateExistingMember(memberId);
+        //회원이 가지고 있는 List를 연도별 + 월별내림차순 형태로 반환
+        return findVerifiedMonthlyReportList(year, memberId);
+
+    }
+
 
     //Report title 중 년/월 까지 추출 (예 : 2025년 4월 1주차 -> 2025년 4월)
     public String splitReportTitle(String title){
@@ -79,19 +98,25 @@ public class MonthlyReportService {
     }
 
     //회원이 가지고 있는 monthlyReport 반환
-    public List<MonthlyReport> findVerifiedMonthlyReport(long memberId){
-        List<MonthlyReport> findMonthly = repository.findByMemberId(memberId);
-        if(findMonthly == null) {
-            throw new BusinessLogicException(ExceptionCode.MONTHLY_REPORT_NOT_FOUND);
-        }
+    public List<MonthlyReport> findVerifiedMonthlyReportList(int year, long memberId){
+        List<MonthlyReport> findMonthly = repository.findByMember_IdAndYearOrderByYearMonthDesc(memberId, year);
+
         return findMonthly;
+    }
+
+    //monthlyReport 반환
+    public MonthlyReport findVerifiedMonthlyReport(long monthlyId){
+
+        return repository.findById(monthlyId).orElseThrow(
+                () -> new BusinessLogicException(ExceptionCode.MONTHLY_REPORT_NOT_FOUND)
+        );
     }
 
     //LocalDate 로 monthlyReport 찾아서 반환
     public Optional<MonthlyReport> findVerifiedMonthlyReport(long memberId, LocalDate yaerMonth){
         //존재하는 회원인지 검증
         memberService.validateExistingMember(memberId);
-         return repository.findByMemberIdAndYearMonth(memberId, yaerMonth);
+         return repository.findByMember_MemberIdAndYearMonth(memberId, yaerMonth);
     }
 
     //이미 존재하는 Report의 경우 추가하지 않는다.

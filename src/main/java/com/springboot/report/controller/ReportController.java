@@ -1,5 +1,6 @@
 package com.springboot.report.controller;
 
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.report.dto.ReportDto;
 import com.springboot.report.entity.Report;
 import com.springboot.report.mapper.ReportMapper;
@@ -7,6 +8,7 @@ import com.springboot.report.service.ReportService;
 import com.springboot.utils.UriCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,8 +27,9 @@ public class ReportController {
     private final ReportMapper mapper;
 
     @PostMapping
-    public ResponseEntity postReport(@RequestBody ReportDto.Post post) {
-        Report report = reportService.createReport(mapper.reportPostToReport(post));
+    public ResponseEntity postReport(@RequestBody ReportDto.Post post,
+                                     @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        Report report = reportService.createReport(mapper.reportPostToReport(post), customPrincipal.getMemberId());
         URI location = UriCreator.createUri(REPORT_DEFAULT_URL, report.getReportId());
         return ResponseEntity.created(location).build();
     }
