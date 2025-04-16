@@ -4,6 +4,7 @@ import com.google.api.client.util.DateTime;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.service.MemberService;
 import com.springboot.redis.RedisService;
 import com.springboot.schedule.dto.GoogleEventDto;
 import com.springboot.schedule.entity.HistoricalSchedule;
@@ -31,6 +32,8 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final HistoricalScheduleRepository historicalScheduleRepository;
     private final RedisService redisService;
+    private final MemberService memberService;
+
     // 일정 등록 - 음성
 
 
@@ -44,22 +47,21 @@ public class ScheduleService {
     // 일정 조회_단일
     public Schedule findSchedule (long scheduleId) {
         // 일정 찾기
-        Optional<Schedule> findSchedule = scheduleRepository.findById(scheduleId);
-        Schedule schedule = findSchedule.orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
-
-        validateScheduleStatus(schedule);
-
-        return schedule;
+        return validateExistingSchedule(scheduleId);
     }
 
     // 일정 조회_전체
-    public Page<Schedule> findSchedules (int page, int size) {
+    public Page<Schedule> findSchedules (int page, int size, MemberDetails memberDetails) {
+        // member 검증
+        memberService.validateExistingMember(memberDetails.getMemberId());
         // 페이지네이션 양식 생성
         Pageable pageable =  PageRequest.of(page, size);
 
-        Page<Schedule> schedule = scheduleRepository.findAll(pageable);
+//        Page<Schedule> schedule = scheduleRepository.findAll(pageable);
 
-        return schedule;
+        // memberId 로 일정 찾기
+        return scheduleRepository.findAllByMember_MemberId(memberDetails.getMemberId(), pageable);
+
     }
 
     // 일정 수정
@@ -99,61 +101,16 @@ public class ScheduleService {
         scheduleRepository.save(findSchedule);
     }
 
-
     // 일정 삭제
     public void deletedSchedule (long scheduleId) {
         // scheduleId 로 schedule 찾기
-        Optional<Schedule> findSchedule = scheduleRepository.findById(scheduleId);
-        Schedule schedule = findSchedule.orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
+       Schedule schedule = validateExistingSchedule(scheduleId);
+       // 삭제 가능한 상태인지 확인
+        validateScheduleStatus(schedule);
         // schedule 삭제 상태로 변경
         schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_DELETED);
         // 상태 변경한 schedule 저장
         scheduleRepository.save(schedule);
-    }
-
-    // 구글 캘린더
-    public void sendEventToGoogleCalendar(GoogleEventDto dto) {
-        try {
-            // 서버에 저장된 accessToken (실제 환경에서는 DB, Redis, 혹은 사용자별 저장소에서 가져와야 함)
-            String accessToken = redisService.getGoogleAccessToken(dto.getCalendarId());
-
-            // 인증 설정
-            GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-
-            // 구글 Calendar 클라이언트 생성
-            Calendar calendar = new Calendar.Builder(
-                    GoogleNetHttpTransport.newTrustedTransport(),
-                    JacksonFactory.getDefaultInstance(),
-                    credential
-            ).setApplicationName("LogBeI").build();
-
-            // 이벤트 객체 생성
-            Event event = new Event()
-                    .setSummary(dto.getSummary())
-                    .setDescription(dto.getDescription())
-                    .setLocation(dto.getLocation());
-
-            // 날짜 설정
-            EventDateTime start = new EventDateTime()
-                    .setDateTime(new DateTime(dto.getStartDateTime()))
-                    .setTimeZone("Asia/Seoul");
-
-            EventDateTime end = new EventDateTime()
-                    .setDateTime(new DateTime(dto.getEndDateTime()))
-                    .setTimeZone("Asia/Seoul");
-
-            event.setStart(start);
-            event.setEnd(end);
-
-            // 캘린더 ID 설정 (없으면 기본값 "primary" 사용)
-//            String calendarId = dto.getCalendarId() != null ? dto.getCalendarId() : "primary";
-            String calendarId = "primary"; // 고정
-            // 구글 캘린더에 이벤트 삽입
-            calendar.events().insert(calendarId, event).execute();
-
-        } catch (Exception e) {
-            throw new RuntimeException("Google Calendar 이벤트 등록 실패: " + e.getMessage(), e);
-        }
     }
 
     // 존재하는 일정인지 확인
