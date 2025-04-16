@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Positive;
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -34,7 +36,14 @@ public class RecordController {
     public ResponseEntity postRecord(@RequestBody RecordDto.Post post,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         post.setMemberId(customPrincipal.getMemberId());
-        Record record = recordService.createRecord(mapper.recordPostDtoToRecord(post), customPrincipal.getMemberId());
+        //문자열을 LocalDateTime 로 변환
+        LocalDateTime recordDateTime = LocalDateTime.parse(post.getRecordDateTime());
+        //Dto-> Entity 변환
+        Record textRecord = mapper.recordPostDtoToRecord(post);
+        //LocalDate 타입으로 변경된 RecordTime set
+        textRecord.setRecordDateTime(recordDateTime);
+
+        Record record = recordService.createRecord(textRecord, customPrincipal.getMemberId());
         URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
         return ResponseEntity.created(location).build();
     }
@@ -44,7 +53,16 @@ public class RecordController {
                                       @RequestBody RecordDto.Patch patch,
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal){
         patch.setMemberId(customPrincipal.getMemberId());
-        Record record = recordService.updateRecord(mapper.recordPatchDtoToRecord(patch), customPrincipal.getMemberId());
+        //recordTime이 null이 아닐 때 변환
+        LocalDateTime recordDateTime = null;
+        if(patch.getRecordDateTime() != null) {
+            //문자열 -> LocalDateTime 타입으로 변환
+            recordDateTime = LocalDateTime.parse(patch.getRecordDateTime());
+        }
+
+        Record textRecord = mapper.recordPatchDtoToRecord(patch);
+        textRecord.setRecordDateTime(recordDateTime);
+        Record record = recordService.updateRecord(textRecord, customPrincipal.getMemberId());
         return new ResponseEntity<>( new SingleResponseDto<>(mapper.recordToRecordResponse(record)), HttpStatus.OK);
 
     }

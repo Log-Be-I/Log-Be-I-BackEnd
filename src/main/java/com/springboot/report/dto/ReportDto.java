@@ -1,7 +1,7 @@
 package com.springboot.report.dto;
 
 
-import com.springboot.report.entity.MonthlyReport;
+import com.springboot.monthlyreport.entity.MonthlyReport;
 import com.springboot.report.entity.Report;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -32,6 +32,7 @@ public class ReportDto {
         private String title;
         private String content;
         private Report.ReportType reportType;
+        private int periodNumber;
         private MonthlyReport monthlyReport;
     }
 }

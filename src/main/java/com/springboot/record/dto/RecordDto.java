@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 public class RecordDto {
 
@@ -20,7 +21,7 @@ public class RecordDto {
 
         @Schema(description = "기록 등록 시간", example = "09시 30분")
         @NotBlank
-        private String recordTime;
+        private String recordDateTime;
 
         @Schema(description = "기록의 내용", example = "아침에 삼각김밥 먹고, 약 먹음")
         @NotBlank(message = "내용을 작성해주세요.")
@@ -44,7 +45,7 @@ public class RecordDto {
 
         @Schema(description = "기록 등록 시간", example = "08시 30분")
         @NotBlank
-        private String recordTime;
+        private String recordDateTime;
 
         @Schema(description = "기록의 내용", example = "아침에 삼각김밥 먹고, 약 먹음")
         @NotBlank(message = "내용을 작성해주세요.")
@@ -62,7 +63,7 @@ public class RecordDto {
     @AllArgsConstructor
     public static class Response {
         private Long recordId;
-        private String recordTime;
+        private LocalDateTime recordTime;
         private String content;
         private Record.RecordStatus recordStatus;
         private long memberId;

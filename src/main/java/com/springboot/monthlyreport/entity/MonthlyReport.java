@@ -1,7 +1,8 @@
-package com.springboot.report.entity;
+package com.springboot.monthlyreport.entity;
 
 import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;
+import com.springboot.report.entity.Report;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
-package com.springboot.report.repository;
+package com.springboot.monthlyreport.repository;
 
-import com.springboot.report.entity.MonthlyReport;
+import com.springboot.monthlyreport.entity.MonthlyReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MonthlyReportRepository extends JpaRepository<MonthlyReport, Long> {
