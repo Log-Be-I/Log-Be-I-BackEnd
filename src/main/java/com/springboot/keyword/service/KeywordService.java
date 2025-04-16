@@ -19,7 +19,7 @@ public class KeywordService {
     private final MemberService memberService;
 
     // keyword 생성
-    public void createKeyword (List<String> keywordStringList, MemberDetails memberDetails) {
+    public void createKeyword (List<Keyword> keywordList, MemberDetails memberDetails) {
         //member 찾기
         Member member = memberService.validateExistingMember(memberDetails.getMemberId());
         // memberId 로 기존 키워드 리스트 찾기
@@ -27,16 +27,17 @@ public class KeywordService {
 
         // 새로운 키워드 리스트가 비어있다면 (기존 데이터 삭제 상태로 변경해달라는거임)
         // 기존 키워드 리스트에 값이 들어있다면 ( 기존 데이터 삭제 상태로 변경 )
-        if(keywordStringList.isEmpty() || !keywords.isEmpty()){
+        if(keywordList.isEmpty() || !keywords.isEmpty()){
             // 기존 키워드 상태 전부 "삭제 상태"로 변경
             keywords.stream().forEach(keyword -> {
                 keyword.setKeywordStatus(Keyword.KeywordStatus.KEYWORD_DELETED);
                 keywordRepository.save(keyword);
             });
         }
+
         // 키워드 객체 및 리스트 생성
-        List<Keyword> keywordList = keywordStringList.stream()
-                .map(keyword -> new Keyword(keyword, member)).collect(Collectors.toList());
+        List<Keyword> newKeywordList = keywordList.stream()
+                .map(keyword -> new Keyword(keyword.getName(), member)).collect(Collectors.toList());
 
         // 키워드 하나 하나 저장하기
         keywordList.stream().forEach(
