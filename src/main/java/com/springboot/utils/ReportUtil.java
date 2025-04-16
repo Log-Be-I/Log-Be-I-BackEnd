@@ -3,7 +3,6 @@ package com.springboot.utils;
 import com.springboot.record.entity.Record;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;
 import java.util.*;
@@ -40,7 +39,7 @@ public class ReportUtil {
     }
 
     /**
-     * Record 리스트를 주차별로 그룹핑
+     * Record 리스트를 월별로 그룹핑
      * @param records Record 리스트
      * @return 월별 key로, 해당 월의 Record 리스트를 value로 하는 Map
      */

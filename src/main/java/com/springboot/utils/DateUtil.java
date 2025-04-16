@@ -27,6 +27,16 @@ public class DateUtil {
         return LocalDate.parse(dateStr, formatter);
 
     }
+
+    //원하는 패턴 지정하여 LocalDate를 문자열로 변환
+    public static String formatLocalDateToString(LocalDate date, String pattern) {
+        if(date == null){
+            throw new IllegalArgumentException("날짜 데이터가 없습니다.");
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        return date.format(formatter);
+    }
+
     // "yyyy-MM-dd HH:mm:ss" 문자열을 LocalDateTime 타입으로 변환
     public static LocalDateTime parseToLocalDateTime(String dateTimeStr) {
         if (dateTimeStr == null || dateTimeStr.isBlank()) {

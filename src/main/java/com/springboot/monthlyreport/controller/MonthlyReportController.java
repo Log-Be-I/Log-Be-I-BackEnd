@@ -2,6 +2,7 @@ package com.springboot.monthlyreport.controller;
 
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.monthlyreport.dto.MonthlyReportDto;
+import com.springboot.monthlyreport.entity.MonthlyReport;
 import com.springboot.monthlyreport.mapper.MonthlyReportMapper;
 import com.springboot.monthlyreport.service.MonthlyReportService;
 import com.springboot.report.entity.Report;
@@ -26,14 +27,15 @@ public class MonthlyReportController {
     private final MonthlyReportService monthlyReportService;
     private final MonthlyReportMapper mapper;
 
-//    @PostMapping
-//    public ResponseEntity postMonthly(@RequestBody MonthlyReportDto.Post post,
-//                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
-//
-//        post.setMemberId(customPrincipal.getMemberId());
-//        //post에서 year, month 추출
-//        Report report = mapper.re
-//        URI location = UriCreator.createUri(MONTHLY_DEFAULT_URL, monthly);
-//        return ResponseEntity.created(location).build();
-//    }
+    @PostMapping
+    public ResponseEntity postMonthly(@RequestBody MonthlyReportDto.Post post,
+                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
+
+        post.setMemberId(customPrincipal.getMemberId());
+        //post에서 year, month 추출
+        MonthlyReport monthly = monthlyReportService.addReportToMonthlyReport(
+                mapper.monthlyPostToMonthly(post), customPrincipal.getMemberId());
+        URI location = UriCreator.createUri(MONTHLY_DEFAULT_URL, monthly.getMonthlyId());
+        return ResponseEntity.created(location).build();
+    }
 }

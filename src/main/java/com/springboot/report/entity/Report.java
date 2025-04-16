@@ -39,7 +39,7 @@ public class Report extends BaseEntity {
 
     public enum ReportType {
         REPORT_WEEKLY("주간 분석 정보"),
-        REPORT_MONTH("월간 분석 정보");
+        REPORT_MONTHLY("월간 분석 정보");
 
         @Getter
         private String status;
@@ -49,11 +49,11 @@ public class Report extends BaseEntity {
         }
     }
 
-    // monthlyReport 영속성
-    public void setMonthlyReport(MonthlyReport monthlyReport) {
-        this.monthlyReport = monthlyReport;
-        if(monthlyReport.getReports().contains(this)) {
-            monthlyReport.setReport(this);
-        }
-    }
+//    // monthlyReport 영속성
+//    public void setMonthlyReport(MonthlyReport monthlyReport) {
+//        this.monthlyReport = monthlyReport;
+//        if(monthlyReport.getReports().contains(this)) {
+//            monthlyReport.setReport(this);
+//        }
+//    }
 }

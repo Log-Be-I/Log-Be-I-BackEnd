@@ -7,6 +7,7 @@ import com.springboot.record.mapper.RecordMapper;
 import com.springboot.record.service.RecordService;
 import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
+import com.springboot.utils.DateUtil;
 import com.springboot.utils.UriCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,7 +38,7 @@ public class RecordController {
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         post.setMemberId(customPrincipal.getMemberId());
         //문자열을 LocalDateTime 로 변환
-        LocalDateTime recordDateTime = LocalDateTime.parse(post.getRecordDateTime());
+        LocalDateTime recordDateTime = DateUtil.parseToLocalDateTime(post.getRecordDateTime());
         //Dto-> Entity 변환
         Record textRecord = mapper.recordPostDtoToRecord(post);
         //LocalDate 타입으로 변경된 RecordTime set
@@ -54,11 +55,7 @@ public class RecordController {
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal){
         patch.setMemberId(customPrincipal.getMemberId());
         //recordTime이 null이 아닐 때 변환
-        LocalDateTime recordDateTime = null;
-        if(patch.getRecordDateTime() != null) {
-            //문자열 -> LocalDateTime 타입으로 변환
-            recordDateTime = LocalDateTime.parse(patch.getRecordDateTime());
-        }
+        LocalDateTime recordDateTime = DateUtil.parseToLocalDateTime(patch.getRecordDateTime());
 
         Record textRecord = mapper.recordPatchDtoToRecord(patch);
         textRecord.setRecordDateTime(recordDateTime);

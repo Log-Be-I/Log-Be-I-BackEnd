@@ -8,7 +8,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface MonthlyReportMapper {
-    MonthlyReport monthlyPostToMonthly(MonthlyReportDto.Post post);
     MonthlyReportDto.Response monthlyToMonthlyResponse(MonthlyReport monthlyReport);
     List<MonthlyReportDto.Response> monthliesToMonthlyResponses(List<MonthlyReport> monthlyReports);
 }

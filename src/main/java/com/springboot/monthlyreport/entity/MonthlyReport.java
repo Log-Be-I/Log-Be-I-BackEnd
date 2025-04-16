@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class MonthlyReport extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false)
+    private LocalDate yearMonth;    //2025-04-01 로 등록 -> 연/월만 기록 (검증)
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
@@ -42,13 +46,20 @@ public class MonthlyReport extends BaseEntity {
         }
     }
 
-    // report 영속성
-    public void setReport(Report report) {
-        if(report.getMonthlyReport() != this) {
-            report.setMonthlyReport(this);
-        }
-        if(!this.getReports().contains(report)) {
-            report.setMonthlyReport(this);
-        }
+    //report 영속성 -> MonthlyReport에서만 관리
+    public void addReport(Report report){
+        this.reports.add(report);
+        report.setMonthlyReport(this);
     }
+
+//     report 영속성
+//    public void setReport(Report report) {
+//        if(report.getMonthlyReport() != this) {
+//            report.setMonthlyReport(this);
+//        }
+//        if(!this.getReports().contains(report)) {
+//            report.setMonthlyReport(this);
+//        }
+//    }
+
 }
