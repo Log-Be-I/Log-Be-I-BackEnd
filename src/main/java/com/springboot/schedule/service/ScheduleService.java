@@ -115,7 +115,7 @@ public class ScheduleService {
     public void sendEventToGoogleCalendar(GoogleEventDto dto) {
         try {
             // 서버에 저장된 accessToken (실제 환경에서는 DB, Redis, 혹은 사용자별 저장소에서 가져와야 함)
-            String accessToken = redisService.getAccessToken("google");
+            String accessToken = redisService.getGoogleAccessToken(dto.getCalendarId());
 
             // 인증 설정
             GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);

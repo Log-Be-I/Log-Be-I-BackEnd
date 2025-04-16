@@ -135,7 +135,7 @@ public class GoogleOAuthService {
                 memberRepository.save(member);
 
                 // Redis 저장 예시 (실제 RedisTemplate 주입 필요)
-                redisTemplate.opsForValue().set("google", accessToken,
+                redisTemplate.opsForValue().set("google:"+ member.getEmail(), accessToken,
                     jwtTokenizer.getAccessTokenExpirationMinutes(), TimeUnit.MINUTES);
             }
         }
