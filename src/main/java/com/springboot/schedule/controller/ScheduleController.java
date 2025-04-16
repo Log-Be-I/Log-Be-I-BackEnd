@@ -8,6 +8,7 @@ import com.springboot.keyword.dto.KeywordResponseDto;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.responsedto.MultiResponseDto;
+import com.springboot.schedule.dto.GoogleEventDto;
 import com.springboot.schedule.dto.SchedulePatchDto;
 import com.springboot.schedule.dto.SchedulePostDto;
 import com.springboot.schedule.dto.ScheduleResponseDto;
@@ -74,7 +75,21 @@ public class ScheduleController {
         Schedule schedule = scheduleMapper.schedulePostDtoToSchedule(schedulePostDto);
         scheduleService.postTextSchedule(schedule, memberDetails);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        // 구글 캘린더
+        try {
+            // google calendar 등록시 필수 정보
+            GoogleEventDto googleEventDto = new GoogleEventDto();
+            googleEventDto.setStartDateTime(schedule.getStartDateTime());
+            googleEventDto.setEndDateTime(schedule.getEndDateTime());
+            googleEventDto.setSummary(schedule.getTitle());
+            googleEventDto.setCalendarId(memberDetails.getEmail());
+
+            scheduleService.sendEventToGoogleCalendar(googleEventDto);
+            return ResponseEntity.ok(googleEventDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Google Calendar API 호출 실패: " + e.getMessage());
+        }
+
     }
 
     //swagger API - 수정

@@ -49,7 +49,8 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             String token = authorizationHeader.substring(7);
 
             try {
-                Map<String, Object> claims = verifyJws(request);
+//                Map<String, Object> claims = verifyJws(request);
+                Map<String, Object> claims = verifyJws(token);
                 // Redis 에서 토큰 검증
                 isTokenValidInRedis(claims);
                 setAuthenticationToContext(claims);
@@ -84,22 +85,22 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     }
 
     // JWT 를 검증하는데 사용되는 메서드
-    private Map<String, Object> verifyJws(HttpServletRequest request) {
+    private Map<String, Object> verifyJws(String token) {
         // HTTP 요청에서 Authorization 헤더 값을 가져온다.
         // 이때 Bearer(공백포함) 을 제거한 순수한 JWT 값만 추출한다
-        String jws = request.getHeader("Authorization").replace("Bearer ","");
+//        String jws = request.getHeader("Authorization").replace("Bearer ","");
         // 시크릿키를 인코딩해서 가져온다
         String base64EncodedSecretKey = jwtTokenizer.encodeBase64SecretKey(jwtTokenizer.getSecretKey());
         // JWT 를 검증하고 payload(Claims) 데이터를 Map 형태로 추출
         // getClaims() 는 JWT 의 서명을 검증한 후, Payload 부분을 파싱하여 반환
-        Map<String, Object> claims = jwtTokenizer.getClaims(jws, base64EncodedSecretKey).getBody();
+        Map<String, Object> claims = jwtTokenizer.getClaims(token, base64EncodedSecretKey).getBody();
         return claims;
     }
 
     // 시큐리티 context 에 있는 인증 정보를 변경
     private void setAuthenticationToContext(Map<String, Object> claims) {
         // payload 에서 username 가져오는데 String 으로 형변환 해줘야함
-        String username = (String)claims.get("username");
+        String username = (String)claims.get("sub");
         UserDetails userDetails = memberDetailService.loadUserByUsername(username);
 
         // payload 에서 권한 목록 가져와서 권한 생성후 리스트화
@@ -112,7 +113,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
     // redis 에서 토큰을 검증하는 메서드 추가
     private void isTokenValidInRedis(Map<String, Object> claims) {
-        String username = Optional.ofNullable((String)claims.get("username"))
+        String username = Optional.ofNullable((String)claims.get("sub"))
                 .orElseThrow(() -> new NullPointerException("Username is Null"));
 
         Boolean hasKey = redisTemplate.hasKey(username);

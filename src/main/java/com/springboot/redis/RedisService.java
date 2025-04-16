@@ -23,4 +23,11 @@ public class RedisService {
         jwtTokenizer.deleteRegisterToken("google:" + username);
         return jwtTokenizer.deleteRegisterToken(username);
     }
+
+    public String getAccessToken(String email) {
+        // 예: "ACCESS_TOKEN:{email}" 같은 key에 저장되어 있다고 가정
+        String key = "ACCESS_TOKEN:" + email;
+        Object tokenObj = redisTemplate.opsForValue().get(key);
+        return tokenObj != null ? tokenObj.toString() : null;
+    }
 }

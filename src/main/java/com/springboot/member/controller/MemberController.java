@@ -79,6 +79,8 @@ public class MemberController {
         headers.set("Authorization", "Bearer " + tokens.get("accessToken"));
         headers.set(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
+
+
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
