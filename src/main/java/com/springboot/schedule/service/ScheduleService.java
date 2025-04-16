@@ -1,8 +1,12 @@
 package com.springboot.schedule.service;
 
+import com.google.api.client.util.DateTime;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.service.MemberService;
+import com.springboot.redis.RedisService;
+import com.springboot.schedule.dto.GoogleEventDto;
 import com.springboot.schedule.entity.HistoricalSchedule;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.repository.HistoricalScheduleRepository;
@@ -11,12 +15,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +31,8 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final HistoricalScheduleRepository historicalScheduleRepository;
+    private final RedisService redisService;
+    private final MemberService memberService;
 
     // 일정 등록 - 음성
 
@@ -38,22 +47,21 @@ public class ScheduleService {
     // 일정 조회_단일
     public Schedule findSchedule (long scheduleId) {
         // 일정 찾기
-        Optional<Schedule> findSchedule = scheduleRepository.findById(scheduleId);
-        Schedule schedule = findSchedule.orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
-
-        validateScheduleStatus(schedule);
-
-        return schedule;
+        return validateExistingSchedule(scheduleId);
     }
 
     // 일정 조회_전체
-    public Page<Schedule> findSchedules (int page, int size) {
+    public Page<Schedule> findSchedules (int page, int size, MemberDetails memberDetails) {
+        // member 검증
+        memberService.validateExistingMember(memberDetails.getMemberId());
         // 페이지네이션 양식 생성
         Pageable pageable =  PageRequest.of(page, size);
 
-        Page<Schedule> schedule = scheduleRepository.findAll(pageable);
+//        Page<Schedule> schedule = scheduleRepository.findAll(pageable);
 
-        return schedule;
+        // memberId 로 일정 찾기
+        return scheduleRepository.findAllByMember_MemberId(memberDetails.getMemberId(), pageable);
+
     }
 
     // 일정 수정
@@ -96,8 +104,9 @@ public class ScheduleService {
     // 일정 삭제
     public void deletedSchedule (long scheduleId) {
         // scheduleId 로 schedule 찾기
-        Optional<Schedule> findSchedule = scheduleRepository.findById(scheduleId);
-        Schedule schedule = findSchedule.orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
+       Schedule schedule = validateExistingSchedule(scheduleId);
+       // 삭제 가능한 상태인지 확인
+        validateScheduleStatus(schedule);
         // schedule 삭제 상태로 변경
         schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_DELETED);
         // 상태 변경한 schedule 저장

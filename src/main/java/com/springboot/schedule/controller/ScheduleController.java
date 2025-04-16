@@ -1,6 +1,8 @@
 package com.springboot.schedule.controller;
 
 
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Events;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
@@ -8,12 +10,12 @@ import com.springboot.keyword.dto.KeywordResponseDto;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.responsedto.MultiResponseDto;
-import com.springboot.schedule.dto.SchedulePatchDto;
-import com.springboot.schedule.dto.SchedulePostDto;
-import com.springboot.schedule.dto.ScheduleResponseDto;
+import com.springboot.schedule.dto.*;
 import com.springboot.schedule.entity.Schedule;
+import com.springboot.schedule.mapper.GoogleEventMapper;
 import com.springboot.schedule.mapper.ScheduleMapper;
 import com.springboot.schedule.repository.ScheduleRepository;
+import com.springboot.schedule.service.GoogleCalendarService;
 import com.springboot.schedule.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,6 +44,8 @@ public class ScheduleController {
     private final MemberService memberService;
     private final ScheduleRepository scheduleRepository;
     private final ScheduleMapper scheduleMapper;
+    private final GoogleCalendarService googleCalendarService;
+    private final GoogleEventMapper googleEventMapper;
 
     // 일정 등록 - 음성
     @PostMapping("/audio-schedules")
@@ -74,7 +78,21 @@ public class ScheduleController {
         Schedule schedule = scheduleMapper.schedulePostDtoToSchedule(schedulePostDto);
         scheduleService.postTextSchedule(schedule, memberDetails);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        // 구글 캘린더
+        try {
+            // google calendar 등록시 필수 정보
+            GoogleEventDto googleEventDto = new GoogleEventDto();
+            googleEventDto.setStartDateTime(schedule.getStartDateTime());
+            googleEventDto.setEndDateTime(schedule.getEndDateTime());
+            googleEventDto.setSummary(schedule.getTitle());
+            googleEventDto.setCalendarId(memberDetails.getEmail());
+
+            googleCalendarService.sendEventToGoogleCalendar(googleEventDto);
+            return ResponseEntity.ok(googleEventDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Google Calendar API 호출 실패: " + e.getMessage());
+        }
+
     }
 
     //swagger API - 수정
@@ -159,9 +177,22 @@ public class ScheduleController {
                 .filter(schedule -> schedule.getStartDateTime().startsWith(target))
                 .collect(Collectors.toList());
 
+        // 시간 객체 생성
+        String timeMin = googleCalendarService.getStartOfMonth(year, month);
+        String timeMax = googleCalendarService.getEndOfMonth(year, month);
+
+        // 구글 캘린더 조회 요청
+        List<Event> eventList = googleCalendarService.getEventsFromGoogleCalendar(timeMin, timeMax);
+
+        // 구글 일정 조회 리스트
+        List<GoogleEventDto> googleEventDtoList = googleEventMapper.eventListToGoogleEventDtoList(eventList);
+        // 서버 db 일정 조회 리스트
         List<ScheduleResponseDto> scheduleResponseDtos = scheduleMapper.schedulesToScheduleResponseDtos(scheduleList);
 
-        return new ResponseEntity<>(scheduleResponseDtos, HttpStatus.OK);
+        // 그냥 한번에 조회해볼려고 만들었음 (저장은 잘 되고 구글에서 잘 받아오는지)
+        ScheduleBundleResponseDto scheduleBundleResponseDto = new ScheduleBundleResponseDto(scheduleResponseDtos, googleEventDtoList);
+
+        return new ResponseEntity<>(scheduleBundleResponseDto, HttpStatus.OK);
     }
 
     //swagger API - 삭제
@@ -172,6 +203,7 @@ public class ScheduleController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
     })
+
     // 일정 삭제
     @DeleteMapping("/schedules/{schedule-id}")
     public ResponseEntity deleteSchedule(@PathVariable("schedule-id") @Positive long scheduleId,

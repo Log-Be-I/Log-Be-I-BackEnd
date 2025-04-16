@@ -20,7 +20,22 @@ public class RedisService {
 
      // 로그아웃 처리 - 토큰을 Redis 블랙리스트에 추가
     public boolean logout(String username) {
-        jwtTokenizer.deleteRegisterToken("google:" + username);
+        jwtTokenizer.deleteRegisterToken("ACCESS_TOKEN:" + username);
         return jwtTokenizer.deleteRegisterToken(username);
+    }
+
+    public String getAccessToken(String email) {
+        // 예: "ACCESS_TOKEN:{email}" 같은 key에 저장되어 있다고 가정
+        String key = "ACCESS_TOKEN:" + email;
+        Object tokenObj = redisTemplate.opsForValue().get(key);
+        return tokenObj != null ? tokenObj.toString() : null;
+    }
+
+    // 구글 redis getAccessToken
+    public String getGoogleAccessToken(String email) {
+        // 예: "ACCESS_TOKEN:{email}" 같은 key에 저장되어 있다고 가정
+        String key = "google:" + email;
+        Object tokenObj = redisTemplate.opsForValue().get(key);
+        return tokenObj != null ? tokenObj.toString() : null;
     }
 }

@@ -172,8 +172,8 @@ public class JwtTokenizer {
     }
 
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+        String encodedKey = encodeBase64SecretKey(secretKey);
+        return getKeyFromBase64EncodedKey(encodedKey);
     }
 
 }

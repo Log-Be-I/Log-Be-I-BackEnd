@@ -70,9 +70,10 @@ public class GoogleOAuthService {
         Date refreshTokenExp = jwtTokenizer.getTokenExpiration(jwtTokenizer.getRefreshTokenExpirationMinutes());
         // JWT 액세스 토큰 생성
         String accessToken = jwtTokenizer.generateAccessToken(claims, subject,
-                accessTokenExp, jwtTokenizer.getSecretKey());
+                // base64 로 인코딩 완료
+                accessTokenExp, jwtTokenizer.encodeBase64SecretKey(jwtTokenizer.getSecretKey()));
         // JWT 리프레시 토큰 생성
-        String refreshToken = jwtTokenizer.generateRefreshToken(subject, refreshTokenExp, jwtTokenizer.getSecretKey(), accessToken);
+        String refreshToken = jwtTokenizer.generateRefreshToken(subject, refreshTokenExp, jwtTokenizer.encodeBase64SecretKey(jwtTokenizer.getSecretKey()), accessToken);
 
         // 토큰을 Map 형태로 반환
         Map<String, String> tokens = new HashMap<>();
@@ -134,7 +135,7 @@ public class GoogleOAuthService {
                 memberRepository.save(member);
 
                 // Redis 저장 예시 (실제 RedisTemplate 주입 필요)
-                redisTemplate.opsForValue().set("google:" + email, accessToken,
+                redisTemplate.opsForValue().set("google:"+ member.getEmail(), accessToken,
                     jwtTokenizer.getAccessTokenExpirationMinutes(), TimeUnit.MINUTES);
             }
         }
