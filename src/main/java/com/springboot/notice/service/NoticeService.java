@@ -84,7 +84,7 @@ public class NoticeService {
     //검증로직 : noticeId로 DB 조회, 없으면 예외처리
     public Notice findVerifiedNotice(long noticeId) {
         return noticeRepository.findById(noticeId).orElseThrow(
-                () -> new BusinessLogicException(ExceptionCode.NOTICE_NOT_EXIST)
+                () -> new BusinessLogicException(ExceptionCode.NOTICE_NOT_FOUND)
         );
     }
 

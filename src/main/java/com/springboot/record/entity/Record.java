@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -27,7 +28,8 @@ public class Record extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private String recordTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+//    private String recordTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    private LocalDateTime recordDateTime = LocalDateTime.now();
 
     @Enumerated(value = EnumType.STRING)
     private RecordStatus recordStatus = RecordStatus.RECORD_REGISTERED;

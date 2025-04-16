@@ -1,6 +1,7 @@
 package com.springboot.report.entity;
 
 import com.springboot.audit.BaseEntity;
+import com.springboot.monthlyreport.entity.MonthlyReport;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,19 +27,19 @@ public class Report extends BaseEntity {
     private String content;
 
     @Enumerated(value = EnumType.STRING)
-    private ReportType reportType = ReportType.REPORT_WEEK_1;
+    private ReportType reportType = ReportType.REPORT_WEEKLY;
+
+    //월간(0), 주차(1~5)
+    @Column(nullable = false)
+    private int periodNumber;
 
     @ManyToOne
     @JoinColumn(name = "monthly_id")
     private MonthlyReport monthlyReport;
 
     public enum ReportType {
-        REPORT_WEEK_1("1주차"),
-        REPORT_WEEK_2("2주차"),
-        REPORT_WEEK_3("3주차"),
-        REPORT_WEEK_4("4주차"),
-        REPORT_WEEK_5("5주차"),
-        REPORT_MONTH("월간");
+        REPORT_WEEKLY("주간 분석 정보"),
+        REPORT_MONTHLY("월간 분석 정보");
 
         @Getter
         private String status;
@@ -48,11 +49,11 @@ public class Report extends BaseEntity {
         }
     }
 
-    // monthlyReport 영속성
-    public void setMonthlyReport(MonthlyReport monthlyReport) {
-        this.monthlyReport = monthlyReport;
-        if(monthlyReport.getReports().contains(this)) {
-            monthlyReport.setReport(this);
-        }
-    }
+//    // monthlyReport 영속성
+//    public void setMonthlyReport(MonthlyReport monthlyReport) {
+//        this.monthlyReport = monthlyReport;
+//        if(monthlyReport.getReports().contains(this)) {
+//            monthlyReport.setReport(this);
+//        }
+//    }
 }

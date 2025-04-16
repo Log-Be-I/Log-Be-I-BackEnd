@@ -12,7 +12,7 @@ public enum ExceptionCode {
     ANSWER_EXISTS(409, "Answer exists"),
     CANNOT_CHANGE_QUESTION(403, "Question already answered"),
     QUESTION_NOT_FOUND(404, "Question not found"),
-    NOTICE_NOT_EXIST(404, "Notice not found"),
+    NOTICE_NOT_FOUND(404, "Notice not found"),
     PRODUCT_NOT_FOUND(404, "Product not found"),
     REPORT_NOT_FOUND(404, "Report Not found"),
     CANNOT_CANCEL(400, "Cannot cancel log"),
@@ -26,7 +26,10 @@ public enum ExceptionCode {
     CATEGORY_EXISTS(409, "Category exists"),
     CATEGORY_NOT_FOUND(404, "Category not found"),
     RECORD_NOT_FOUND(404, "Record not found"),
+    MONTHLY_REPORT_NOT_FOUND(404, "Monthly report not found"),
+    REPORT_EXISTS(409, "Report already exists");
     NOT_FOUND(404, "Not Found");
+
 
     @Getter
     private int status;

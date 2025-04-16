@@ -4,11 +4,14 @@ import com.springboot.category.service.CategoryService;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.service.MemberService;
+import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.HistoricalRecord;
 import com.springboot.record.entity.Record;
+import com.springboot.record.mapper.RecordMapper;
 import com.springboot.record.repository.HistoricalRecordRepository;
 import com.springboot.record.repository.RecordRepository;
 import com.springboot.utils.AuthorizationUtils;
+import com.springboot.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +20,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,10 +32,12 @@ public class RecordService {
     private final RecordRepository repository;
     private final HistoricalRecordRepository historicalRecordRepository;
     private final MemberService memberService;
+    private final RecordMapper mapper;
     private final CategoryService categoryService;
 
 
     public Record createRecord(Record record, long memberId){
+
         memberService.validateExistingMember(memberId);
 
         return repository.save(record);
@@ -67,12 +75,10 @@ public class RecordService {
         // 수정 내용
         Optional.ofNullable(record.getContent())
                 .ifPresent(content -> findRecord.setContent(content));
-        Optional.ofNullable(record.getRecordTime())
-                .ifPresent(time -> findRecord.setRecordTime(time));
+        Optional.ofNullable(record.getRecordDateTime())
+                .ifPresent(time -> findRecord.setRecordDateTime(time));
         Optional.ofNullable(record.getRecordStatus())
                 .ifPresent(status -> findRecord.setRecordStatus(status));
-        Optional.ofNullable(record.getMember())
-                .ifPresent(member -> findRecord.setMember(member));
         Optional.ofNullable(record.getCategory())
                 .ifPresent(category -> findRecord.setCategory(category));
 
@@ -97,12 +103,13 @@ public class RecordService {
         }
 
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("recordTime"));
-        //특정 회원이 작성한 질문 목록조 회
+        //특정 회원이 작성한 질문 목록 조회
         return repository.findAllByMember_MemberId(memberId, pageable);
     }
 
     //기록 카테고리별 조회
 
+    //기록 삭제
     public void deleteRecord(long recordId, long memberId){
 
         Record findRecord = findVerifiedRecord(recordId);
@@ -113,9 +120,24 @@ public class RecordService {
         repository.save(findRecord);
     }
 
+    //기록이 저장되어있는지 확인
     public Record findVerifiedRecord(long recordId) {
         return repository.findById(recordId).orElseThrow(
                 () -> new BusinessLogicException(ExceptionCode.RECORD_NOT_FOUND)
         );
     }
+
+    // weekStart: 한 주의 기록
+    public List<Record> getWeeklyRecords(LocalDateTime weekStart, LocalDateTime weekEnd) {
+       // JPA 쿼리로 weekStart~weekEnd 사이의 Record 조회
+        return repository.findByRecordDateTimeBetween(weekStart, weekEnd);
+    }
+
+    // month : 월별 기록
+    public List<Record> getMonthlyRecords(LocalDateTime start, LocalDateTime end) {
+        // JPA 쿼리로 weekStart~weekEnd 사이의 Record 조회
+        return repository.findByRecordDateTimeBetween(start, end);
+    }
+
+
 }
