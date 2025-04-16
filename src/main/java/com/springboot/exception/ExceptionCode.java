@@ -27,7 +27,7 @@ public enum ExceptionCode {
     CATEGORY_NOT_FOUND(404, "Category not found"),
     RECORD_NOT_FOUND(404, "Record not found"),
     MONTHLY_REPORT_NOT_FOUND(404, "Monthly report not found"),
-    REPORT_EXISTS(409, "Report already exists");
+    REPORT_EXISTS(409, "Report already exists"),
     NOT_FOUND(404, "Not Found");
 
 
