@@ -28,6 +28,8 @@ public enum ExceptionCode {
     RECORD_NOT_FOUND(404, "Record not found"),
     MONTHLY_REPORT_NOT_FOUND(404, "Monthly report not found"),
     REPORT_EXISTS(409, "Report already exists");
+    NOT_FOUND(404, "Not Found");
+
 
     @Getter
     private int status;

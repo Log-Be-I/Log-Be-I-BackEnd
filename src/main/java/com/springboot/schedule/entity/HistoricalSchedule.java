@@ -6,8 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -21,6 +24,9 @@ public class HistoricalSchedule {
     private Long hScheduleId;
 
     @Column(nullable = false)
+    private Long originalScheduleId;
+
+    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
@@ -31,6 +37,9 @@ public class HistoricalSchedule {
 
     @Enumerated(value = EnumType.STRING)
     private ScheduleStatus scheduleStatus = ScheduleStatus.SCHEDULE_REGISTERED;
+
+    @Column(nullable = false)
+    private LocalDateTime operationTime = LocalDateTime.now();
 
     @Column
     private Long memberId;

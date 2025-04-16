@@ -30,6 +30,11 @@ public class Keyword extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    public Keyword(String name, Member member) {
+        this.name = name;
+        this.member = member;
+    }
+
     public enum KeywordStatus {
         KEYWORD_REGISTERED("키워드 등록"),
         KEYWORD_DELETED("키워드 삭제");
@@ -49,4 +54,5 @@ public class Keyword extends BaseEntity {
             member.setKeyword(this);
         }
     }
+
 }
