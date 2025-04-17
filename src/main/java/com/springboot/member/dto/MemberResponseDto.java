@@ -32,4 +32,6 @@ public class MemberResponseDto {
 
     @Schema(description = "알림 설정", example = "true")
     private Boolean notification;
+
+
 }

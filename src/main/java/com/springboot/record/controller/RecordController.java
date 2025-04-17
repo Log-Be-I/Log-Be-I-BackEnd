@@ -29,11 +29,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class RecordController {
-    private final static String RECORD_DEFAULT_URL = "/records";
+//    private final static String RECORD_DEFAULT_URL = "/records";
     private final RecordService recordService;
     private final RecordMapper mapper;
 
-    @PostMapping("/text-record")
+    @PostMapping("/text-records")
     public ResponseEntity postRecord(@RequestBody RecordDto.Post post,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         post.setMemberId(customPrincipal.getMemberId());
@@ -45,8 +45,8 @@ public class RecordController {
         textRecord.setRecordDateTime(recordDateTime);
 
         Record record = recordService.createRecord(textRecord, customPrincipal.getMemberId());
-        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
-        return ResponseEntity.created(location).build();
+//        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PatchMapping("/records/{record-id}")
