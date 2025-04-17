@@ -4,7 +4,6 @@ package com.springboot.schedule.controller;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.auth.utils.MemberDetails;
 import com.springboot.googleCalendar.dto.GoogleEventDto;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
@@ -23,7 +22,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.convert.Jsr310Converters;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -71,30 +69,34 @@ public class ScheduleController {
     public ResponseEntity postTextSchedule(@Valid @RequestBody SchedulePostDto schedulePostDto,
                                            @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-        // 가입된 회원인지 검증
-        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
-        // 정상적인 상태인지 검증
-        memberService.validateMemberStatus(member);
+    // 가입된 회원인지 검증
+    Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
+    // 정상적인 상태인지 검증
+    memberService.validateMemberStatus(member);
 
+    Schedule schedule = scheduleMapper.schedulePostDtoToSchedule(schedulePostDto);
+    schedule.setMember(member);
+    // 1. DB에 먼저 저장
+    scheduleService.postTextSchedule(schedule, customPrincipal);
 
-        Schedule schedule = scheduleMapper.schedulePostDtoToSchedule(schedulePostDto);
-        scheduleService.postTextSchedule(schedule, customPrincipal);
+    try {
+        // 2. Google Calendar에 등록
+        GoogleEventDto googleEventDto = new GoogleEventDto();
+        googleEventDto.setStartDateTime(schedule.getStartDateTime());
+        googleEventDto.setEndDateTime(schedule.getEndDateTime());
+        googleEventDto.setSummary(schedule.getTitle());
+        googleEventDto.setCalendarId(customPrincipal.getEmail());
 
-        // 구글 캘린더
-        try {
-            // google calendar 등록시 필수 정보
-            GoogleEventDto googleEventDto = new GoogleEventDto();
-            googleEventDto.setStartDateTime(schedule.getStartDateTime());
-            googleEventDto.setEndDateTime(schedule.getEndDateTime());
-            googleEventDto.setSummary(schedule.getTitle());
-            googleEventDto.setCalendarId(customPrincipal.getEmail());
+        Event googleEvent = googleCalendarService.sendEventToGoogleCalendar(googleEventDto);
 
-            googleCalendarService.sendEventToGoogleCalendar(googleEventDto);
-            return ResponseEntity.ok(googleEventDto);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Google Calendar API 호출 실패: " + e.getMessage());
-        }
+        // 3. eventId 반영 후 다시 저장
+        schedule.setEventId(googleEvent.getId());
+        scheduleRepository.save(schedule);
 
+        return new ResponseEntity<>(scheduleMapper.scheduleToscheduleResponseDto(schedule), HttpStatus.CREATED);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Google Calendar API 호출 실패: " + e.getMessage());
+    }
     }
 
     //swagger API - 수정
@@ -121,7 +123,6 @@ public class ScheduleController {
         // 일정 수정 서비스 요청
         scheduleService.updateSchedule(scheduleId, customPrincipal, schedule);
 
-
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -147,7 +148,6 @@ public class ScheduleController {
 
         Schedule schedule = scheduleService.findSchedule(scheduleId);
 
-
         return new ResponseEntity<>(scheduleMapper.scheduleToscheduleResponseDto(schedule), HttpStatus.OK);
     }
 
@@ -164,34 +164,15 @@ public class ScheduleController {
     // 일정 전체 조회 (월 기준 조회)
     @GetMapping("/schedules")
     public ResponseEntity getSchedules(@Parameter(description = "조회할 연도", example = "2025")
-                                           @Positive @RequestParam(value = "year") int year,
-                                       @Parameter(description = "조회할 월 (1~12)", example = "4")
-                                       @Positive @RequestParam(value = "month") int month,
-                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                       @Positive @RequestParam(value = "year") int year,
+                                   @Parameter(description = "조회할 월 (1~12)", example = "4")
+                                   @Positive @RequestParam(value = "month") int month,
+                                   @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-        List<Schedule> serverList = scheduleService.findSchedules(year, month, customPrincipal);
-
-        // 시간 객체 생성
-        String timeMin = googleCalendarService.getStartOfMonth(year, month);
-        String timeMax = googleCalendarService.getEndOfMonth(year, month);
-
-        // 구글 캘린더 조회 요청
-        List<Event> googleList = googleCalendarService.getEventsFromGoogleCalendar(timeMin, timeMax, customPrincipal);
-
-        googleList.stream().forEach(google ->
-                serverList.stream().forEach(server ->
-                        isMoreRecent(toLocalDateTime(google.getUpdated()).toString(), server.getModifiedAt().toString())
-        ));
-
-        // 구글 일정 조회 리스트
-        List<GoogleEventDto> googleEventDtoList = googleEventMapper.eventListToGoogleEventDtoList(googleList);
-        // 서버 db 양식에 맞게 변경
-        List<ScheduleResponseDto> changeToSchedule = scheduleMapper.googleEventDtoListToScheduleResponseDtoList(googleEventDtoList);
-        // 서버 db 일정 조회 리스트
-        List<ScheduleResponseDto> scheduleResponseDtoList = scheduleMapper.schedulesToScheduleResponseDtos(serverList);
-
-        return new ResponseEntity<>(scheduleResponseDtoList, HttpStatus.OK);
-    }
+    List<Schedule> syncedSchedules = googleCalendarService.syncSchedulesWithGoogleCalendar(year, month, customPrincipal);
+    List<ScheduleResponseDto> scheduleResponseDtoList = scheduleMapper.schedulesToScheduleResponseDtos(syncedSchedules);
+    return new ResponseEntity<>(scheduleResponseDtoList, HttpStatus.OK);
+}
 
     // true: timeA가 더 최신
     // false: timeB가 더 최신 or 같음
@@ -206,6 +187,16 @@ public class ScheduleController {
         return Instant.ofEpochMilli(dateTime.getValue())  // DateTime → Instant
                 .atZone(ZoneId.of("Asia/Seoul"))    // 원하는 시간대 설정
                 .toLocalDateTime();                 // LocalDateTime으로 변환
+    }
+
+    public Schedule eventToSchedule (CustomPrincipal customPrincipal, Event event) {
+        Schedule schedule = new Schedule();
+        schedule.setMember(memberService.validateExistingMember(customPrincipal.getMemberId()));
+        schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_UPDATED);
+        schedule.setTitle(event.getSummary());
+        schedule.setEventId(event.getId());
+        schedule.setStartDateTime(event.getStart().getDateTime().toString());
+        return schedule;
     }
 
     //swagger API - 삭제

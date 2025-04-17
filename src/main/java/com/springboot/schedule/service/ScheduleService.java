@@ -71,6 +71,11 @@ public class ScheduleService {
     public void updateSchedule (long scheduleId, CustomPrincipal customPrincipal, Schedule schedule) {
         // 일정 찾기
         Schedule findSchedule = validateExistingSchedule(scheduleId);
+        // 최초 등록된 일정이면 상태를 유지
+        if (findSchedule.getScheduleStatus() == Schedule.ScheduleStatus.SCHEDULE_REGISTERED &&
+            schedule.getScheduleStatus() == Schedule.ScheduleStatus.SCHEDULE_UPDATED) {
+            schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_REGISTERED);
+        }
         // 데이터 수정
         if(Objects.equals(customPrincipal.getEmail(), findSchedule.getMember().getEmail())){
             // 데이터 이관
@@ -95,13 +100,19 @@ public class ScheduleService {
                     Optional.ofNullable(schedule.getScheduleStatus())
                             .orElse(findSchedule.getScheduleStatus()));
 
+            Schedule newSchedule = new Schedule();
+            newSchedule.setEndDateTime(findSchedule.getEndDateTime());
+            newSchedule.setStartDateTime(findSchedule.getStartDateTime());
+            newSchedule.setTitle(findSchedule.getTitle());
+            scheduleRepository.delete(findSchedule);
+            // 수정 데이터 등록
+            scheduleRepository.save(newSchedule);
             // 이관 완료
             historicalScheduleRepository.save(historicalSchedule);
         } else {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
         }
-        // 수정 데이터 등록
-        scheduleRepository.save(findSchedule);
+
     }
 
     // 일정 삭제
