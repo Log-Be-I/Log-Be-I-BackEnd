@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.persistence.*;
 
@@ -31,6 +32,9 @@ public class Schedule extends BaseEntity {
 
     @Enumerated(value = EnumType.STRING)
     private ScheduleStatus scheduleStatus = ScheduleStatus.SCHEDULE_REGISTERED;
+
+    @Column
+    private String calendarId;
 
     @ManyToOne
     @JoinColumn(name = "member_id")

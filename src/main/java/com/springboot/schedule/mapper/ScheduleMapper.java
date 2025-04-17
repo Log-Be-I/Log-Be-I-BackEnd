@@ -1,5 +1,6 @@
 package com.springboot.schedule.mapper;
 
+import com.springboot.googleCalendar.dto.GoogleEventDto;
 import com.springboot.member.entity.Member;
 import com.springboot.schedule.dto.SchedulePatchDto;
 import com.springboot.schedule.dto.SchedulePostDto;
@@ -21,5 +22,12 @@ public interface ScheduleMapper{
                 .collect(Collectors.toList());
 
         return scheduleResponseDtos;
+    }
+
+    default ScheduleResponseDto googleEventDtoToScheduleResponseDto (GoogleEventDto googleEventDto) {
+        ScheduleResponseDto scheduleResponseDto = new ScheduleResponseDto();
+        scheduleResponseDto.setEndDateTime(googleEventDto.getEndDateTime());
+
+        return scheduleResponseDto;
     }
 }

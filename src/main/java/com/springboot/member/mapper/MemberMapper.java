@@ -15,7 +15,19 @@ public interface MemberMapper {
 
     Member memberPostDtoToMember(MemberPostDto memberPostDto);
     Member memberPatchDtoToMember(MemberPatchDto memberPatchDto);
-    MemberResponseDto memberToMemberResponseDto(Member member);
+    default MemberResponseDto memberToMemberResponseDto(Member member) {
+        MemberResponseDto memberResponseDto = new MemberResponseDto();
+        memberResponseDto.setName(member.getName());
+        memberResponseDto.setEmail(member.getEmail());
+        memberResponseDto.setProfile(member.getProfile());
+        memberResponseDto.setBirth(member.getBirth());
+        memberResponseDto.setRegion(member.getRegion());
+        memberResponseDto.setNotification(member.isNotification());
+        memberResponseDto.setNickname(member.getNickname());
+        memberResponseDto.setMemberStatus(member.getMemberStatus());
+
+        return memberResponseDto;
+    }
 
     default List<MemberResponseDto> membersToMemberResponseDtos(List<Member> members) {
        List<MemberResponseDto> memberResponseDtoList =

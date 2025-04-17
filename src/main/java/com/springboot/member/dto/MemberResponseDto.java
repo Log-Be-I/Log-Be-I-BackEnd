@@ -1,8 +1,10 @@
 package com.springboot.member.dto;
 
+import com.springboot.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -10,6 +12,7 @@ import javax.validation.constraints.Pattern;
 
 @Getter
 @NoArgsConstructor
+@Setter
 public class MemberResponseDto {
 
     @Schema(description = "회원 이름", example = "기로기")
@@ -33,5 +36,7 @@ public class MemberResponseDto {
     @Schema(description = "알림 설정", example = "true")
     private Boolean notification;
 
+    @Schema(description = "회원 상태", example = "MEMBER_ACTIVE")
+    private Member.MemberStatus memberStatus;
 
 }
