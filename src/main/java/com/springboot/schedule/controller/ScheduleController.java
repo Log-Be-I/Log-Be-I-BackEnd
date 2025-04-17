@@ -1,6 +1,7 @@
 package com.springboot.schedule.controller;
 
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.googleCalendar.dto.GoogleEventDto;
@@ -21,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.convert.Jsr310Converters;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +30,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -160,22 +167,45 @@ public class ScheduleController {
                                        @Parameter(description = "조회할 월 (1~12)", example = "4")
                                        @Positive @RequestParam(value = "month") int month,
                                        @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
-        // 가입된 회원인지 검증
-        List<Schedule> scheduleList = scheduleService.findSchedules(year, month, memberDetails);
+
+        List<Schedule> serverList = scheduleService.findSchedules(year, month, memberDetails);
 
         // 시간 객체 생성
         String timeMin = googleCalendarService.getStartOfMonth(year, month);
         String timeMax = googleCalendarService.getEndOfMonth(year, month);
 
         // 구글 캘린더 조회 요청
-        List<Event> eventList = googleCalendarService.getEventsFromGoogleCalendar(timeMin, timeMax, memberDetails);
+        List<Event> googleList = googleCalendarService.getEventsFromGoogleCalendar(timeMin, timeMax, memberDetails);
+
+        googleList.stream().forEach(google ->
+                serverList.stream().forEach(server ->
+                        isMoreRecent(toLocalDateTime(google.getUpdated()).toString(), server.getModifiedAt().toString())
+        ));
+
 
         // 구글 일정 조회 리스트
-        List<GoogleEventDto> googleEventDtoList = googleEventMapper.eventListToGoogleEventDtoList(eventList);
+        List<GoogleEventDto> googleEventDtoList = googleEventMapper.eventListToGoogleEventDtoList(googleList);
+        // 서버 db 양식에 맞게 변경
+        List<ScheduleResponseDto> changeToSchedule = scheduleMapper.googleEventDtoListToScheduleResponseDtoList(googleEventDtoList);
         // 서버 db 일정 조회 리스트
-        List<ScheduleResponseDto> scheduleResponseDtos = scheduleMapper.schedulesToScheduleResponseDtos(scheduleList);
+        List<ScheduleResponseDto> scheduleResponseDtoList = scheduleMapper.schedulesToScheduleResponseDtos(serverList);
 
-        return new ResponseEntity<>(scheduleResponseDtos, HttpStatus.OK);
+        return new ResponseEntity<>(scheduleResponseDtoList, HttpStatus.OK);
+    }
+
+    // true: timeA가 더 최신
+    // false: timeB가 더 최신 or 같음
+    public static boolean isMoreRecent(String google, String server) {
+        LocalDateTime timeA = LocalDateTime.parse(google).truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime timeB = LocalDateTime.parse(server).truncatedTo(ChronoUnit.SECONDS);
+        return timeA.isAfter(timeB);
+    }
+
+    // DateTime -> LocalDateTime
+    public LocalDateTime toLocalDateTime(DateTime dateTime) {
+        return Instant.ofEpochMilli(dateTime.getValue())  // DateTime → Instant
+                .atZone(ZoneId.of("Asia/Seoul"))    // 원하는 시간대 설정
+                .toLocalDateTime();                 // LocalDateTime으로 변환
     }
 
     //swagger API - 삭제
@@ -201,4 +231,6 @@ public class ScheduleController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
 }

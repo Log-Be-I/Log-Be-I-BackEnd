@@ -112,6 +112,8 @@ public class ScheduleService {
         scheduleRepository.save(schedule);
     }
 
+
+
     // 존재하는 일정인지 확인
     public Schedule validateExistingSchedule(long scheduleId) {
         Optional<Schedule> findSchedule = scheduleRepository.findById(scheduleId);

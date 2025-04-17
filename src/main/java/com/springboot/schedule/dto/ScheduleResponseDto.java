@@ -11,6 +11,8 @@ import javax.validation.constraints.NotBlank;
 @Setter
 @NoArgsConstructor
 public class ScheduleResponseDto {
+    @Schema(description = "일정 Id", example = "1")
+    private String scheduleId;
 
     @Schema(description = "제목", example = "점심점심")
     @NotBlank
@@ -23,5 +25,8 @@ public class ScheduleResponseDto {
     @Schema(description = "종료 날짜", example = "2025-04-12T14:30")
     @NotBlank
     private String endDateTime;
+
+    @NotBlank
+    private String calendarId;
 
 }
