@@ -1,29 +1,22 @@
 package com.springboot.schedule.service;
 
-import com.google.api.client.util.DateTime;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.redis.RedisService;
-import com.springboot.schedule.dto.GoogleEventDto;
 import com.springboot.schedule.entity.HistoricalSchedule;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.repository.HistoricalScheduleRepository;
 import com.springboot.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,18 +43,24 @@ public class ScheduleService {
         return validateExistingSchedule(scheduleId);
     }
 
-    // 일정 조회_전체
-    public Page<Schedule> findSchedules (int page, int size, MemberDetails memberDetails) {
+    // 일정 조회_전체 (페이지네이션 필요 x) 한달 일정 전체를 리스트로 줘야함
+    public List<Schedule> findSchedules (int year, int month, MemberDetails memberDetails) {
         // member 검증
-        memberService.validateExistingMember(memberDetails.getMemberId());
-        // 페이지네이션 양식 생성
-        Pageable pageable =  PageRequest.of(page, size);
+        Member member = memberService.validateExistingMember(memberDetails.getMemberId());
 
-//        Page<Schedule> schedule = scheduleRepository.findAll(pageable);
+        //정상적인 상태인지 검증
+        memberService.validateMemberStatus(member);
+        String target = String.format("%d-%02d", year, month);
 
         // memberId 로 일정 찾기
-        return scheduleRepository.findAllByMember_MemberId(memberDetails.getMemberId(), pageable);
+        List<Schedule> scheduleList = scheduleRepository.findAllByMember_MemberId(memberDetails.getMemberId());
 
+        // "year" 과 "month" 가 포함된 모든 일정 조회
+        List<Schedule> findScheduleList = scheduleList.stream()
+                .filter(schedule -> schedule.getStartDateTime().startsWith(target))
+                .collect(Collectors.toList());
+
+        return findScheduleList;
     }
 
     // 일정 수정

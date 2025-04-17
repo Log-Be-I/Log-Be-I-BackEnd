@@ -167,15 +167,7 @@ public class ScheduleController {
                                        @Positive @RequestParam(value = "month") int month,
                                        @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
         // 가입된 회원인지 검증
-        Member member = memberService.validateExistingMember(memberDetails.getMemberId());
-        // 정상적인 상태인지 검증
-        memberService.validateMemberStatus(member);
-        String target = String.format("%d-%02d", year, month);
-
-        // "year" 과 "month" 가 포함된 모든 일정 조회
-        List<Schedule> scheduleList = scheduleRepository.findAll().stream()
-                .filter(schedule -> schedule.getStartDateTime().startsWith(target))
-                .collect(Collectors.toList());
+        List<Schedule> scheduleList = scheduleService.findSchedules(year, month, memberDetails);
 
         // 시간 객체 생성
         String timeMin = googleCalendarService.getStartOfMonth(year, month);
@@ -189,10 +181,7 @@ public class ScheduleController {
         // 서버 db 일정 조회 리스트
         List<ScheduleResponseDto> scheduleResponseDtos = scheduleMapper.schedulesToScheduleResponseDtos(scheduleList);
 
-        // 그냥 한번에 조회해볼려고 만들었음 (저장은 잘 되고 구글에서 잘 받아오는지)
-        ScheduleBundleResponseDto scheduleBundleResponseDto = new ScheduleBundleResponseDto(scheduleResponseDtos, googleEventDtoList);
-
-        return new ResponseEntity<>(scheduleBundleResponseDto, HttpStatus.OK);
+        return new ResponseEntity<>(scheduleResponseDtos, HttpStatus.OK);
     }
 
     //swagger API - 삭제
