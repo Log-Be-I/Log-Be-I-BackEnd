@@ -1,7 +1,7 @@
-package com.springboot.schedule.mapper;
+package com.springboot.googleCalendar.mapper;
 
 import com.google.api.services.calendar.model.Event;
-import com.springboot.schedule.dto.GoogleEventDto;
+import com.springboot.googleCalendar.dto.GoogleEventDto;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -29,3 +29,4 @@ public interface GoogleEventMapper {
         return googleEventDtoList;
     }
 }
+

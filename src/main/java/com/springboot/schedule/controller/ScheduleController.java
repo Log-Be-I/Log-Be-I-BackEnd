@@ -2,20 +2,16 @@ package com.springboot.schedule.controller;
 
 
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
 import com.springboot.auth.utils.MemberDetails;
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.exception.ExceptionCode;
-import com.springboot.keyword.dto.KeywordResponseDto;
+import com.springboot.googleCalendar.dto.GoogleEventDto;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
-import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.schedule.dto.*;
 import com.springboot.schedule.entity.Schedule;
-import com.springboot.schedule.mapper.GoogleEventMapper;
+import com.springboot.googleCalendar.mapper.GoogleEventMapper;
 import com.springboot.schedule.mapper.ScheduleMapper;
 import com.springboot.schedule.repository.ScheduleRepository;
-import com.springboot.schedule.service.GoogleCalendarService;
+import com.springboot.googleCalendar.service.GoogleCalendarService;
 import com.springboot.schedule.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,7 +21,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -159,7 +153,7 @@ public class ScheduleController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
     })
-    // 일정 전체 조회
+    // 일정 전체 조회 (월 기준 조회)
     @GetMapping("/schedules")
     public ResponseEntity getSchedules(@Parameter(description = "조회할 연도", example = "2025")
                                            @Positive @RequestParam(value = "year") int year,
@@ -174,7 +168,7 @@ public class ScheduleController {
         String timeMax = googleCalendarService.getEndOfMonth(year, month);
 
         // 구글 캘린더 조회 요청
-        List<Event> eventList = googleCalendarService.getEventsFromGoogleCalendar(timeMin, timeMax);
+        List<Event> eventList = googleCalendarService.getEventsFromGoogleCalendar(timeMin, timeMax, memberDetails);
 
         // 구글 일정 조회 리스트
         List<GoogleEventDto> googleEventDtoList = googleEventMapper.eventListToGoogleEventDtoList(eventList);
