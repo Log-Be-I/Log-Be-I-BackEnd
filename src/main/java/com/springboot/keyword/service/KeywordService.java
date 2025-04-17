@@ -1,5 +1,6 @@
 package com.springboot.keyword.service;
 
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.keyword.entity.Keyword;
 import com.springboot.keyword.repository.KeywordRepository;
@@ -19,9 +20,9 @@ public class KeywordService {
     private final MemberService memberService;
 
     // keyword 생성
-    public void createKeyword (List<Keyword> keywordList, MemberDetails memberDetails) {
+    public void createKeyword (List<Keyword> keywordList, CustomPrincipal customPrincipal) {
         //member 찾기
-        Member member = memberService.validateExistingMember(memberDetails.getMemberId());
+        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
         // memberId 로 기존 키워드 리스트 찾기
         List<Keyword> keywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
 
@@ -46,9 +47,9 @@ public class KeywordService {
     }
 
     // keyword 조회
-    public List<Keyword> getKeywords (MemberDetails memberDetails) {
+    public List<Keyword> getKeywords (CustomPrincipal customPrincipal) {
         //member 찾기
-        Member member = memberService.validateExistingMember(memberDetails.getMemberId());
+        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
 
         // 키워드 찾기
         List<Keyword> keywords = keywordRepository.findAllByMember_MemberId(member.getMemberId())

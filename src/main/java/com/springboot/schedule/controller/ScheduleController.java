@@ -1,7 +1,9 @@
 package com.springboot.schedule.controller;
 
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.googleCalendar.dto.GoogleEventDto;
 import com.springboot.member.entity.Member;
@@ -21,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.convert.Jsr310Converters;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +31,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,7 +52,7 @@ public class ScheduleController {
     // 일정 등록 - 음성
     @PostMapping("/audio-schedules")
     public ResponseEntity postAudioSchedule(@Valid @RequestBody SchedulePostDto schedulePostDto,
-                                            @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+                                            @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
 
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -61,16 +69,16 @@ public class ScheduleController {
     // 일정 등록 - text
     @PostMapping("/text-schedules")
     public ResponseEntity postTextSchedule(@Valid @RequestBody SchedulePostDto schedulePostDto,
-                                           @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+                                           @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         // 가입된 회원인지 검증
-        Member member = memberService.validateExistingMember(memberDetails.getMemberId());
+        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
         // 정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
 
 
         Schedule schedule = scheduleMapper.schedulePostDtoToSchedule(schedulePostDto);
-        scheduleService.postTextSchedule(schedule, memberDetails);
+        scheduleService.postTextSchedule(schedule, customPrincipal);
 
         // 구글 캘린더
         try {
@@ -79,7 +87,7 @@ public class ScheduleController {
             googleEventDto.setStartDateTime(schedule.getStartDateTime());
             googleEventDto.setEndDateTime(schedule.getEndDateTime());
             googleEventDto.setSummary(schedule.getTitle());
-            googleEventDto.setCalendarId(memberDetails.getEmail());
+            googleEventDto.setCalendarId(customPrincipal.getEmail());
 
             googleCalendarService.sendEventToGoogleCalendar(googleEventDto);
             return ResponseEntity.ok(googleEventDto);
@@ -102,16 +110,16 @@ public class ScheduleController {
     public ResponseEntity patchSchedule(@Parameter(description = "수정할 일정의 ID", example = "1")
                                             @PathVariable("schedule-id") @Positive long scheduleId,
                                         @RequestBody SchedulePatchDto schedulePatchDto,
-                                        @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+                                        @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         // 가입된 회원인지 검증
-        Member member = memberService.validateExistingMember(memberDetails.getMemberId());
+        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
         // 정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
         // dto -> entity
         Schedule schedule = scheduleMapper.schedulePatchDtoToSchedule(schedulePatchDto);
         // 일정 수정 서비스 요청
-        scheduleService.updateSchedule(scheduleId, memberDetails, schedule);
+        scheduleService.updateSchedule(scheduleId, customPrincipal, schedule);
 
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -131,9 +139,9 @@ public class ScheduleController {
     @GetMapping("/schedules/{schedule-id}")
     public ResponseEntity getSchedule(@Parameter(description = "조회할 일정의 ID", example = "1")
                                           @PathVariable("schedule-id") @Positive long scheduleId,
-                                      @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails){
+                                      @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal){
         // 가입된 회원인지 검증
-        Member member = memberService.validateExistingMember(memberDetails.getMemberId());
+        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
         // 정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
 
@@ -159,23 +167,45 @@ public class ScheduleController {
                                            @Positive @RequestParam(value = "year") int year,
                                        @Parameter(description = "조회할 월 (1~12)", example = "4")
                                        @Positive @RequestParam(value = "month") int month,
-                                       @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
-        // 가입된 회원인지 검증
-        List<Schedule> scheduleList = scheduleService.findSchedules(year, month, memberDetails);
+                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+
+        List<Schedule> serverList = scheduleService.findSchedules(year, month, customPrincipal);
 
         // 시간 객체 생성
         String timeMin = googleCalendarService.getStartOfMonth(year, month);
         String timeMax = googleCalendarService.getEndOfMonth(year, month);
 
         // 구글 캘린더 조회 요청
-        List<Event> eventList = googleCalendarService.getEventsFromGoogleCalendar(timeMin, timeMax, memberDetails);
+        List<Event> googleList = googleCalendarService.getEventsFromGoogleCalendar(timeMin, timeMax, customPrincipal);
+
+        googleList.stream().forEach(google ->
+                serverList.stream().forEach(server ->
+                        isMoreRecent(toLocalDateTime(google.getUpdated()).toString(), server.getModifiedAt().toString())
+        ));
 
         // 구글 일정 조회 리스트
-        List<GoogleEventDto> googleEventDtoList = googleEventMapper.eventListToGoogleEventDtoList(eventList);
+        List<GoogleEventDto> googleEventDtoList = googleEventMapper.eventListToGoogleEventDtoList(googleList);
+        // 서버 db 양식에 맞게 변경
+        List<ScheduleResponseDto> changeToSchedule = scheduleMapper.googleEventDtoListToScheduleResponseDtoList(googleEventDtoList);
         // 서버 db 일정 조회 리스트
-        List<ScheduleResponseDto> scheduleResponseDtos = scheduleMapper.schedulesToScheduleResponseDtos(scheduleList);
+        List<ScheduleResponseDto> scheduleResponseDtoList = scheduleMapper.schedulesToScheduleResponseDtos(serverList);
 
-        return new ResponseEntity<>(scheduleResponseDtos, HttpStatus.OK);
+        return new ResponseEntity<>(scheduleResponseDtoList, HttpStatus.OK);
+    }
+
+    // true: timeA가 더 최신
+    // false: timeB가 더 최신 or 같음
+    public static boolean isMoreRecent(String google, String server) {
+        LocalDateTime timeA = LocalDateTime.parse(google).truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime timeB = LocalDateTime.parse(server).truncatedTo(ChronoUnit.SECONDS);
+        return timeA.isAfter(timeB);
+    }
+
+    // DateTime -> LocalDateTime
+    public LocalDateTime toLocalDateTime(DateTime dateTime) {
+        return Instant.ofEpochMilli(dateTime.getValue())  // DateTime → Instant
+                .atZone(ZoneId.of("Asia/Seoul"))    // 원하는 시간대 설정
+                .toLocalDateTime();                 // LocalDateTime으로 변환
     }
 
     //swagger API - 삭제
@@ -190,9 +220,9 @@ public class ScheduleController {
     // 일정 삭제
     @DeleteMapping("/schedules/{schedule-id}")
     public ResponseEntity deleteSchedule(@PathVariable("schedule-id") @Positive long scheduleId,
-                                         @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+                                         @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         // 가입된 회원인지 검증
-        Member member = memberService.validateExistingMember(memberDetails.getMemberId());
+        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
         // 정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
 
@@ -201,4 +231,6 @@ public class ScheduleController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
 }

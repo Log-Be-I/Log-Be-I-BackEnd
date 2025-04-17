@@ -26,8 +26,17 @@ public interface ScheduleMapper{
 
     default ScheduleResponseDto googleEventDtoToScheduleResponseDto (GoogleEventDto googleEventDto) {
         ScheduleResponseDto scheduleResponseDto = new ScheduleResponseDto();
+        scheduleResponseDto.setTitle(googleEventDto.getSummary());
+        scheduleResponseDto.setStartDateTime(googleEventDto.getStartDateTime());
         scheduleResponseDto.setEndDateTime(googleEventDto.getEndDateTime());
+        scheduleResponseDto.setCalendarId(googleEventDto.getCalendarId());
 
         return scheduleResponseDto;
+    }
+
+    default List<ScheduleResponseDto> googleEventDtoListToScheduleResponseDtoList (List<GoogleEventDto> googleEventDtoList) {
+        return googleEventDtoList.stream().map(googleEventDto ->
+                googleEventDtoToScheduleResponseDto(googleEventDto))
+                .collect(Collectors.toList());
     }
 }

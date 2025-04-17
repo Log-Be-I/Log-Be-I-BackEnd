@@ -117,10 +117,10 @@ public class MemberController {
     public ResponseEntity patchMember(@Valid @RequestBody MemberPatchDto requestBody,
                                       @Parameter(description = "수정할 멤버의 ID", example = "1")
                                       @PathVariable("member-id") long memberId,
-                                      @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+                                      @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         Member member = memberMapper.memberPatchDtoToMember(requestBody);
 
-        memberService.updateMember(member, memberId, memberDetails);
+        memberService.updateMember(member, memberId, customPrincipal.getEmail());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -208,9 +208,9 @@ public class MemberController {
     public ResponseEntity deleteMember(@Parameter(description = "삭제할 회원 ID", example = "1")
                                            @Valid @PathVariable("member-id") long memberId,
                                        @Parameter(hidden = true)
-                                       @AuthenticationPrincipal MemberDetails memberDetails,
+                                       @AuthenticationPrincipal CustomPrincipal customPrincipal,
                                        @RequestBody String request) {
-        memberService.deleteMember(memberId, memberDetails, request);
+        memberService.deleteMember(memberId, customPrincipal.getEmail(), request);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

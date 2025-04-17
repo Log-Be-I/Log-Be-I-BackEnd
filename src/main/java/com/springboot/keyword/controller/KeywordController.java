@@ -1,5 +1,6 @@
 package com.springboot.keyword.controller;
 
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.keyword.dto.KeywordPostDto;
 import com.springboot.keyword.dto.KeywordResponseDto;
@@ -50,10 +51,10 @@ public class KeywordController {
     // 키워드 등록
     @PostMapping("/keywords")
     public ResponseEntity postKeyword(@Valid @RequestBody List<KeywordPostDto> keywordPostDtoList,
-                                      @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+                                      @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         // 키워드 생성
-        keywordService.createKeyword(keywordMapper.KeywordPostDtoListToKeywordList(keywordPostDtoList), memberDetails);
+        keywordService.createKeyword(keywordMapper.KeywordPostDtoListToKeywordList(keywordPostDtoList), customPrincipal);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -69,9 +70,9 @@ public class KeywordController {
     })
     // 키워드 조회
     @GetMapping("/keywords")
-    public ResponseEntity getKeyword(@Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+    public ResponseEntity getKeyword(@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-        List<Keyword> keywordList = keywordService.getKeywords(memberDetails);
+        List<Keyword> keywordList = keywordService.getKeywords(customPrincipal);
 
         return new ResponseEntity<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList), HttpStatus.OK);
     }

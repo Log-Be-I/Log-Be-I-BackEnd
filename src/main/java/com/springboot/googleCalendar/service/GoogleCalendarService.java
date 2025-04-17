@@ -8,6 +8,7 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.member.service.MemberService;
 import com.springboot.redis.RedisService;
@@ -71,10 +72,10 @@ public class GoogleCalendarService {
     }
 
     // 구글 캘린더 조회 요청 (월 기준 조회)
-    public List<Event> getEventsFromGoogleCalendar(String timeMin, String timeMax, MemberDetails memberDetails) {
+    public List<Event> getEventsFromGoogleCalendar(String timeMin, String timeMax, CustomPrincipal customPrincipal) {
         try {
             // 엑세스 토큰 받아오기
-            String accessToken = redisService.getGoogleAccessToken(memberDetails.getEmail());
+            String accessToken = redisService.getGoogleAccessToken(customPrincipal.getEmail());
             // 받은 accessToken 으로 GoogleCredential 객체 생성
             GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
 
