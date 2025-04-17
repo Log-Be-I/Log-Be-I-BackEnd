@@ -14,6 +14,7 @@ import com.springboot.member.repository.MemberRepository;
 import com.springboot.oauth.GoogleInfoDto;
 import com.springboot.question.entity.Question;
 import com.springboot.record.entity.Record;
+import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -98,23 +99,24 @@ public class MemberService {
     }
 
     // 유저 단일 조회는 유저 본인과 관리자만 허용
-    public Member findMember(long memberId, MemberDetails memberDetails) {
+    public Member findMember(long memberId, long currentMemberId) {
         // 유저 존재 확인
-        Member findMember = validateExistingMember(memberId);
+        AuthorizationUtils.isAdminOrOwner(memberId, currentMemberId);
+        return validateExistingMember(memberId);
 
-        // 유저 정보 owner 의 email 과 관리자 email 을 담은 리스트
-        List<String> authentication = List.of(findMember.getEmail(), adminEmail);
-
-        // 요청한 유저의 이메일과 비교하여 리스트에 동일한 이메일이 있는지 true / false
-        boolean valuer = authentication.stream()
-                .anyMatch(email -> Objects.equals(email, memberDetails.getEmail()));
-
-        // 요청한 유저가 조회하고자 하는 유저 정보의 owner 와 동일 인물인지 또는 관리자인지 권한에 따른 접근 제한
-        if(!valuer) {
-            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
-        } else {
-            return findMember;
-        }
+//        // 유저 정보 owner 의 email 과 관리자 email 을 담은 리스트
+//        List<String> authentication = List.of(findMember.getEmail(), adminEmail);
+//
+//        // 요청한 유저의 이메일과 비교하여 리스트에 동일한 이메일이 있는지 true / false
+//        boolean valuer = authentication.stream()
+//                .anyMatch(email -> Objects.equals(email, memberDetails.getEmail()));
+//
+//        // 요청한 유저가 조회하고자 하는 유저 정보의 owner 와 동일 인물인지 또는 관리자인지 권한에 따른 접근 제한
+//        if(!valuer) {
+//            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
+//        } else {
+//            return findMember;
+//        }
     }
 
     // 전체 조회는 관리자만 가능하다.

@@ -15,24 +15,6 @@ public interface MemberMapper {
 
     Member memberPostDtoToMember(MemberPostDto memberPostDto);
     Member memberPatchDtoToMember(MemberPatchDto memberPatchDto);
-    default MemberResponseDto memberToMemberResponseDto(Member member) {
-        MemberResponseDto memberResponseDto = new MemberResponseDto();
-        memberResponseDto.setName(member.getName());
-        memberResponseDto.setEmail(member.getEmail());
-        memberResponseDto.setProfile(member.getProfile());
-        memberResponseDto.setBirth(member.getBirth());
-        memberResponseDto.setRegion(member.getRegion());
-        memberResponseDto.setNotification(member.isNotification());
-        memberResponseDto.setNickname(member.getNickname());
-        memberResponseDto.setMemberStatus(member.getMemberStatus());
-
-        return memberResponseDto;
-    }
-
-    default List<MemberResponseDto> membersToMemberResponseDtos(List<Member> members) {
-       List<MemberResponseDto> memberResponseDtoList =
-        members.stream().map(member -> memberToMemberResponseDto(member)).collect(Collectors.toList());
-
-       return memberResponseDtoList;
-    }
+    MemberResponseDto memberToMemberResponseDto(Member member);
+    List<MemberResponseDto> membersToMemberResponseDtos(List<Member> members);
 }

@@ -2,7 +2,9 @@ package com.springboot.auth.filter;
 
 import com.springboot.auth.jwt.JwtTokenizer;
 import com.springboot.auth.utils.CustomAuthorityUtils;
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetailService;
+import com.springboot.auth.utils.MemberDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -101,12 +103,14 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     private void setAuthenticationToContext(Map<String, Object> claims) {
         // payload 에서 username 가져오는데 String 으로 형변환 해줘야함
         String username = (String)claims.get("sub");
-        UserDetails userDetails = memberDetailService.loadUserByUsername(username);
-
+//        UserDetails userDetails = memberDetailService.loadUserByUsername(username);
+        MemberDetails memberDetails = (MemberDetails) memberDetailService.loadUserByUsername(username);
         // payload 에서 권한 목록 가져와서 권한 생성후 리스트화
         List<GrantedAuthority> authorities = authorityUtils.createAuthorities((List)claims.get("roles"));
+        //customPrincipal 객체 생성
+        CustomPrincipal customPrincipal = new CustomPrincipal(username, memberDetails.getMemberId());
         // username 과 password 가 들어간 토큰 생성
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(customPrincipal, null, authorities);
         // 시큐리티 context 에 있는 인증 정보를 현재 생성한 인증 정보로 교체
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
