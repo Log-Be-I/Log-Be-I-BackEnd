@@ -233,7 +233,7 @@ public class MemberService {
         // 탈퇴한 내역이 있다면
         if(deletedMember.isPresent()) {
             //탈퇴 후 6개월이 지나지 않았다면 회원가입 불가
-            if (LocalDateTime.now().isBefore(deletedMember.get().getCreatedAt().plusMonths(6))) {
+            if (LocalDateTime.now().isBefore(deletedMember.get().getDeletedAt().plusMonths(6))) {
                 throw new IllegalStateException("탈퇴 후 6개월 이내에는 재가입할 수 없습니다.");
             }
         }

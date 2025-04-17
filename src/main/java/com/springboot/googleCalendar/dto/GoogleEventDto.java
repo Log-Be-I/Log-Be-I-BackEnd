@@ -1,4 +1,4 @@
-package com.springboot.schedule.dto;
+package com.springboot.googleCalendar.dto;
 import lombok.*;
 
 @Getter
