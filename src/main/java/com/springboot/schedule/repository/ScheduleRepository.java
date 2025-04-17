@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
-    Page<Schedule> findAllByMember_MemberId (long memberId, Pageable pageable);
+    List<Schedule> findAllByMember_MemberId (long memberId);
 }
