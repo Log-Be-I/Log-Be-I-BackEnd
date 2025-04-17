@@ -63,7 +63,7 @@ public class MemberService {
         return googleOAuthService.processUserLogin(new GoogleInfoDto(member.getEmail(),member.getName()));
     }
 
-    public Member updateMember(Member member, long memberId, MemberDetails memberDetails) {
+    public Member updateMember(Member member, long memberId, String email) {
         // MemberId 로 존재하는 회원인지 검증
         Member findMember = validateExistingMember(memberId);
         validateMemberStatus(findMember);
@@ -72,7 +72,7 @@ public class MemberService {
         String isOwnerEmail = findMember.getEmail();
 
         // 만약 요청한 사용자의 이메일과 변경하고자하는 유저정보의 owner 의 이메일이 같다면 변경 실행
-        if(Objects.equals(memberDetails.getEmail(), isOwnerEmail)){
+        if(Objects.equals(email, isOwnerEmail)){
             findMember.setNickname(
                     Optional.ofNullable(member.getNickname())
                             .orElse(findMember.getNickname()));
@@ -156,7 +156,7 @@ public class MemberService {
     }
 
     // 회원 삭제는 관리자와 유저 본인만 가능
-    public void deleteMember(long memberId, MemberDetails memberDetails, String response) {
+    public void deleteMember(long memberId, String memberEmail, String response) {
         // 존재하는 회원인지 검증
         Member member = validateExistingMember(memberId);
 
@@ -172,7 +172,7 @@ public class MemberService {
         List<String> authentication = List.of(isOwnerEmail, adminEmail);
 
         // 만약 요청한 사용자의 이메일과 변경하고자하는 유저 정보의 owner 의 이메일이 동일하거나 admin 일 경우 변경 실행
-        boolean value = authentication.stream().anyMatch(email -> Objects.equals(memberDetails.getEmail(), email));
+        boolean value = authentication.stream().anyMatch(email -> Objects.equals(memberEmail, email));
 
         if(value){
             // 회원 상태 변경

@@ -1,5 +1,7 @@
 package com.springboot.schedule.service;
 
+import com.springboot.auth.utils.CustomAuthorityUtils;
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
@@ -10,6 +12,7 @@ import com.springboot.schedule.entity.HistoricalSchedule;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.repository.HistoricalScheduleRepository;
 import com.springboot.schedule.repository.ScheduleRepository;
+import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +34,9 @@ public class ScheduleService {
 
 
     // 일정 등록 - text
-    public void postTextSchedule (Schedule schedule, MemberDetails memberDetails) {
-        schedule.setMember(memberDetails);
+    public void postTextSchedule (Schedule schedule, CustomPrincipal customPrincipal) {
+
+        schedule.setMember(memberService.validateExistingMember(customPrincipal.getMemberId()));
         // 일정 저장
         scheduleRepository.save(schedule);
     }
@@ -44,16 +48,16 @@ public class ScheduleService {
     }
 
     // 일정 조회_전체 (페이지네이션 필요 x) 한달 일정 전체를 리스트로 줘야함
-    public List<Schedule> findSchedules (int year, int month, MemberDetails memberDetails) {
+    public List<Schedule> findSchedules (int year, int month, CustomPrincipal customPrincipal) {
         // member 검증
-        Member member = memberService.validateExistingMember(memberDetails.getMemberId());
+        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
 
         //정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
         String target = String.format("%d-%02d", year, month);
 
         // memberId 로 일정 찾기
-        List<Schedule> scheduleList = scheduleRepository.findAllByMember_MemberId(memberDetails.getMemberId());
+        List<Schedule> scheduleList = scheduleRepository.findAllByMember_MemberId(customPrincipal.getMemberId());
 
         // "year" 과 "month" 가 포함된 모든 일정 조회
         List<Schedule> findScheduleList = scheduleList.stream()
@@ -64,15 +68,15 @@ public class ScheduleService {
     }
 
     // 일정 수정
-    public void updateSchedule (long scheduleId, MemberDetails memberDetails, Schedule schedule) {
+    public void updateSchedule (long scheduleId, CustomPrincipal customPrincipal, Schedule schedule) {
         // 일정 찾기
         Schedule findSchedule = validateExistingSchedule(scheduleId);
         // 데이터 수정
-        if(Objects.equals(memberDetails.getEmail(), findSchedule.getMember().getEmail())){
+        if(Objects.equals(customPrincipal.getEmail(), findSchedule.getMember().getEmail())){
             // 데이터 이관
             HistoricalSchedule historicalSchedule = new HistoricalSchedule();
             historicalSchedule.setScheduleStatus(HistoricalSchedule.ScheduleStatus.SCHEDULE_UPDATED);
-            historicalSchedule.setMemberId(memberDetails.getMemberId());
+            historicalSchedule.setMemberId(customPrincipal.getMemberId());
             historicalSchedule.setEndDateTime(findSchedule.getEndDateTime());
             historicalSchedule.setStartDateTime(findSchedule.getStartDateTime());
             historicalSchedule.setOriginalScheduleId(findSchedule.getScheduleId());
