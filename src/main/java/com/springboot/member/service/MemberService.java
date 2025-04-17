@@ -62,7 +62,7 @@ public class MemberService {
         return googleOAuthService.processUserLogin(new GoogleInfoDto(member.getEmail(),member.getName()));
     }
 
-    public Member updateMember(Member member, int memberId, MemberDetails memberDetails) {
+    public Member updateMember(Member member, long memberId, MemberDetails memberDetails) {
         // MemberId 로 존재하는 회원인지 검증
         Member findMember = validateExistingMember(memberId);
         validateMemberStatus(findMember);
@@ -154,7 +154,7 @@ public class MemberService {
     }
 
     // 회원 삭제는 관리자와 유저 본인만 가능
-    public void deleteMember(int memberId, MemberDetails memberDetails, String response) {
+    public void deleteMember(long memberId, MemberDetails memberDetails, String response) {
         // 존재하는 회원인지 검증
         Member member = validateExistingMember(memberId);
 

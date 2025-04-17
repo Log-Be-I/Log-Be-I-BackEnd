@@ -13,6 +13,8 @@ import javax.validation.constraints.Pattern;
 @Schema(name = "memberPatchDto", description = "키워드 요청")
 public class MemberPatchDto {
 
+    private Long memberId;
+
     @Schema(description = "회원 이름", example = "기로기")
     private String name;
 

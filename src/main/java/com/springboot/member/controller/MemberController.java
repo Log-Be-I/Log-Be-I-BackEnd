@@ -114,10 +114,10 @@ public class MemberController {
                             examples = @ExampleObject(value = "{\"error\": \"Bad Request\", \"message\": \"잘못된 입력 형태입니다.\"}")))
     })
     // 회원 수정
-    @PatchMapping("/{memberId}")
+    @PatchMapping("/{member-id}")
     public ResponseEntity patchMember(@Valid @RequestBody MemberPatchDto requestBody,
                                       @Parameter(description = "수정할 멤버의 ID", example = "1")
-                                      @PathVariable("memberId") int memberId,
+                                      @PathVariable("member-id") long memberId,
                                       @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
         Member member = memberMapper.memberPatchDtoToMember(requestBody);
 
@@ -205,9 +205,9 @@ public class MemberController {
                             examples = @ExampleObject(value = "{\"error\": \"Bad Request\", \"message\": \"가입중인 회원이 아닙니다.\"}")))
     })
     // 회원 삭제
-    @DeleteMapping("/{memberId}")
+    @DeleteMapping("/{member-id}")
     public ResponseEntity deleteMember(@Parameter(description = "삭제할 회원 ID", example = "1")
-                                           @Valid @PathVariable("memberId") int memberId,
+                                           @Valid @PathVariable("member-id") long memberId,
                                        @Parameter(hidden = true)
                                        @AuthenticationPrincipal MemberDetails memberDetails,
                                        @RequestBody String request) {

@@ -14,6 +14,7 @@ import javax.validation.constraints.Pattern;
 @NoArgsConstructor
 @Setter
 public class MemberResponseDto {
+    private Long memberId;
 
     @Schema(description = "회원 이름", example = "기로기")
     private String name;
