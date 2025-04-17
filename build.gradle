@@ -26,8 +26,8 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'org.mapstruct:mapstruct:1.5.1.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.1.Final'
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'com.google.code.gson:gson'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -44,6 +44,7 @@ dependencies {
 	implementation 'com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0'
 
 	implementation 'com.google.http-client:google-http-client-jackson2:1.43.3'
+//	implementation 'com.google.http-client:google-http-client-gson:1.43.3'
 }
 
 tasks.named('test') {
