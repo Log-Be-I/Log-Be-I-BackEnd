@@ -1,5 +1,6 @@
 package com.springboot.member.controller;
 
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.member.dto.MemberPatchDto;
 import com.springboot.member.dto.MemberPostDto;
@@ -92,12 +93,10 @@ public class MemberController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
     })
-    @PatchMapping("/notification/{member-id}")
+    @PatchMapping("/{member-id}/notification")
     //앱 푸쉬 알림 수신동의 여부 저장
-    public ResponseEntity setNotificationConsent(@Parameter(description = "알림 동의 수정할 멤버 ID", example = "1")
-                                                     @PathVariable("member-id") @Positive long memberId,
-                                                 @Parameter(description = "수신 동의", example = "true")
-                                                 @Valid  @RequestParam boolean notification){
+    public ResponseEntity setNotificationConsent(@PathVariable("member-id") @Positive long memberId,
+                                                 @Valid  @RequestParam("notification") boolean notification){
         memberService.updateNotificationConsent(memberId, notification);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -143,9 +142,9 @@ public class MemberController {
     public ResponseEntity getMember(@Parameter(description = "조회할 멤버의 ID", example = "1")
                                         @Valid @PathVariable("member-id") long memberId,
                                     @Parameter(hidden = true)
-                                    @AuthenticationPrincipal MemberDetails memberDetails) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Member member = memberService.findMember(memberId, memberDetails);
+                                    @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Member member = memberService.findMember(memberId, customPrincipal.getMemberId());
         return new ResponseEntity<>(
                 new SingleResponseDto<>(memberMapper.memberToMemberResponseDto(member)), HttpStatus.OK
         );

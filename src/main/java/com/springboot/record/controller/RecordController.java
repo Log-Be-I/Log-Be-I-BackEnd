@@ -36,7 +36,7 @@ public class RecordController {
     @PostMapping("/text-records")
     public ResponseEntity postRecord(@RequestBody RecordDto.Post post,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        post.setMemberId(customPrincipal.getMemberId());
+//        post.setMemberId(customPrincipal.getMemberId());
         //문자열을 LocalDateTime 로 변환
         LocalDateTime recordDateTime = DateUtil.parseToLocalDateTime(post.getRecordDateTime());
         //Dto-> Entity 변환

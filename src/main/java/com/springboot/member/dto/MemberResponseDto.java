@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -40,4 +38,6 @@ public class MemberResponseDto {
     @Schema(description = "회원 상태", example = "MEMBER_ACTIVE")
     private Member.MemberStatus memberStatus;
 
+    @Schema(description = "회원의 마지막 로그인 시간", example = "2025-04-17 12:39:22")
+    private LocalDateTime lastLoginAt;
 }
