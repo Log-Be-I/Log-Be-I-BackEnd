@@ -27,6 +27,7 @@ public interface ScheduleMapper{
     default ScheduleResponseDto googleEventDtoToScheduleResponseDto (GoogleEventDto googleEventDto) {
         ScheduleResponseDto scheduleResponseDto = new ScheduleResponseDto();
         scheduleResponseDto.setEndDateTime(googleEventDto.getEndDateTime());
+        scheduleResponseDto.setStartDateTime(googleEventDto.getStartDateTime());
 
         return scheduleResponseDto;
     }
