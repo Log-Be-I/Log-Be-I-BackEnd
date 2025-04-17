@@ -61,7 +61,6 @@ public class RecordService {
             //데이터 이관을 위해 HistorycalRecord 빈 객체생성
             HistoricalRecord historicalRecord = new HistoricalRecord();
             //기존 Record 필드 복사
-            historicalRecord.setHRecordId(findRecord.getRecordId());
             historicalRecord.setContent(findRecord.getContent());
             historicalRecord.setMemberId(findRecord.getMember().getMemberId());
             //수정 상태로 변경

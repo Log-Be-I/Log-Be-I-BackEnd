@@ -25,7 +25,6 @@ public class HistoricalRecord {
     private String content;
 //    @Column(nullable = false)
 //    private String recordTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
     @Column
     private Long memberId;
     //데이터 이관 시점
