@@ -38,4 +38,5 @@ public class MemberResponseDto {
 
     @Schema(description = "회원 상태", example = "MEMBER_ACTIVE")
     private Member.MemberStatus memberStatus;
+
 }

@@ -98,7 +98,7 @@ public class MemberService {
     }
 
     // 유저 단일 조회는 유저 본인과 관리자만 허용
-    public Member findMember(int memberId, MemberDetails memberDetails) {
+    public Member findMember(long memberId, MemberDetails memberDetails) {
         // 유저 존재 확인
         Member findMember = validateExistingMember(memberId);
 

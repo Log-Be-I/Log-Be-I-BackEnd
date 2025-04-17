@@ -139,9 +139,9 @@ public class MemberController {
                             examples = @ExampleObject(value = "{\"error\": \"Bad Request\", \"message\": \"조회하신 회원이 없습니다.\"}")))
     })
     // 회원 단일 조회
-    @GetMapping("/{memberId}")
+    @GetMapping("/{member-id}")
     public ResponseEntity getMember(@Parameter(description = "조회할 멤버의 ID", example = "1")
-                                        @Valid @PathVariable("memberId") int memberId,
+                                        @Valid @PathVariable("member-id") long memberId,
                                     @Parameter(hidden = true)
                                     @AuthenticationPrincipal MemberDetails memberDetails) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
