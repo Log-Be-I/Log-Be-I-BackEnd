@@ -12,5 +12,5 @@ import lombok.Setter;
 public class KeywordPostDto {
 
     @Schema(description = "키워드 이름", example = "봄.")
-    private String keywordName;
+    private String name;
 }
