@@ -14,7 +14,7 @@ public interface KeywordMapper {
 
     default KeywordResponseDto keywordToKeywordResponseDto (Keyword keyword) {
         KeywordResponseDto keywordResponseDto = new KeywordResponseDto();
-        keywordResponseDto.setKeywordName(keyword.getName());
+        keywordResponseDto.setName(keyword.getName());
         keywordResponseDto.setKeywordId(keyword.getKeywordId());
         return keywordResponseDto;
     }

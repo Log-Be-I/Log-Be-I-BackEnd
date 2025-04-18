@@ -13,5 +13,5 @@ public class KeywordResponseDto {
     @Schema(description = "키워드 번호", example = "1")
     private Long keywordId;
     @Schema(description = "키워드 이름", example = "봄.")
-    private String keywordName;
+    private String name;
 }

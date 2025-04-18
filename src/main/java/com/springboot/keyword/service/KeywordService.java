@@ -20,7 +20,7 @@ public class KeywordService {
     private final MemberService memberService;
 
     // keyword 생성
-    public void createKeyword (List<Keyword> keywordList, CustomPrincipal customPrincipal) {
+    public List<Keyword> createKeyword (List<Keyword> keywordList, CustomPrincipal customPrincipal) {
         //member 찾기
         Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
         // memberId 로 기존 키워드 리스트 찾기
@@ -32,18 +32,15 @@ public class KeywordService {
             // 기존 키워드 상태 전부 "삭제 상태"로 변경
             keywords.stream().forEach(keyword -> {
                 keyword.setKeywordStatus(Keyword.KeywordStatus.KEYWORD_DELETED);
+//                keyword.setMember(member);
                 keywordRepository.save(keyword);
             });
         }
-
-        // 키워드 객체 및 리스트 생성
-        List<Keyword> newKeywordList = keywordList.stream()
-                .map(keyword -> new Keyword(keyword.getName(), member)).collect(Collectors.toList());
-
-        // 키워드 하나 하나 저장하기
-        keywordList.stream().forEach(
-                keyword -> keywordRepository.save(keyword)
-        );
+        keywordList.stream().forEach(keyword -> {
+            keyword.setMember(member);
+            keywordRepository.save(keyword);
+        });
+        return keywordList;
     }
 
     // keyword 조회

@@ -11,6 +11,8 @@ import com.springboot.keyword.service.KeywordService;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.question.dto.QuestionDto;
+import com.springboot.responsedto.ListResponseDto;
+import com.springboot.responsedto.SingleResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -54,8 +56,11 @@ public class KeywordController {
                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         // 키워드 생성
-        keywordService.createKeyword(keywordMapper.KeywordPostDtoListToKeywordList(keywordPostDtoList), customPrincipal);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        List<Keyword> keywordList = keywordService.createKeyword(
+                keywordMapper.KeywordPostDtoListToKeywordList(keywordPostDtoList), customPrincipal);
+
+        return new ResponseEntity<>(
+                new ListResponseDto<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList)),HttpStatus.CREATED);
     }
 
     //swagger API - 조회
@@ -74,6 +79,7 @@ public class KeywordController {
 
         List<Keyword> keywordList = keywordService.getKeywords(customPrincipal);
 
-        return new ResponseEntity<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new ListResponseDto<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList)), HttpStatus.OK);
     }
 }
