@@ -33,7 +33,7 @@ public class Notice extends BaseEntity {
     private NoticeType noticeType = NoticeType.NOTICE;
 
     @Enumerated(value = EnumType.STRING)
-    private NoticeStatus noticeStatus = NoticeStatus.NOTICE_REGISERED;
+    private NoticeStatus noticeStatus = NoticeStatus.NOTICE_REGISTERED;
 
     @Enumerated(value = EnumType.STRING)
     private IsPinned isPinned = IsPinned.NONE;
@@ -69,9 +69,9 @@ public class Notice extends BaseEntity {
     }
 
     public enum NoticeStatus{
-        NOTICE_REGISERED("공지 등록"),
+        NOTICE_REGISTERED("공지 등록"),
         NOTICE_UPDATED("공지 수정"),
-        NOTICE_DELTETED("공지 삭제");
+        NOTICE_DELETED("공지 삭제");
 
         @Getter
         private String status;

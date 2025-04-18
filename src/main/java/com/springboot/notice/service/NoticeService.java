@@ -76,7 +76,7 @@ public class NoticeService {
         //회원인지 확인
         memberService.validateExistingMember(adminId);
         AuthorizationUtils.verifyAuthorIsAdmin(findNotice.getMember().getMemberId(), adminId);
-        findNotice.setNoticeStatus(Notice.NoticeStatus.NOTICE_DELTETED);
+        findNotice.setNoticeStatus(Notice.NoticeStatus.NOTICE_DELETED);
         //변경사항 저장
         noticeRepository.save(findNotice);
     }

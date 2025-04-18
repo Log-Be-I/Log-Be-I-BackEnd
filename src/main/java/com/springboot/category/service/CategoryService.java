@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,11 +31,10 @@ public class CategoryService {
     public Category createCategory(Category category, Long memberId) {
         //회원인지 확인
         Member findMember = memberService.validateExistingMember(memberId);
-
-        //회원이 가진 카테고리 중 중복되는 이름이 있다면 예외처리
-        if(categoryRepository.existsByMemberAndName(findMember, category.getName())){
-            throw new BusinessLogicException(ExceptionCode.CATEGORY_EXISTS);
-        }
+        //카테고리 생성시 영속성전이
+        findMember.setCategory(category);
+        //이름이 중복되면 예외발생
+        verifyExistsCategory(findMember, category.getName());
         //저장
         return categoryRepository.save(category);
     }
@@ -46,6 +46,8 @@ public class CategoryService {
         AuthorizationUtils.isOwner(findCategory.getMember().getMemberId(), memberId);
         //해당 카테고리가 기본 제공 카테고리라면 수정되지 않아야 한다.
         defaultCategory(findCategory);
+        //이름이 중복되면 예외발생
+        verifyExistsCategory(findCategory.getMember(), category.getName());
 
         Optional.ofNullable(category.getName())
                 .ifPresent(name -> findCategory.setName(name));
@@ -56,17 +58,11 @@ public class CategoryService {
     }
 
     //특정 회원의 카테고리 전체 조회
-    public Page<Category> findCategories (int page, int size, long memberId) {
+    public List<Category> findCategories ( long memberId) {
         memberService.validateExistingMember(memberId);
 
-        if(page < 1){
-            throw new IllegalArgumentException("페이지의 번호는 1이상이어야 합니다.");
-        }
-        //페이징 및 정렬 정보 생성
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by("categoryId").descending());
-
         //특정 회원의 카테고리 조회
-        return categoryRepository.findByMember_MemberId(memberId, pageable);
+        return categoryRepository.findByMember_MemberId(memberId);
     }
 
     //카테고리 단일 조회
@@ -98,7 +94,14 @@ public class CategoryService {
     public void defaultCategory(Category category) {
         if(category.isDefault()) {
             //객체의 현재 상태에서 허용되지 않는 작업을 시도할 때 사용하는 예외처리
-            throw new IllegalStateException("기본 카테고리는 수정할 수 없습니다.");
+            throw new BusinessLogicException(ExceptionCode.CANNAT_UPDATE_CATEGORY);
+        }
+    }
+
+    //회원이 가진 카테고리 중 중복되는 이름이 있다면 예외처리
+    public void verifyExistsCategory(Member member, String name) {
+        if (categoryRepository.existsByMemberAndName(member, name)) {
+            throw new BusinessLogicException(ExceptionCode.CATEGORY_EXISTS);
         }
     }
 }

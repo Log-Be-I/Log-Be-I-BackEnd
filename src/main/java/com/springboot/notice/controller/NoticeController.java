@@ -50,11 +50,12 @@ public class NoticeController {
     @PostMapping
     public ResponseEntity postNotice(@Valid @RequestBody NoticeDto.Post post,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        long memberId = customPrincipal.getMemberId();
-        Notice createdNotice = noticeService.createNotice(mapper.noticePostToNotice(post), memberId);
+
+        post.setMemberId(customPrincipal.getMemberId());
+        Notice createdNotice = noticeService.createNotice(mapper.noticePostToNotice(post), customPrincipal.getMemberId());
         URI location = UriCreator.createUri(NOTICE_DEFAULT_URL, createdNotice.getNoticeId());
 
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(createdNotice);
     }
 
     //swagger API - 수정
