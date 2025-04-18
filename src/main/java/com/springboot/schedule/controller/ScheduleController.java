@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -112,7 +114,7 @@ public class ScheduleController {
     public ResponseEntity patchSchedule(@Parameter(description = "수정할 일정의 ID", example = "1")
                                             @PathVariable("schedule-id") @Positive long scheduleId,
                                         @RequestBody SchedulePatchDto schedulePatchDto,
-                                        @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                        @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) throws GeneralSecurityException, IOException {
 
         // 가입된 회원인지 검증
         Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
@@ -120,8 +122,9 @@ public class ScheduleController {
         memberService.validateMemberStatus(member);
         // dto -> entity
         Schedule schedule = scheduleMapper.schedulePatchDtoToSchedule(schedulePatchDto);
+        // tn
         // 일정 수정 서비스 요청
-        scheduleService.updateSchedule(scheduleId, customPrincipal, schedule);
+        scheduleService.updateSchedule(scheduleId, customPrincipal);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -167,37 +170,12 @@ public class ScheduleController {
                                        @Positive @RequestParam(value = "year") int year,
                                    @Parameter(description = "조회할 월 (1~12)", example = "4")
                                    @Positive @RequestParam(value = "month") int month,
-                                   @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                   @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) throws GeneralSecurityException, IOException {
 
     List<Schedule> syncedSchedules = googleCalendarService.syncSchedulesWithGoogleCalendar(year, month, customPrincipal);
     List<ScheduleResponseDto> scheduleResponseDtoList = scheduleMapper.schedulesToScheduleResponseDtos(syncedSchedules);
     return new ResponseEntity<>(scheduleResponseDtoList, HttpStatus.OK);
 }
-
-    // true: timeA가 더 최신
-    // false: timeB가 더 최신 or 같음
-    public static boolean isMoreRecent(String google, String server) {
-        LocalDateTime timeA = LocalDateTime.parse(google).truncatedTo(ChronoUnit.SECONDS);
-        LocalDateTime timeB = LocalDateTime.parse(server).truncatedTo(ChronoUnit.SECONDS);
-        return timeA.isAfter(timeB);
-    }
-
-    // DateTime -> LocalDateTime
-    public LocalDateTime toLocalDateTime(DateTime dateTime) {
-        return Instant.ofEpochMilli(dateTime.getValue())  // DateTime → Instant
-                .atZone(ZoneId.of("Asia/Seoul"))    // 원하는 시간대 설정
-                .toLocalDateTime();                 // LocalDateTime으로 변환
-    }
-
-    public Schedule eventToSchedule (CustomPrincipal customPrincipal, Event event) {
-        Schedule schedule = new Schedule();
-        schedule.setMember(memberService.validateExistingMember(customPrincipal.getMemberId()));
-        schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_UPDATED);
-        schedule.setTitle(event.getSummary());
-        schedule.setEventId(event.getId());
-        schedule.setStartDateTime(event.getStart().getDateTime().toString());
-        return schedule;
-    }
 
     //swagger API - 삭제
     @Operation(summary = "일정 삭제", description = "일정을 삭제합니다")
@@ -217,8 +195,14 @@ public class ScheduleController {
         // 정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
 
+        // 일정 찾기
+        Schedule schedule = scheduleService.validateExistingSchedule(scheduleId);
+
         // 일정 상태 변경
         scheduleService.deletedSchedule(scheduleId);
+
+        // 캘린더 삭제
+        googleCalendarService.deleteGoogleCalendarEvent(schedule.getEventId(), customPrincipal.getEmail());
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

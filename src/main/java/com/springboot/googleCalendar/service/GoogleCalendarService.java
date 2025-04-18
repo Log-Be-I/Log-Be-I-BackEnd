@@ -18,6 +18,9 @@ import com.springboot.schedule.repository.ScheduleRepository;
 import com.springboot.schedule.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.temporal.ChronoUnit;
 
 import java.time.*;
@@ -89,7 +92,7 @@ public class GoogleCalendarService {
             // 받은 accessToken 으로 GoogleCredential 객체 생성
             GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
 
-            // calendar 객체 생성
+            // calendar 객체 생성 (구글 캘린더와 연결해주는 객체 음,. 구글 db?)
             Calendar calendar = new Calendar.Builder(
                     // http 전송을 위한 기본 트랜스포트 객체 생성 ( 서버랑 통신할 때 어떤 방식 데이터를 보낼지 정해주는 도구 )
                     GoogleNetHttpTransport.newTrustedTransport(),
@@ -170,13 +173,14 @@ public class GoogleCalendarService {
         }
     }
 
-    public List<Schedule> syncSchedulesWithGoogleCalendar(int year, int month, CustomPrincipal principal) {
+    public List<Schedule> syncSchedulesWithGoogleCalendar(int year, int month, CustomPrincipal principal) throws GeneralSecurityException, IOException {
         // ✅ 1. 서버(DB)에서 해당 연/월의 일정 목록 조회
         List<Schedule> serverScheduleList = scheduleService.findSchedules(year, month, principal);
 
         // ✅ 2. 서버 일정들을 eventId 기준으로 Map으로 변환
         Map<String, Schedule> serverScheduleMap = serverScheduleList.stream()
-                .filter(schedule -> schedule.getEventId() != null)
+                .filter(schedule -> schedule.getEventId() != null &&
+                        schedule.getScheduleStatus() != Schedule.ScheduleStatus.SCHEDULE_DELETED)
                 .collect(Collectors.toMap(Schedule::getEventId, schedule -> schedule));
 
         // ✅ 3. 해당 월의 시작과 끝 날짜 구하기
@@ -208,7 +212,7 @@ public class GoogleCalendarService {
 
         // ✅ 7. 다시 Map으로 변환
         Map<String, Schedule> serverMap = updatedServerList.stream()
-                .filter(s -> s.getEventId() != null)
+                .filter(s -> s.getEventId() != null && s.getScheduleStatus() != Schedule.ScheduleStatus.SCHEDULE_DELETED)
                 .collect(Collectors.toMap(
                     Schedule::getEventId,
                     Function.identity(),
@@ -224,9 +228,10 @@ public class GoogleCalendarService {
             LocalDateTime googleTime = toLocalDateTime(google.getUpdated()).truncatedTo(ChronoUnit.SECONDS);
             LocalDateTime serverTime = server.getModifiedAt().truncatedTo(ChronoUnit.SECONDS);
 
-            if (googleTime.isAfter(serverTime)) {
+            if (Duration.between(serverTime, googleTime).getSeconds() > 3) {
                 // 구글이 최신 → 서버 업데이트
-                scheduleService.updateSchedule(server.getScheduleId(), principal, eventToSchedule(principal, google));
+                scheduleService.updateSchedule(server.getScheduleId(), principal);
+//                scheduleRepository.delete(server);
             } else if (googleTime.isBefore(serverTime)) {
                 // 서버가 최신 → 구글 업데이트
                 updateGoogleCalendarEvent(google.getId(), scheduleMapper.scheduleToGoogleEventDto(server));
@@ -242,8 +247,12 @@ public class GoogleCalendarService {
                 .filter(schedule -> schedule.getEventId() != null && !googleEventIds.contains(schedule.getEventId()))
                 .collect(Collectors.toList());
 
-        schedulesToDelete.forEach(schedule -> scheduleRepository.delete(schedule));
+//        schedulesToDelete.forEach(schedule -> scheduleRepository.delete(schedule));
 
+        schedulesToDelete.forEach(schedule -> {
+            schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_DELETED);
+            scheduleRepository.save(schedule);
+        });
         // ✅ 10. 최종 반영된 서버 일정 반환
         return scheduleService.findSchedules(year, month, principal);
     }
@@ -264,4 +273,30 @@ public class GoogleCalendarService {
                 .atZone(ZoneId.of("Asia/Seoul"))
                 .toLocalDateTime();
     }
+
+    // 삭제 요청
+    public void deleteGoogleCalendarEvent(String eventId, String email) {
+        try {
+            String calendarId = email;
+            // accessToken 가져오기
+            String accessToken = redisService.getGoogleAccessToken(calendarId);
+            GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+
+            Calendar calendar = new Calendar.Builder(
+                    GoogleNetHttpTransport.newTrustedTransport(),
+                    JacksonFactory.getDefaultInstance(),
+                    credential
+            ).setApplicationName("LogBeI").build();
+
+            // 기존 이벤트 불러오기
+            Event event = calendar.events().get(calendarId, eventId).execute();
+
+            // 이벤트 삭제
+            calendar.events().delete(calendarId, event.getId()).execute();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Google Calendar 이벤트 삭제 실패: " + e.getMessage(), e);
+        }
+    }
+
 }

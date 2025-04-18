@@ -1,5 +1,10 @@
 package com.springboot.schedule.service;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Event;
 import com.springboot.auth.utils.CustomAuthorityUtils;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
@@ -16,6 +21,8 @@ import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -62,20 +69,26 @@ public class ScheduleService {
         // "year" 과 "month" 가 포함된 모든 일정 조회
         List<Schedule> findScheduleList = scheduleList.stream()
                 .filter(schedule -> schedule.getStartDateTime().startsWith(target))
+                .filter(schedule -> schedule.getScheduleStatus() != Schedule.ScheduleStatus.SCHEDULE_DELETED)
                 .collect(Collectors.toList());
 
         return findScheduleList;
     }
 
     // 일정 수정
-    public void updateSchedule (long scheduleId, CustomPrincipal customPrincipal, Schedule schedule) {
+    public void updateSchedule (long scheduleId, CustomPrincipal customPrincipal) throws GeneralSecurityException, IOException {
         // 일정 찾기
         Schedule findSchedule = validateExistingSchedule(scheduleId);
+
+        Event schedule = getEvent(findSchedule.getEventId());
+
+
+
         // 최초 등록된 일정이면 상태를 유지
-        if (findSchedule.getScheduleStatus() == Schedule.ScheduleStatus.SCHEDULE_REGISTERED &&
-            schedule.getScheduleStatus() == Schedule.ScheduleStatus.SCHEDULE_UPDATED) {
-            schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_REGISTERED);
-        }
+//        if (findSchedule.getScheduleStatus() == Schedule.ScheduleStatus.SCHEDULE_REGISTERED &&
+//            schedule.getStatus() == Schedule.ScheduleStatus.SCHEDULE_UPDATED) {
+//            schedule.getStatus(Schedule.ScheduleStatus.SCHEDULE_REGISTERED);
+//        }
         // 데이터 수정
         if(Objects.equals(customPrincipal.getEmail(), findSchedule.getMember().getEmail())){
             // 데이터 이관
@@ -88,25 +101,30 @@ public class ScheduleService {
             historicalSchedule.setTitle(findSchedule.getTitle());
 
             findSchedule.setTitle(
-                    Optional.ofNullable(schedule.getTitle())
+                    Optional.ofNullable(schedule.getSummary())
                             .orElse(findSchedule.getTitle()));
             findSchedule.setEndDateTime(
-                    Optional.ofNullable(schedule.getEndDateTime())
+                    Optional.ofNullable(schedule.getEnd().getDateTime().toString())
                             .orElse(findSchedule.getEndDateTime()));
             findSchedule.setStartDateTime(
-                    Optional.ofNullable(schedule.getStartDateTime())
+                    Optional.ofNullable(schedule.getStart().getDateTime().toString())
                             .orElse(findSchedule.getStartDateTime()));
-            findSchedule.setScheduleStatus(
-                    Optional.ofNullable(schedule.getScheduleStatus())
-                            .orElse(findSchedule.getScheduleStatus()));
+//            findSchedule.setScheduleStatus(
+//                    Optional.ofNullable(schedule.getScheduleStatus())
+//                            .orElse(findSchedule.getScheduleStatus()));
 
-            Schedule newSchedule = new Schedule();
-            newSchedule.setEndDateTime(findSchedule.getEndDateTime());
-            newSchedule.setStartDateTime(findSchedule.getStartDateTime());
-            newSchedule.setTitle(findSchedule.getTitle());
-            scheduleRepository.delete(findSchedule);
+//            Schedule newSchedule = new Schedule();
+//            newSchedule.setEndDateTime(findSchedule.getEndDateTime());
+//            newSchedule.setStartDateTime(findSchedule.getStartDateTime());
+//            newSchedule.setTitle(findSchedule.getTitle());
+//            newSchedule.setMember(findSchedule.getMember());
+//            newSchedule.setScheduleStatus(S);
+//            newSchedule.setEventId(findSchedule.getEventId());
+
+            // 기존 데이터 삭제
+//            scheduleRepository.deleteById(findSchedule.getScheduleId());
             // 수정 데이터 등록
-            scheduleRepository.save(newSchedule);
+            scheduleRepository.save(findSchedule);
             // 이관 완료
             historicalScheduleRepository.save(historicalSchedule);
         } else {
@@ -143,5 +161,25 @@ public class ScheduleService {
         if (schedule.getScheduleStatus() != Schedule.ScheduleStatus.SCHEDULE_DELETED) {
             new BusinessLogicException(ExceptionCode.NOT_FOUND);
         }
+    }
+
+    // 단일 조회
+    public Event getEvent (String eventId) throws GeneralSecurityException, IOException {
+
+        String calendarId = "6feetlife56@gmail.com";
+        // accessToken 가져오기
+        String accessToken = redisService.getGoogleAccessToken(calendarId);
+        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+
+        Calendar calendar = new Calendar.Builder(
+                GoogleNetHttpTransport.newTrustedTransport(),
+                JacksonFactory.getDefaultInstance(),
+                credential
+        ).setApplicationName("LogBeI").build();
+
+        // 기존 이벤트 불러오기
+        Event event = calendar.events().get(calendarId, eventId).execute();
+
+        return event;
     }
 }
