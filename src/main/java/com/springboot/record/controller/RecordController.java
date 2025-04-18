@@ -44,7 +44,7 @@ public class RecordController {
         //LocalDate 타입으로 변경된 RecordTime set
 //        textRecord.setRecordDateTime(recordDateTime);
 
-        recordService.createRecord(textRecord, customPrincipal.getMemberId());
+        Record record =recordService.createRecord(textRecord, customPrincipal.getMemberId());
 //        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
         return new ResponseEntity<>(new SingleResponseDto<>(mapper.recordToRecordResponse(record)), HttpStatus.CREATED);
     }
