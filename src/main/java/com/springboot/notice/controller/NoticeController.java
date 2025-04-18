@@ -34,7 +34,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Notice API", description = "공지사항 관련 API")
 public class NoticeController {
-    private final static String NOTICE_DEFAULT_URL = "/notice";
+    private final static String NOTICE_DEFAULT_URL = "/notices";
     private final NoticeService noticeService;
     private final NoticeMapper mapper;
 
@@ -55,7 +55,8 @@ public class NoticeController {
         Notice createdNotice = noticeService.createNotice(mapper.noticePostToNotice(post), customPrincipal.getMemberId());
         URI location = UriCreator.createUri(NOTICE_DEFAULT_URL, createdNotice.getNoticeId());
 
-        return ResponseEntity.created(location).body(createdNotice);
+        return ResponseEntity.created(location).body(new SingleResponseDto<>(mapper.noticeToNoticeResponse(createdNotice)));
+
     }
 
     //swagger API - 수정
