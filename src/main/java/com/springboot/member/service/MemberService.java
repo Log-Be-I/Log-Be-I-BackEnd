@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,12 +42,12 @@ public class MemberService {
     private String adminEmail;
 
     public Map<String, String> createMember(Member member) {
+        // 탈퇴한 내역이 있는지 있다면 재가입 가능한지 검증
+        validateRejoinableMember(member);
         // 중복된 회원인지 이메일로 검증
         isMemberAlreadyRegistered(member.getEmail());
         // 중복된 닉네임인지 검증
         isNicknameAlreadyUsed(member);
-        // 탈퇴한 내역이 있는지 있다면 재가입 가능한지 검증
-        validateRejoinableMember(member);
 
         List<String> roles = authorityUtils.createRoles(member.getEmail());
         member.setRoles(roles);
@@ -90,7 +91,7 @@ public class MemberService {
                     Optional.ofNullable(member.isNotification())
                             .orElse(findMember.isNotification()));
             findMember.setMemberStatus(
-                    Optional.ofNullable(member.getMemberStatus())
+                    Optional.ofNullable(findMember.getMemberStatus())
                             .orElse(findMember.getMemberStatus()));
         } else {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
@@ -156,39 +157,46 @@ public class MemberService {
     }
 
     // 회원 삭제는 관리자와 유저 본인만 가능
-    public void deleteMember(long memberId, String memberEmail, String response) {
+    @Transactional
+    public void deleteMember(long memberId, long loginMemberId, String memberEmail, String response) {
         // 존재하는 회원인지 검증
         Member member = validateExistingMember(memberId);
-
+        AuthorizationUtils.isAdminOrOwner(memberId,loginMemberId);
+        //memberId와 email이 같은 회원의 정보인지 확인
+        checkMemberIdentityByIdAndEmail(member, memberEmail);
         // 회원 상태가 활동중인지 검증
         // 활동중인 경우에만 삭제 가능 ( 보통 휴면계정 또한 휴면을 풀어야 삭제든 뭐든 가능)
-        if(member.getMemberStatus() != Member.MemberStatus.MEMBER_ACTIVE){
-            throw new BusinessLogicException(ExceptionCode.MEMBER_DEACTIVATED);
-        }
+        validateMemberStatus(member);
 
-        // uri 에 있는 memberId 의 owner email 추출
-        String isOwnerEmail = member.getEmail();
+//        // uri 에 있는 memberId 의 owner email 추출
+//        String isOwnerEmail = member.getEmail();
 
-        List<String> authentication = List.of(isOwnerEmail, adminEmail);
+        List<String> authentication = List.of(memberEmail, adminEmail);
 
         // 만약 요청한 사용자의 이메일과 변경하고자하는 유저 정보의 owner 의 이메일이 동일하거나 admin 일 경우 변경 실행
         boolean value = authentication.stream().anyMatch(email -> Objects.equals(memberEmail, email));
-
+        //탈퇴 요청을 보낸 회원이 사용자 본인 또는 관리자라면 true
         if(value){
             // 회원 상태 변경
             member.setMemberStatus(Member.MemberStatus.MEMBER_DELETEED);
-            memberRepository.save(member);
             // 회원이 작성한 질문글 상태 변경
             member.getQuestions().stream()
                     .forEach(question -> question.setQuestionStatus(Question.QuestionStatus.QUESTION_DELETED));
+            memberRepository.save(member);
             // DeletedMember 에 post
             DeletedMember deletedMember = new DeletedMember();
             deletedMember.setMemberId(member.getMemberId());
+            deletedMember.setEmail(memberEmail);
             deletedMember.setReason(response);
             deletedMemberRepository.save(deletedMember);
+
+
         } else {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
         }
+
+
+
     }
 
     // 이미 가입된 회원인지 중복 가입 예외처리
@@ -210,8 +218,8 @@ public class MemberService {
     // 가입된 회원인지 검증(id)
     public Member validateExistingMember(long memberId) {
         Optional<Member> findMember = memberRepository.findByMemberId(memberId);
-        Member member = findMember.orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
-        return member;
+        return findMember.orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+
     }
 
     // 가입된 회원인지 검증(email)
@@ -221,11 +229,23 @@ public class MemberService {
         return member;
     }
 
+    //memberId로 찾은 회원과 email로 찾은 회원이 서로 같지않다면 예외발생
+    public void checkMemberIdentityByIdAndEmail(Member member ,String memberEmail) {
+        Member wishDeleteMember = validateExistingMemberUsedEmail(memberEmail);
+        if (!member.getEmail().equals(wishDeleteMember.getEmail())) {
+            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
+        }
+    }
+
     // 회원 상태 검증
     public void validateMemberStatus(Member member) {
-        if (member.getMemberStatus() != Member.MemberStatus.MEMBER_ACTIVE) {
+        if (member.getMemberStatus() == Member.MemberStatus.MEMBER_DELETEED){
+            throw new BusinessLogicException(ExceptionCode.MEMBER_DELETED);
+
+        } else if (member.getMemberStatus() != Member.MemberStatus.MEMBER_ACTIVE) {
             throw new BusinessLogicException(ExceptionCode.MEMBER_DEACTIVATED);
         }
+
     }
 
     // 탈퇴 회원 재가입 가능한지 검증
@@ -236,7 +256,8 @@ public class MemberService {
         if(deletedMember.isPresent()) {
             //탈퇴 후 6개월이 지나지 않았다면 회원가입 불가
             if (LocalDateTime.now().isBefore(deletedMember.get().getDeletedAt().plusMonths(6))) {
-                throw new IllegalStateException("탈퇴 후 6개월 이내에는 재가입할 수 없습니다.");
+                throw new BusinessLogicException(ExceptionCode.CANCEL_MEMBERSHIP);
+
             }
         }
     }

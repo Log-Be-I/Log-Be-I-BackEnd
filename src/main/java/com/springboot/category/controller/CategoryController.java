@@ -5,6 +5,7 @@ import com.springboot.category.dto.CategoryDto;
 import com.springboot.category.entity.Category;
 import com.springboot.category.mapper.CategoryMapper;
 import com.springboot.category.service.CategoryService;
+import com.springboot.responsedto.ListResponseDto;
 import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
 import com.springboot.utils.UriCreator;
@@ -55,7 +56,8 @@ public class CategoryController {
         Category category = categoryService.createCategory(mapper.categoryPostToCategory(post), customPrincipal.getMemberId());
         URI location = UriCreator.createUri(CATEGORY_DEFAULT_URL, category.getCategoryId());
 
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(new SingleResponseDto<>(
+                mapper.categoryToCategoryResponse(category)));
 
     }
 
@@ -103,13 +105,9 @@ public class CategoryController {
 
     //특정 회원의 카테고리 목록 조회
     @GetMapping("/my")
-    public ResponseEntity getMyCategory(@Positive @RequestParam("page") int page,
-                                        @Positive @RequestParam("size") int size,
-                                        @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Page<Category> categoryPage = categoryService.findCategories(page, size, customPrincipal.getMemberId());
-        List<Category> categories = categoryPage.getContent();
-        return new ResponseEntity<>(new MultiResponseDto<>(
-                mapper.categoriesToCategoryResponses(categories), categoryPage), HttpStatus.OK
+    public ResponseEntity getMyCategory(@AuthenticationPrincipal CustomPrincipal customPrincipal){
+        List<Category> categories = categoryService.findCategories(customPrincipal.getMemberId());
+        return new ResponseEntity<>(new ListResponseDto<>(mapper.categoriesToCategoryResponses(categories)), HttpStatus.OK
         );
     }
 
