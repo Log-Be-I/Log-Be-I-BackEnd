@@ -122,9 +122,15 @@ public class ScheduleController {
         memberService.validateMemberStatus(member);
         // dto -> entity
         Schedule schedule = scheduleMapper.schedulePatchDtoToSchedule(schedulePatchDto);
-        // tn
+        Schedule originalSchedule = scheduleService.validateExistingSchedule(scheduleId);
         // 일정 수정 서비스 요청
-        scheduleService.updateSchedule(scheduleId, customPrincipal);
+        scheduleService.updateServerSchedule(scheduleId, customPrincipal, schedule);
+
+        GoogleEventDto googleEventDto = scheduleMapper.scheduleToGoogleEventDto(schedule);
+        googleEventDto.setCalendarId(member.getEmail());
+
+        // 구글 캘린더에 수정 요청
+        googleCalendarService.updateGoogleCalendarEvent(originalSchedule);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

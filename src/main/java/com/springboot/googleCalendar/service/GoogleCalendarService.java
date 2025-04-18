@@ -131,9 +131,9 @@ public class GoogleCalendarService {
         return endOfMonth.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 
-    public String updateGoogleCalendarEvent(String eventId, GoogleEventDto dto) {
+    public String updateGoogleCalendarEvent(Schedule schedule) {
         try {
-            String calendarId = "primary";
+            String calendarId = schedule.getMember().getEmail();
             // accessToken 가져오기
             String accessToken = redisService.getGoogleAccessToken(calendarId);
             GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
@@ -145,18 +145,16 @@ public class GoogleCalendarService {
             ).setApplicationName("LogBeI").build();
 
             // 기존 이벤트 불러오기
-            Event event = calendar.events().get(calendarId, eventId).execute();
+            Event event = calendar.events().get(calendarId, schedule.getEventId()).execute();
 
             // 이벤트 정보 수정
-            event.setSummary(dto.getSummary());
-            event.setDescription(dto.getDescription());
-            event.setLocation(dto.getLocation());
+            event.setSummary(schedule.getTitle());
 
             EventDateTime start = new EventDateTime()
-                    .setDateTime(new DateTime(dto.getStartDateTime()))
+                    .setDateTime(new DateTime(schedule.getStartDateTime()))
                     .setTimeZone("Asia/Seoul");
             EventDateTime end = new EventDateTime()
-                    .setDateTime(new DateTime(dto.getEndDateTime()))
+                    .setDateTime(new DateTime(schedule.getEndDateTime()))
                     .setTimeZone("Asia/Seoul");
 
             event.setStart(start);
@@ -234,7 +232,7 @@ public class GoogleCalendarService {
 //                scheduleRepository.delete(server);
             } else if (googleTime.isBefore(serverTime)) {
                 // 서버가 최신 → 구글 업데이트
-                updateGoogleCalendarEvent(google.getId(), scheduleMapper.scheduleToGoogleEventDto(server));
+                updateGoogleCalendarEvent(server);
             }
         }
 

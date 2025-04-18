@@ -75,20 +75,13 @@ public class ScheduleService {
         return findScheduleList;
     }
 
-    // 일정 수정
+    // 일정 수정( 구글 )
     public void updateSchedule (long scheduleId, CustomPrincipal customPrincipal) throws GeneralSecurityException, IOException {
         // 일정 찾기
         Schedule findSchedule = validateExistingSchedule(scheduleId);
 
         Event schedule = getEvent(findSchedule.getEventId());
 
-
-
-        // 최초 등록된 일정이면 상태를 유지
-//        if (findSchedule.getScheduleStatus() == Schedule.ScheduleStatus.SCHEDULE_REGISTERED &&
-//            schedule.getStatus() == Schedule.ScheduleStatus.SCHEDULE_UPDATED) {
-//            schedule.getStatus(Schedule.ScheduleStatus.SCHEDULE_REGISTERED);
-//        }
         // 데이터 수정
         if(Objects.equals(customPrincipal.getEmail(), findSchedule.getMember().getEmail())){
             // 데이터 이관
@@ -109,20 +102,7 @@ public class ScheduleService {
             findSchedule.setStartDateTime(
                     Optional.ofNullable(schedule.getStart().getDateTime().toString())
                             .orElse(findSchedule.getStartDateTime()));
-//            findSchedule.setScheduleStatus(
-//                    Optional.ofNullable(schedule.getScheduleStatus())
-//                            .orElse(findSchedule.getScheduleStatus()));
 
-//            Schedule newSchedule = new Schedule();
-//            newSchedule.setEndDateTime(findSchedule.getEndDateTime());
-//            newSchedule.setStartDateTime(findSchedule.getStartDateTime());
-//            newSchedule.setTitle(findSchedule.getTitle());
-//            newSchedule.setMember(findSchedule.getMember());
-//            newSchedule.setScheduleStatus(S);
-//            newSchedule.setEventId(findSchedule.getEventId());
-
-            // 기존 데이터 삭제
-//            scheduleRepository.deleteById(findSchedule.getScheduleId());
             // 수정 데이터 등록
             scheduleRepository.save(findSchedule);
             // 이관 완료
@@ -132,6 +112,44 @@ public class ScheduleService {
         }
 
     }
+
+    // 일정 수정( 서버 수정 )
+    public void updateServerSchedule (long scheduleId, CustomPrincipal customPrincipal, Schedule schedule) {
+        // 일정 찾기
+        Schedule findSchedule = validateExistingSchedule(scheduleId);
+
+        // 데이터 수정
+        if(Objects.equals(customPrincipal.getEmail(), findSchedule.getMember().getEmail())){
+            // 데이터 이관
+            HistoricalSchedule historicalSchedule = new HistoricalSchedule();
+            historicalSchedule.setScheduleStatus(HistoricalSchedule.ScheduleStatus.SCHEDULE_UPDATED);
+            historicalSchedule.setMemberId(customPrincipal.getMemberId());
+            historicalSchedule.setEndDateTime(findSchedule.getEndDateTime());
+            historicalSchedule.setStartDateTime(findSchedule.getStartDateTime());
+            historicalSchedule.setOriginalScheduleId(findSchedule.getScheduleId());
+            historicalSchedule.setTitle(findSchedule.getTitle());
+
+            findSchedule.setTitle(
+                    Optional.ofNullable(schedule.getTitle())
+                            .orElse(findSchedule.getTitle()));
+            findSchedule.setEndDateTime(
+                    Optional.ofNullable(schedule.getEndDateTime())
+                            .orElse(findSchedule.getEndDateTime()));
+            findSchedule.setStartDateTime(
+                    Optional.ofNullable(schedule.getStartDateTime())
+                            .orElse(findSchedule.getStartDateTime()));
+//            findSchedule.setEventId(schedule.getEventId());
+
+            // 수정 데이터 등록
+            scheduleRepository.save(findSchedule);
+            // 이관 완료
+            historicalScheduleRepository.save(historicalSchedule);
+        } else {
+            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
+        }
+
+    }
+
 
     // 일정 삭제
     public void deletedSchedule (long scheduleId) {
