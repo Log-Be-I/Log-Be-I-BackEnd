@@ -27,9 +27,9 @@ public class Record extends BaseEntity {
     @Column(nullable = false, length = 500)
     private String content;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
 //    private String recordTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-    private LocalDateTime recordDateTime = LocalDateTime.now();
+    private LocalDateTime recordDateTime;
 
     @Enumerated(value = EnumType.STRING)
     private RecordStatus recordStatus = RecordStatus.RECORD_REGISTERED;

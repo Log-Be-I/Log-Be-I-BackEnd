@@ -99,9 +99,8 @@ public class MonthlyReportService {
 
     //회원이 가지고 있는 monthlyReport 반환
     public List<MonthlyReport> findVerifiedMonthlyReportList(int year, long memberId){
-        List<MonthlyReport> findMonthly = repository.findByMember_IdAndYearOrderByYearMonthDesc(memberId, year);
+        return repository.findByMember_IdAndYearOrderByYearMonthDesc(memberId, year);
 
-        return findMonthly;
     }
 
     //monthlyReport 반환

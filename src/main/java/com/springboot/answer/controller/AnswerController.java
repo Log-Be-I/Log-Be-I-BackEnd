@@ -34,7 +34,6 @@ public class AnswerController {
     private final static String ANSWER_DEFAULT_URL = "/questions/{question-id}/answers";
     private final AnswerService answerService;
     private final AnswerMapper mapper;
-
     //swagger API - 등록
     @Operation(summary = "답변 등록", description = "관리자가 문의 글에 답변을 등록합니다.")
     @ApiResponses(value = {
@@ -56,7 +55,7 @@ public class AnswerController {
         Answer answer = mapper.answerPostToAnswer(postDto);
         Answer createdAnswer = answerService.createAnswer(answer);
         URI location = UriCreator.createUri(ANSWER_DEFAULT_URL, createdAnswer.getQuestion().getQuestionId());
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(mapper.answerToAnswerResponse(createdAnswer));
     }
 
     //swagger API - 수정
@@ -79,7 +78,7 @@ public class AnswerController {
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         patchDto.setAnswerId(answerId);
         Answer updatedAnswer = answerService.updateAnswer(mapper.answerPatchToAnswer(patchDto), customPrincipal.getMemberId());
-        return new ResponseEntity<>(new SingleResponseDto<>(updatedAnswer), HttpStatus.OK);
+        return new ResponseEntity<>(new SingleResponseDto<>(mapper.answerToAnswerResponse(updatedAnswer)), HttpStatus.OK);
     }
 
     //swagger API - 삭제

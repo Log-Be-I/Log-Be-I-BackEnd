@@ -30,7 +30,7 @@ public class DateUtil {
 
     //원하는 패턴 지정하여 LocalDate를 문자열로 변환
     public static String formatLocalDateToString(LocalDate date, String pattern) {
-        if(date == null){
+        if (date == null) {
             throw new IllegalArgumentException("날짜 데이터가 없습니다.");
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
@@ -39,22 +39,26 @@ public class DateUtil {
 
     // "yyyy-MM-dd HH:mm:ss" 문자열을 LocalDateTime 타입으로 변환
     public static LocalDateTime parseToLocalDateTime(String dateTimeStr) {
+        //입력 값이 없다면
         if (dateTimeStr == null || dateTimeStr.isBlank()) {
-            throw new IllegalArgumentException("날짜 문자열이 비어 있습니다.");
+            return LocalDateTime.now();
+
+            //입력 값이 있다면 문자열을 변환
+        } else {
+            // 기본 포맷(yyyy-MM-dd HH:mm:ss)으로 파싱
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            return LocalDateTime.parse(dateTimeStr, formatter);
         }
-        // 기본 포맷(yyyy-MM-dd HH:mm:ss)으로 파싱
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return LocalDateTime.parse(dateTimeStr, formatter);
     }
 
-    // 원하는 패턴 지정하여 문자열을 LocalDateTime으로 변환
-    public static LocalDateTime parseToLocalDateTime(String dateTimeStr, String pattern) {
-        if (dateTimeStr == null || dateTimeStr.isBlank()) {
-            throw new IllegalArgumentException("날짜 문자열이 비어 있습니다.");
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-        return LocalDateTime.parse(dateTimeStr, formatter);
-    }
+//    public static LocalDateTime parseToLocalDateTime(String dateTimeStr, String pattern) {
+//        //해당 문자열에 입력값이 있을 때 타입 변환
+//        if (dateTimeStr != null && !dateTimeStr.isBlank()) {
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+//            return LocalDateTime.parse(dateTimeStr, formatter);
+//        }
+//        return
+//    }
 
 
 }

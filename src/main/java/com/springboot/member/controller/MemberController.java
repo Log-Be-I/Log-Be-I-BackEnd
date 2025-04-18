@@ -120,8 +120,9 @@ public class MemberController {
                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         Member member = memberMapper.memberPatchDtoToMember(requestBody);
 
-        memberService.updateMember(member, memberId, customPrincipal.getEmail());
-        return new ResponseEntity<>(HttpStatus.OK);
+        Member uodateMember = memberService.updateMember(member, memberId, customPrincipal.getEmail());
+        return new ResponseEntity<>(new SingleResponseDto<>(
+                memberMapper.memberToMemberResponseDto(uodateMember)),HttpStatus.OK);
     }
 
     //swagger API - 조회
@@ -210,8 +211,8 @@ public class MemberController {
                                        @Parameter(hidden = true)
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal,
                                        @RequestBody String request) {
-        memberService.deleteMember(memberId, customPrincipal.getEmail(), request);
-
+//        memberService.deleteMember(memberId, customPrincipal.getEmail(), request);
+        memberService.deleteMember(memberId, customPrincipal.getMemberId(), customPrincipal.getEmail(), request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

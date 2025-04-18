@@ -56,6 +56,7 @@ public class NoticeController {
         URI location = UriCreator.createUri(NOTICE_DEFAULT_URL, createdNotice.getNoticeId());
 
         return ResponseEntity.created(location).body(new SingleResponseDto<>(mapper.noticeToNoticeResponse(createdNotice)));
+
     }
 
     //swagger API - 수정
