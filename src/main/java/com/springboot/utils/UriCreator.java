@@ -20,4 +20,12 @@ public class UriCreator {
                 .buildAndExpand(questionId)
                 .toUri();
     }
+
+    public static URI createUri(String defaultUrl) {
+        return UriComponentsBuilder
+                .newInstance()
+                .path(defaultUrl)
+                .build()
+                .toUri();
+    }
 }

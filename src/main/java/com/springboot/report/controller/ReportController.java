@@ -5,6 +5,7 @@ import com.springboot.report.dto.ReportDto;
 import com.springboot.report.entity.Report;
 import com.springboot.report.mapper.ReportMapper;
 import com.springboot.report.service.ReportService;
+import com.springboot.responsedto.SingleResponseDto;
 import com.springboot.utils.UriCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class ReportController {
     public ResponseEntity postReport(@RequestBody ReportDto.Post post,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         Report report = reportService.createReport(mapper.reportPostToReport(post), customPrincipal.getMemberId());
-        URI location = UriCreator.createUri(REPORT_DEFAULT_URL, report.getReportId());
-        return ResponseEntity.created(location).build();
+        URI location = UriCreator.createUri(REPORT_DEFAULT_URL);
+        return ResponseEntity.created(location).body(new SingleResponseDto<>(mapper.reportToResponseDto(report)));
     }
 }

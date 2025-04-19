@@ -34,6 +34,7 @@ public class MonthlyReportService {
         String title = splitReportTitle(report.getTitle());
         //반환된 문자열을  LocalDate 로 변환
         LocalDate reportTitle = DateUtil.parseToLocalDate(title, "yyyy년 M월");
+
         //해당 LocalDate를 통해 MonthlyReport 조회
         Optional<MonthlyReport> optional = findVerifiedMonthlyReport(memberId,reportTitle);
 
