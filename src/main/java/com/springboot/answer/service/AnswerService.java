@@ -4,6 +4,7 @@ import com.springboot.answer.entity.Answer;
 import com.springboot.answer.repository.AnswerRepository;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.question.entity.Question;
 import com.springboot.question.service.QuestionService;
@@ -23,11 +24,13 @@ public class AnswerService {
 
 
     public Answer createAnswer(Answer answer){
-        memberService.validateExistingMember(answer.getMember().getMemberId());
+        Member member = memberService.validateExistingMember(answer.getMember().getMemberId());
         //로그인한 회원이 관리자인지 확인
         AuthorizationUtils.verifyAdmin();
         Question question = verifyExistsAnswerInQuestion(answer);
         question.setQuestionAnswerStatus(Question.QuestionAnswerStatus.DONE_ANSWER);
+        answer.setMember(member);
+        answer.setQuestion(question);
         return answerRepository.save(answer);
     }
 

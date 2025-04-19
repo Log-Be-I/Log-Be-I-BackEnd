@@ -54,8 +54,9 @@ public class AnswerController {
         postDto.setMemberId(customPrincipal.getMemberId());
         Answer answer = mapper.answerPostToAnswer(postDto);
         Answer createdAnswer = answerService.createAnswer(answer);
-        URI location = UriCreator.createUri(ANSWER_DEFAULT_URL, createdAnswer.getQuestion().getQuestionId());
-        return ResponseEntity.created(location).body(mapper.answerToAnswerResponse(createdAnswer));
+        AnswerDto.Response answerResponseDto = mapper.answerToAnswerResponse(createdAnswer);
+        URI location = UriCreator.createUri(questionId);
+        return ResponseEntity.created(location).body(new SingleResponseDto<>(answerResponseDto));
     }
 
     //swagger API - 수정
