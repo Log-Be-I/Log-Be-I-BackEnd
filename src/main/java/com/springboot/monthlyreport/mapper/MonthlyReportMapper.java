@@ -12,36 +12,9 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface MonthlyReportMapper {
-
+    @Mapping(target = "memberId", source = "member.memberId")
     List<MonthlyReportDto.Response> monthliesToMonthlyResponses(List<MonthlyReport> monthlyReports);
+    @Mapping(target = "memberId", source = "member.memberId")
+    MonthlyReportDto.Response monthlyToMonthlyResponse(MonthlyReport monthlyReport);
 
-    default  MonthlyReportDto.Response monthlyToMonthlyResponse(MonthlyReport monthlyReport) {
-        return new MonthlyReportDto.Response(
-                monthlyReport.getMonthlyId(),
-                monthlyReport.getTitle(),
-                monthlyReport.getMember().getMemberId(),
-                monthlyReport.getYearMonth(),
-                reportsToReportResponses(monthlyReport.getReports())
-        );
-
-    }
-
-    default List<ReportDto.Response> reportsToReportResponses(List<Report> reports) {
-        return reports.stream()
-                .map(report -> reportToReportResponse(report))
-                .collect(Collectors.toList());
-
-    }
-
-    default ReportDto.Response reportToReportResponse(Report report){
-        return new ReportDto.Response(
-                report.getReportId(),
-                report.getTitle(),
-                report.getContent(),
-                report.getReportType(),
-                report.getPeriodNumber(),
-                report.getMonthlyReport()
-
-        );
-    }
 }

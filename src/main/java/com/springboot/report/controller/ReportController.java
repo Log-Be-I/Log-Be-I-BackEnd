@@ -27,9 +27,11 @@ public class ReportController {
     private final ReportService reportService;
     private final ReportMapper mapper;
 
+
     @PostMapping
     public ResponseEntity postReport(@RequestBody ReportDto.Post post,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        post.setMemberId(customPrincipal.getMemberId());
         Report report = reportService.createReport(mapper.reportPostToReport(post), customPrincipal.getMemberId());
         URI location = UriCreator.createUri(REPORT_DEFAULT_URL);
         return ResponseEntity.created(location).body(new SingleResponseDto<>(mapper.reportToResponseDto(report)));

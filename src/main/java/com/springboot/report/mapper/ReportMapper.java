@@ -1,64 +1,49 @@
 package com.springboot.report.mapper;
 
-import com.springboot.monthlyreport.dto.MonthlyReportDto;
+
+import com.springboot.member.entity.Member;
 import com.springboot.monthlyreport.entity.MonthlyReport;
+import com.springboot.report.dto.ReportAnalysisResponse;
+
+import com.springboot.monthlyreport.dto.MonthlyReportDto;
+
+
 import com.springboot.report.dto.ReportDto;
 import com.springboot.report.entity.Report;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
-//
-//@Mapper(componentModel = "spring")
-//public interface ReportMapper {
-//    Report reportPostToReport(ReportDto.Post post);
-//    ReportDto.Response reportToReportResponse(Report report);
-//
-//
-//}
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ReportMapper {
 
-    default Report reportPostToReport(ReportDto.Post post) {
-
-        String[] parts = post.getTitle().split(" ");
-        String weekPart = parts[parts.length - 1]; // "1주차"
-        if(weekPart.length() != 2) {
-            String numberOnly = weekPart.replaceAll("[^0-9]", ""); // 숫자만 추출
-            Report report = new Report();
-            report.setReportType(post.getReportType());
-            report.setTitle(post.getTitle());
-            report.setContent(post.getContent());
-            report.setPeriodNumber(Integer.parseInt(numberOnly));
-
-            return report;
-        } else {
-            Report report = new Report();
-            report.setReportType(post.getReportType());
-            report.setTitle(post.getTitle());
-            report.setContent(post.getContent());
-            report.setPeriodNumber(0);
-
-            return report;
-        }
-
-
-
-
-
+    //ai 응답 -> ReportDto.Post 변환
+    default ReportDto.Post reportAnalysisResponseToReportPost(ReportAnalysisResponse aiResponse){
+        ReportDto.Post post = new ReportDto.Post();
+        post.setTitle(aiResponse.getReportTitle());
+        post.setContent(aiResponse.getContent());
+        post.setMonthlyReportTitle(aiResponse.getMonthlyReportTitle());
+        post.setMemberId(aiResponse.getMemberId());
+        return post;
 
     }
+    default Report reportPostToReport(ReportDto.Post post){
+         Report report = new Report();
+         report.setTitle(post.getTitle());
+         report.setContent(post.getContent());
+         //report가
+         MonthlyReport monthlyReport = new MonthlyReport();
+         monthlyReport.setTitle(post.getMonthlyReportTitle());
+//         Member member = new Member();
+//         member.setMemberId(post.getMemberId());
+//         monthlyReport.setMember(member);
+         report.setMonthlyReport(monthlyReport);
+         return report;
+     }
 
-    default ReportDto.Response reportToResponseDto (Report report) {
-        ReportDto.Response response= new ReportDto.Response(
-                report.getReportId(),
-                report.getTitle(),
-                report.getContent(),
-                report.getReportType(),
-                report.getPeriodNumber(),
-                report.getMonthlyReport()
-        );
-        return response;
-    }
+    ReportDto.Response reportToReportResponse(Report report);
+    List<ReportDto.Response> reportsToReportResponses(List<Report> reports);
+
+
 
 }

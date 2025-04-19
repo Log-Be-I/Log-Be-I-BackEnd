@@ -125,13 +125,13 @@ public class RecordService {
 
     // weekStart: 한 주의 기록
     public List<Record> getWeeklyRecords(LocalDateTime weekStart, LocalDateTime weekEnd) {
-       // JPA 쿼리로 weekStart~weekEnd 사이의 Record 조회
+       // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
         return repository.findByRecordDateTimeBetween(weekStart, weekEnd);
     }
 
     // month : 월별 기록
     public List<Record> getMonthlyRecords(LocalDateTime start, LocalDateTime end) {
-        // JPA 쿼리로 weekStart~weekEnd 사이의 Record 조회
+        // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
         return repository.findByRecordDateTimeBetween(start, end);
     }
 

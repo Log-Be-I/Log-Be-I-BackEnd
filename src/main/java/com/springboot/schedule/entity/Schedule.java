@@ -22,7 +22,7 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scheduleId;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 50)
     private String title;
 
     @Column(nullable = false)

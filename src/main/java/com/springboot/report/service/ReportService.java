@@ -18,11 +18,13 @@ public class ReportService {
     private final MonthlyReportService monthlyReportService;
 
     public Report createReport(Report report, long memberId) {
-        //해당 report가 주간인지 월간인지 구분
-//        report.setPeriodNumber(extractPeriodNumber(report.getTitle()));
-//        setReportType(report);
         //Report 를 MonthlyReport 에 추가하는 로직
         monthlyReportService.addReportToMonthlyReport(report, memberId);
+
+        //해당 report가 주간인지 월간인지 구분
+        report.setPeriodNumber(extractPeriodNumber(report.getTitle()));
+        setReportType(report);
+
         return repository.save(report);
     }
 

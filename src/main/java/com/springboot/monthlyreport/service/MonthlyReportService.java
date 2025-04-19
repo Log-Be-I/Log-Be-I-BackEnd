@@ -7,7 +7,6 @@ import com.springboot.member.service.MemberService;
 import com.springboot.monthlyreport.entity.MonthlyReport;
 import com.springboot.monthlyreport.repository.MonthlyReportRepository;
 import com.springboot.report.entity.Report;
-import com.springboot.report.service.ReportService;
 import com.springboot.utils.AuthorizationUtils;
 import com.springboot.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,44 +27,44 @@ public class MonthlyReportService {
     //새로운 Report 생성 시 추가하는 로직
     @Transactional
     public void addReportToMonthlyReport(Report report, long memberId) {
-        //존재하는 회원인지 검증
-        Member member = memberService.validateExistingMember(memberId);
-        //Report.title 문자열 -> yyyy년 MM월
-        String title = splitReportTitle(report.getTitle());
-        //반환된 문자열을  LocalDate 로 변환
-        LocalDate reportTitle = DateUtil.parseToLocalDate(title, "yyyy년 M월");
+        //회원이 가지고 있는 monthlyReport에 같은 title이 있다면 꺼내고 없다면 새로 만든다.
+        MonthlyReport monthlyReport = getOrCreateMonthlyReport(report.getMonthlyReport().getTitle(), memberId);
+//        //Report.title 문자열 -> yyyy년 MM월
+//        String title = splitReportTitle(report.getTitle());
+//        //반환된 문자열을  LocalDate 로 변환
+//        LocalDate reportTitle = DateUtil.parseToLocalDate(title, "yyyy년 M월");
+//        //해당 LocalDate를 통해 MonthlyReport 조회
+//        Optional<MonthlyReport> optional = findVerifiedMonthlyReport(memberId,reportTitle);
 
-        //해당 LocalDate를 통해 MonthlyReport 조회
-        Optional<MonthlyReport> optional = findVerifiedMonthlyReport(memberId,reportTitle);
+//        //이미 포함된 Report 라면 예외처리
+//        verifyExistsReport(monthlyReport, report);
+        //포함되지 않은 Report 라면 추가
+        //Report 추가  양방향 연관 설정
+        report.setMonthlyReport(monthlyReport);
+//        monthlyReport.addReport(report);
 
-        MonthlyReport monthlyReport;
-        if(optional.isPresent()) {
-            //같은 PK를 가진 엔티티 객체를 반환
-            monthlyReport = optional.get();
-            //이미 포함된 Report 라면 예외처리
-            verifyExistsReport(monthlyReport, report);
-            //포함되지 않은 Report 라면 추가
-            monthlyReport.getReports().add(report);
-            //저장
-            repository.save(monthlyReport);
-            //존재하지 않는다면
-        } else {
-            MonthlyReport newMonthlyReport = new MonthlyReport();
-            newMonthlyReport.getReports().add(report);
-            newMonthlyReport.setTitle(DateUtil.formatLocalDateToString(reportTitle, "yyyy년 M월"));
-            newMonthlyReport.setMember(member);
-            newMonthlyReport.setYearMonth(reportTitle);
-            //저장
-            repository.save(newMonthlyReport);
+        //저장
+        repository.save(monthlyReport);
 
-        }
 
+    }
+
+    //특정 회원이 같은 title의 monthlyReport가 있다면 꺼내고, 없다면 새로 만들어서 꺼내기
+    private MonthlyReport getOrCreateMonthlyReport(String yearMonthTitle, Long memberId) {
+        return repository.findByMember_MemberIdAndTitle(memberId, yearMonthTitle)
+                .orElseGet(() -> {
+                    MonthlyReport newReport = new MonthlyReport();
+                    newReport.setTitle(yearMonthTitle);
+                    newReport.setMember(memberService.validateExistingMember(memberId));
+                    newReport.setYearMonth(LocalDate.now());
+                    return repository.save(newReport);
+                });
     }
 
     //상세 조회
     public MonthlyReport findMonthlyReport(long monthlyId, long memberId){
         //존재하는 회원인지 확인
-        memberService.validateExistingMember(memberId);
+//        memberService.validateExistingMember(memberId);
         //이미 등록된 monthlyReport인지 확인
         MonthlyReport monthlyReport = findVerifiedMonthlyReport(monthlyId);
         //작성자 본인 또는 관리자 인지 확인
@@ -74,6 +73,7 @@ public class MonthlyReportService {
     }
 
     //연도별 전체 조회
+    //@RequestParam으로 year 입력 받음
     public List<MonthlyReport> findMonthlyReports(int year, long memberId) {
         //존재하는 회원인지 확인
         memberService.validateExistingMember(memberId);
@@ -92,7 +92,7 @@ public class MonthlyReportService {
         if(title.endsWith("주차")){
             //공백 기준으로 분할
             String[] parts = title.split(" ");
-            return parts[0] + " " + parts[1];
+            return parts[0] + " " + parts[1] + " 1일";
         } else {
             return title;
         }
@@ -100,7 +100,7 @@ public class MonthlyReportService {
 
     //회원이 가지고 있는 monthlyReport 반환
     public List<MonthlyReport> findVerifiedMonthlyReportList(int year, long memberId){
-        return repository.findByMember_IdAndYearOrderByYearMonthDesc(memberId, year);
+        return repository.findByMember_MemberIdAndYearOrderByYearMonthDesc(memberId, year);
 
     }
 
@@ -112,7 +112,7 @@ public class MonthlyReportService {
         );
     }
 
-    //LocalDate 로 monthlyReport 찾아서 반환
+    //LocalDate 로 monthlyReport 찾아서 반환 없으면 비어있는 곳
     public Optional<MonthlyReport> findVerifiedMonthlyReport(long memberId, LocalDate yaerMonth){
         //존재하는 회원인지 검증
         memberService.validateExistingMember(memberId);
