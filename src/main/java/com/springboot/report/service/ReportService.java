@@ -1,6 +1,7 @@
 package com.springboot.report.service;
 
 
+import com.springboot.monthlyreport.entity.MonthlyReport;
 import com.springboot.monthlyreport.service.MonthlyReportService;
 import com.springboot.report.entity.Report;
 import com.springboot.report.repository.ReportRepository;
@@ -18,8 +19,8 @@ public class ReportService {
 
     public Report createReport(Report report, long memberId) {
         //해당 report가 주간인지 월간인지 구분
-        report.setPeriodNumber(extractPeriodNumber(report.getTitle()));
-        setReportType(report);
+//        report.setPeriodNumber(extractPeriodNumber(report.getTitle()));
+//        setReportType(report);
         //Report 를 MonthlyReport 에 추가하는 로직
         monthlyReportService.addReportToMonthlyReport(report, memberId);
         return repository.save(report);
