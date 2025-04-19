@@ -1,5 +1,7 @@
 package com.springboot.monthlyreport.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;
 import com.springboot.report.entity.Report;
@@ -27,17 +29,26 @@ public class MonthlyReport extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
-    private LocalDate yearMonth;    //2025-04-01 로 등록 -> 연/월만 기록 (검증)
+    @Column(nullable = false, unique = false)
+    private LocalDate yearMonth;    //2025-04-01 로 등록
 
     @ManyToOne
     @JoinColumn(name = "member_id")
+    @JsonBackReference
     private Member member;
 
     @OneToMany(mappedBy = "monthlyReport", cascade = CascadeType.PERSIST)
+    @JsonManagedReference
     private List<Report> reports = new ArrayList<>();
 
 
+    //monthly 처음 생성 기준으로 1번만 발생 (연도별 조회시 필요)
+    @PrePersist
+    public void setDefaultYearMonth() {
+        if (this.yearMonth == null) {
+            this.yearMonth = LocalDate.now(); // 생성 시점에만 한 번
+        }
+    }
     // member 영속성
     public void setMember(Member member) {
         this.member = member;
@@ -52,7 +63,7 @@ public class MonthlyReport extends BaseEntity {
         report.setMonthlyReport(this);
     }
 
-//     report 영속성
+////     report 영속성
 //    public void setReport(Report report) {
 //        if(report.getMonthlyReport() != this) {
 //            report.setMonthlyReport(this);

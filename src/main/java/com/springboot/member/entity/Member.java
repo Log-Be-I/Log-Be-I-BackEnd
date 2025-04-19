@@ -1,5 +1,6 @@
 package com.springboot.member.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.springboot.audit.BaseEntity;
 import com.springboot.category.entity.Category;
 import com.springboot.keyword.entity.Keyword;
@@ -68,6 +69,7 @@ public class Member extends BaseEntity {
     private List<Record> records = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
+    @JsonManagedReference
     private List<MonthlyReport> monthlyReports = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)

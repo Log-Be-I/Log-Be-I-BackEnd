@@ -21,8 +21,10 @@ public class ReportDto {
         private String title;
         @Schema(name = "분석데이터 내용", example = "4월 1주차에 당신의 감정의 굴곡이 많았습니다. 벚꽃이 만개했을 땐 매우 하이텐션이었는데..")
         private String content;
-        @Schema(name = "데이터 분석기간", example = "1주차")
-        private Report.ReportType reportType;
+        private String monthlyReportTitle;
+        private Long memberId;
+//        @Schema(name = "데이터 분석기간", example = "1주차")
+//        private Report.ReportType reportType;
     }
 
     @Getter
@@ -33,6 +35,6 @@ public class ReportDto {
         private String content;
         private Report.ReportType reportType;
         private int periodNumber;
-        private MonthlyReport monthlyReport;
+//        private MonthlyReport monthlyReport;
     }
 }

@@ -35,7 +35,7 @@ public class RecordController {
     public ResponseEntity postRecord(@RequestBody RecordDto.Post post,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         post.setMemberId(customPrincipal.getMemberId());
-        System.out.println(post);
+
         //RecordDateTime을 입력 값이 있다면, 해당 문자열을 LocalDateTime으로 변환
         //문자열을 LocalDateTime 로 변환
 //        LocalDateTime recordDateTime = DateUtil.parseToLocalDateTime(post.getRecordDateTime(), "yyyy-MM-dd HH:mm:ss");
@@ -44,7 +44,7 @@ public class RecordController {
         //LocalDate 타입으로 변경된 RecordTime set
 //        textRecord.setRecordDateTime(recordDateTime);
 
-        recordService.createRecord(textRecord, customPrincipal.getMemberId());
+        Record record = recordService.createRecord(textRecord, customPrincipal.getMemberId());
 //        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
         return new ResponseEntity<>(new SingleResponseDto<>(mapper.recordToRecordResponse(record)), HttpStatus.CREATED);
     }

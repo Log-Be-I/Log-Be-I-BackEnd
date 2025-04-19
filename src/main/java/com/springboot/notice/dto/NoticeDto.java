@@ -31,7 +31,7 @@ public class NoticeDto {
         private String image;
         private Notice.NoticeType noticeType;
         private Notice.IsPinned isPinned;
-        private Long memberId;
+
     }
 
     @Getter

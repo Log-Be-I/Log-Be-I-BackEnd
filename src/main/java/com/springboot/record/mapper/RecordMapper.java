@@ -4,12 +4,11 @@ import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.Record;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface RecordMapper {
@@ -17,9 +16,6 @@ public interface RecordMapper {
     @Mapping(target = "category.categoryId", source = "categoryId")
     @Mapping(target = "recordDateTime", expression = "java(stringToLocalDateTime(post.getRecordDateTime()))")
     Record recordPostDtoToRecord(RecordDto.Post post);
-
-
-
 
     @Mapping(target = "member.memberId", source = "memberId")
     @Mapping(target = "category.categoryId", source = "categoryId")
