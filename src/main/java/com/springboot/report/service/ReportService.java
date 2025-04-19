@@ -1,6 +1,7 @@
 package com.springboot.report.service;
 
 
+import com.springboot.monthlyreport.entity.MonthlyReport;
 import com.springboot.monthlyreport.service.MonthlyReportService;
 import com.springboot.report.entity.Report;
 import com.springboot.report.repository.ReportRepository;
@@ -23,6 +24,7 @@ public class ReportService {
         //해당 report가 주간인지 월간인지 구분
         report.setPeriodNumber(extractPeriodNumber(report.getTitle()));
         setReportType(report);
+
         return repository.save(report);
     }
 

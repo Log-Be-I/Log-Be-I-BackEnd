@@ -18,6 +18,33 @@ public interface QuestionMapper {
     AnswerDto.Response answerToAnswerResponse(Answer answer);
     @Mapping(target = "answer", source = "answer")
     @Mapping(target = "memberId", source = "member.memberId")
-    QuestionDto.Response questionToQuestionResponse(Question question);
+    default QuestionDto.Response questionToQuestionResponse(Question question) {
+        AnswerDto.Response answerResponse = new AnswerDto.Response();
+        if(question.getAnswer() != null) {
+            answerResponse.setQuestionId(question.getQuestionId());
+            answerResponse.setMemberId(question.getAnswer().getMember().getMemberId());
+            answerResponse.setContent(question.getAnswer().getContent());
+        } else {
+            answerResponse.setAnswerId(null);
+            answerResponse.setQuestionId(null);
+            answerResponse.setContent(null);
+            answerResponse.setMemberId(null);
+        }
+
+        QuestionDto.Response questionResponse =
+                new QuestionDto.Response(
+                        question.getQuestionId(),
+                        question.getTitle(),
+                        question.getContent(),
+                        question.getQuestionStatus(),
+                        question.getImage(),
+                        question.getMember().getMemberId(),
+                        answerResponse,
+                        question.getCreatedAt(),
+                        question.getModifiedAt(),
+                        question.getQuestionAnswerStatus()
+                );
+        return questionResponse;
+    }
     List<QuestionDto.Response> questionsToQuestionResponses(List<Question> questions);
 }

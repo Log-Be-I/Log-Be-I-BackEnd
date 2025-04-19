@@ -73,7 +73,7 @@ public class QuestionController {
         Question createdQuestion = questionService.createQuestion(question, customPrincipal.getMemberId());
         // URI
         URI location = UriCreator.createUri(QUESTION_DEFAULT_URL, createdQuestion.getQuestionId());
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(new SingleResponseDto<>(questionMapper.questionToQuestionResponse(createdQuestion)));
     }
 
 //    //swagger API - 수정

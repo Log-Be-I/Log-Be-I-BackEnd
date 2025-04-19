@@ -14,7 +14,9 @@ import java.util.List;
 public class MonthlyReportDto {
 
     @Getter
+    @Setter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class Response{
         private Long monthlyId;
         @Schema(name = "월간 분석 제목", example = "2025년 04월")

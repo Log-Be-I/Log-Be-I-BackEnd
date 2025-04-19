@@ -27,7 +27,6 @@ public class MonthlyReportService {
     //새로운 Report 생성 시 추가하는 로직
     @Transactional
     public void addReportToMonthlyReport(Report report, long memberId) {
-
         //회원이 가지고 있는 monthlyReport에 같은 title이 있다면 꺼내고 없다면 새로 만든다.
         MonthlyReport monthlyReport = getOrCreateMonthlyReport(report.getMonthlyReport().getTitle(), memberId);
 //        //Report.title 문자열 -> yyyy년 MM월

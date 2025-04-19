@@ -1,5 +1,6 @@
 package com.springboot.record.controller;
 
+import com.springboot.ai.clova.ClovaSpeechService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.Record;
@@ -9,16 +10,21 @@ import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -30,6 +36,29 @@ public class RecordController {
 //    private final static String RECORD_DEFAULT_URL = "/records";
     private final RecordService recordService;
     private final RecordMapper mapper;
+    private final ClovaSpeechService clovaSpeechService;
+
+    @Value("${clova.api.key}")
+    private String API_KEY;
+    @Value("${clova.api.id}")
+    private String CLIENT_ID;
+
+    @PostMapping("/audio-records")
+    public ResponseEntity<String> uploadAndRecognize(@RequestParam("audio") MultipartFile audioFile) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        headers.set("X-NCP-APIGW-API-KEY-ID", CLIENT_ID);  // 네이버 콘솔 Client ID
+        headers.set("X-NCP-APIGW-API-KEY", API_KEY);       // 네이버 콘솔 Secret Key
+        File tempFile = File.createTempFile("clova_", ".m4a");
+        audioFile.transferTo(tempFile);
+
+        String result = clovaSpeechService.recognizeSpeech(tempFile);
+        tempFile.delete();
+
+        return ResponseEntity.ok(result);
+    }
 
     @PostMapping("/text-records")
     public ResponseEntity postRecord(@RequestBody RecordDto.Post post,
@@ -44,7 +73,9 @@ public class RecordController {
         //LocalDate 타입으로 변경된 RecordTime set
 //        textRecord.setRecordDateTime(recordDateTime);
 
-        Record record = recordService.createRecord(textRecord, customPrincipal.getMemberId());
+
+        Record record =recordService.createRecord(textRecord, customPrincipal.getMemberId());
+      
 //        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
         return new ResponseEntity<>(new SingleResponseDto<>(mapper.recordToRecordResponse(record)), HttpStatus.CREATED);
     }

@@ -69,5 +69,6 @@ public class QuestionDto {
         private AnswerDto.Response answer;
         private LocalDateTime createdAt;
         private LocalDateTime modifiedAt;
+        private Question.QuestionAnswerStatus questionAnswerStatus;
     }
 }
