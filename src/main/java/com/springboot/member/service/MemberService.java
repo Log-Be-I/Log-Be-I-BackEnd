@@ -60,7 +60,7 @@ public class MemberService {
         member.setCategories(categoryList);
         memberRepository.save(member);
 
-        return googleOAuthService.processUserLogin(new GoogleInfoDto(member.getEmail(),member.getName()));
+        return googleOAuthService.processUserLogin(new GoogleInfoDto(member.getEmail(),member.getName()), member.getRefreshToken());
     }
 
     public Member updateMember(Member member, long memberId, MemberDetails memberDetails) {
