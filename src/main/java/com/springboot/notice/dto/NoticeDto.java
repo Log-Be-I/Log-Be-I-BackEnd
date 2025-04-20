@@ -27,9 +27,9 @@ public class NoticeDto {
         @Schema(description = "공지사항 내용", example = "LOG BE I 이용 방법")
         private String content;
 
+        private Long memberId;
         private String image;
         private Notice.NoticeType noticeType;
-        private Notice.NoticeStatus noticeStatus;
         private Notice.IsPinned isPinned;
     }
 
@@ -52,9 +52,6 @@ public class NoticeDto {
         @Schema(description = "공지 글 타입", example = "NOTICE")
         private Notice.NoticeType noticeType;
 
-        @Schema(description = "공지 타입", example = "NOTICE_UPDATED")
-        private Notice.NoticeStatus noticeStatus;
-
         @Schema(description = "공지사항 고정여부", example = "PINNED")
         private Notice.IsPinned isPinned;
 
@@ -67,6 +64,7 @@ public class NoticeDto {
         private String title;
         private String content;
         private String image;
+        private Long memberId;
         private Notice.NoticeType noticeType;
         private Notice.NoticeStatus noticeStatus;
         private Notice.IsPinned isPinned;

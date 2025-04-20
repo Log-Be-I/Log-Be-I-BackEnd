@@ -4,14 +4,11 @@ import com.springboot.category.service.CategoryService;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.service.MemberService;
-import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.HistoricalRecord;
 import com.springboot.record.entity.Record;
-import com.springboot.record.mapper.RecordMapper;
 import com.springboot.record.repository.HistoricalRecordRepository;
 import com.springboot.record.repository.RecordRepository;
 import com.springboot.utils.AuthorizationUtils;
-import com.springboot.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -32,13 +28,13 @@ public class RecordService {
     private final RecordRepository repository;
     private final HistoricalRecordRepository historicalRecordRepository;
     private final MemberService memberService;
-    private final RecordMapper mapper;
     private final CategoryService categoryService;
 
 
     public Record createRecord(Record record, long memberId){
 
         memberService.validateExistingMember(memberId);
+
 
         return repository.save(record);
     }
@@ -48,6 +44,7 @@ public class RecordService {
     public Record updateRecord(Record record, long memberId) {
 
         Record findRecord = findVerifiedRecord(record.getRecordId());
+        findRecord.getRecordDateTime();
         //작성자인지 확인
         AuthorizationUtils.isOwner(findRecord.getMember().getMemberId(), memberId);
         //content 변경 사항 확인
@@ -71,7 +68,7 @@ public class RecordService {
             historicalRecordRepository.save(historicalRecord);
         }
 
-        // 수정 내용
+    //수정 내용
         Optional.ofNullable(record.getContent())
                 .ifPresent(content -> findRecord.setContent(content));
         Optional.ofNullable(record.getRecordDateTime())
@@ -128,13 +125,13 @@ public class RecordService {
 
     // weekStart: 한 주의 기록
     public List<Record> getWeeklyRecords(LocalDateTime weekStart, LocalDateTime weekEnd) {
-       // JPA 쿼리로 weekStart~weekEnd 사이의 Record 조회
+       // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
         return repository.findByRecordDateTimeBetween(weekStart, weekEnd);
     }
 
     // month : 월별 기록
     public List<Record> getMonthlyRecords(LocalDateTime start, LocalDateTime end) {
-        // JPA 쿼리로 weekStart~weekEnd 사이의 Record 조회
+        // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
         return repository.findByRecordDateTimeBetween(start, end);
     }
 

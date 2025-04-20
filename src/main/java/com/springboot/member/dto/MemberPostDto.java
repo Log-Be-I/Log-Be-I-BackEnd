@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -22,7 +23,7 @@ public class MemberPostDto {
     private String nickname;
 
     @Schema(description = "이메일", example = "girogi@gmail.com")
-    @NotBlank
+    @Email
     private String email;
 
     @Schema(description = "지역", example = "세종시")

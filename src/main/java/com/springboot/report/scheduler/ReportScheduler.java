@@ -2,6 +2,7 @@ package com.springboot.report.scheduler;
 
 import com.springboot.record.entity.Record;
 import com.springboot.record.service.RecordService;
+import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.report.service.ReportService;
 import com.springboot.utils.ReportUtil;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,9 +34,10 @@ public class ReportScheduler {
 
         //분석 조건 : 기록이 10개 이상일 때만 실행
         if (weeklyRecords.size() >= 10) {
-            Map<String, List<Record>> weeklyTitleRecords = ReportUtil.groupRecordsByWeek(weeklyRecords);
+//            Map<String, List<Record>> weeklyTitleRecords = ReportUtil.groupRecordsByWeek(weeklyRecords);
+            List<ReportAnalysisRequest> weekly = ReportUtil.createWeeklyReportRequests(weeklyRecords);
             //ai에 해당 데이터 전달
-            //aiservice.sendWeeklyReport(weeklyTitleRecords);
+            //aiservice.sendWeeklyReport(weekly);
         }
 
     }
@@ -55,9 +57,11 @@ public class ReportScheduler {
         if (weeklyReportCount >= 2) {
             //월간 데이터 준비 및 AI에 전달
             List<Record> monthlyRecords = recordService.getMonthlyRecords(monthStart, monthEnd);
-            Map<String, List<Record>> monthlyTitleRecords = ReportUtil.groupRecordsByYearMonthWeek(monthlyRecords);
+//            Map<String, List<Record>> monthlyTitleRecords = ReportUtil.groupRecordsByYearMonthWeek(monthlyRecords);
+            List<ReportAnalysisRequest> weekly = ReportUtil.createMonthlyReportRequests(monthlyRecords);
+
             //ai에 해당 데이터 전달
-//        aiservice.sendWeeklyReport(monthlyTitleRecords);
+//        aiservice.sendWeeklyReport(monthly);
         }
 
 

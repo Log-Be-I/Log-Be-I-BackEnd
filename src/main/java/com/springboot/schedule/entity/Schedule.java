@@ -9,19 +9,20 @@ import lombok.Setter;
 import org.checkerframework.checker.units.qual.C;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Schedule extends BaseEntity {
+public class Schedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scheduleId;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 50)
     private String title;
 
     @Column(nullable = false)
@@ -34,11 +35,21 @@ public class Schedule extends BaseEntity {
     private ScheduleStatus scheduleStatus = ScheduleStatus.SCHEDULE_REGISTERED;
 
     @Column
-    private String calendarId;
+    private String eventId;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Column(name = "LAST_MODIFIED_AT")
+    private LocalDateTime modifiedAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.modifiedAt == null) {
+            this.modifiedAt = LocalDateTime.now();
+        }
+    }
 
     public enum ScheduleStatus {
         SCHEDULE_REGISTERED("일정 등록"),

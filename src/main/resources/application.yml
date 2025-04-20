@@ -46,6 +46,7 @@ server:
     multipart:      #파일 업로드 활성화
       enabled: true
       max-file-size: 10MB     #최대 파일 크기 설정
+      max-request-size: 10MB
       file-size-threshold: 2KB    #임계값 설정
 jwt:
   key: ${JWT_SECRET_KEY}
@@ -70,3 +71,8 @@ springdoc:
 logging:
   level:
     org.springframework.security: DEBUG
+clova:
+  api:
+    key: ${CLOVA_API_SECRET}
+    id: ${CLOVA_CLIENT_ID}
+

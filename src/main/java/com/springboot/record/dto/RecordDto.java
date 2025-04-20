@@ -44,7 +44,7 @@ public class RecordDto {
         private Long recordId;
 
         @Schema(description = "기록 등록 시간", example = "08시 30분")
-        @NotBlank
+//        @NotBlank
         private String recordDateTime;
 
         @Schema(description = "기록의 내용", example = "아침에 삼각김밥 먹고, 약 먹음")
@@ -63,7 +63,7 @@ public class RecordDto {
     @AllArgsConstructor
     public static class Response {
         private Long recordId;
-        private LocalDateTime recordTime;
+        private LocalDateTime recordDateTime;
         private String content;
         private Record.RecordStatus recordStatus;
         private long memberId;

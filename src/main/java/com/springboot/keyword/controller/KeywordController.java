@@ -1,5 +1,6 @@
 package com.springboot.keyword.controller;
 
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
 import com.springboot.keyword.dto.KeywordPostDto;
 import com.springboot.keyword.dto.KeywordResponseDto;
@@ -10,6 +11,8 @@ import com.springboot.keyword.service.KeywordService;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.question.dto.QuestionDto;
+import com.springboot.responsedto.ListResponseDto;
+import com.springboot.responsedto.SingleResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -50,11 +53,14 @@ public class KeywordController {
     // 키워드 등록
     @PostMapping("/keywords")
     public ResponseEntity postKeyword(@Valid @RequestBody List<KeywordPostDto> keywordPostDtoList,
-                                      @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+                                      @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         // 키워드 생성
-        keywordService.createKeyword(keywordMapper.KeywordPostDtoListToKeywordList(keywordPostDtoList), memberDetails);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        List<Keyword> keywordList = keywordService.createKeyword(
+                keywordMapper.KeywordPostDtoListToKeywordList(keywordPostDtoList), customPrincipal);
+
+        return new ResponseEntity<>(
+                new ListResponseDto<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList)),HttpStatus.CREATED);
     }
 
     //swagger API - 조회
@@ -69,10 +75,11 @@ public class KeywordController {
     })
     // 키워드 조회
     @GetMapping("/keywords")
-    public ResponseEntity getKeyword(@Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+    public ResponseEntity getKeyword(@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-        List<Keyword> keywordList = keywordService.getKeywords(memberDetails);
+        List<Keyword> keywordList = keywordService.getKeywords(customPrincipal);
 
-        return new ResponseEntity<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new ListResponseDto<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList)), HttpStatus.OK);
     }
 }
