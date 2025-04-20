@@ -17,8 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.*;
-
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -40,6 +38,7 @@ public class ReportController {
 //    private final ChatGptService chatGptService;
 
     private final GoogleTextToSpeechService googleTextToSpeechService;
+//    private final ChatGptService chatGptService;
 
     @PostMapping
     public ResponseEntity postReport(@RequestBody ReportDto.Post post,

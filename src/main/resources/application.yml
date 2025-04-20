@@ -74,14 +74,11 @@ clova:
   api:
     key: ${CLOVA_API_SECRET}
     id: ${CLOVA_CLIENT_ID}
-<<<<<<< HEAD
 google:
   api:
     key: ${GOOGLE_APPLICATION_CREDENTIALS}
-
-=======
 openai:
   api-key: ${OPENAI_API_KEY}
   base-url: https://api.openai.com/v1/chat/completions
   model: gpt-4-turbo
->>>>>>> def0aa3 (OpenAI-API-Key (ChatGPT))
+
