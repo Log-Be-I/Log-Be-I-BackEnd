@@ -49,6 +49,10 @@ dependencies {
 
 	// CLOVA
 	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+
+	// Google 공식 BOM 사용
+	implementation platform("com.google.cloud:libraries-bom:26.23.0")
+	implementation 'com.google.cloud:google-cloud-texttospeech'
 }
 
 tasks.named('test') {
