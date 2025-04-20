@@ -61,8 +61,8 @@ public class MemberService {
         member.setCategories(categoryList);
         memberRepository.save(member);
 
-        // 회원가입과 로그인 동시 진행으로 토큰 반환 맞음 근데 이거 말고 jwtTokenizer 로 변경
-        return googleOAuthService.processUserLogin(new GoogleInfoDto(member.getEmail(),member.getName()));
+        return googleOAuthService.processUserLogin(new GoogleInfoDto(member.getEmail(),member.getName()), member.getRefreshToken());
+
     }
 
     public Member updateMember(Member member, long memberId, String email) {

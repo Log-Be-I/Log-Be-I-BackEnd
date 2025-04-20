@@ -20,6 +20,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -32,10 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,6 +44,8 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MemberMapper memberMapper;
+//    private final RedisTemplate redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
     //swagger API - 등록
     @Operation(summary = "회원 등록", description = "회원가입과 로그인 동시 진행")
@@ -61,6 +62,19 @@ public class MemberController {
     @PostMapping
     public ResponseEntity postMember(@Valid @RequestBody MemberPostDto memberPostDto) {
         Member member = memberMapper.memberPostDtoToMember(memberPostDto);
+
+        // redis에서 임시 저장한 구글 refreshToken 꺼내기
+        String googleRefreshToken = stringRedisTemplate.opsForValue()
+                .get("temp:refreshToken:" + member.getEmail());
+
+        // refreshToken 유효성검사
+        if(googleRefreshToken ==null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("구글 인증 정보가 만료되었거나 존재하지 않습니다..");
+        }
+        // refreshToken 설정
+        member.setRefreshToken(googleRefreshToken);
+
         Map<String, String> tokens = memberService.createMember(member);
         // accessToken을 헤더에 추가
         HttpHeaders headers = new HttpHeaders();
@@ -80,9 +94,12 @@ public class MemberController {
         headers.set("Authorization", "Bearer " + tokens.get("accessToken"));
         headers.set(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
+        MemberResponseDto memberResponseDto = memberMapper.memberToMemberResponseDto(member);
 
 
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+
+
+        return new ResponseEntity<>(new SingleResponseDto<>(memberResponseDto), headers, HttpStatus.CREATED);
     }
 
     //swagger API - 앱 푸쉬 알림 수신동의
