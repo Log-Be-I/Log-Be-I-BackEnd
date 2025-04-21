@@ -12,6 +12,9 @@ import lombok.Setter;
 
 public class ReportDto {
 
+    public ReportDto(String response) {
+    }
+
     @Getter
     @Setter
     @AllArgsConstructor

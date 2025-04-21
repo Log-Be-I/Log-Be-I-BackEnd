@@ -5,7 +5,6 @@ import com.springboot.member.entity.Member;
 import com.springboot.monthlyreport.entity.MonthlyReport;
 import com.springboot.report.dto.ReportAnalysisResponse;
 
-import com.springboot.monthlyreport.dto.MonthlyReportDto;
 
 
 import com.springboot.report.dto.ReportDto;
@@ -17,6 +16,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ReportMapper {
 
+
+
     //ai 응답 -> ReportDto.Post 변환
     default ReportDto.Post reportAnalysisResponseToReportPost(ReportAnalysisResponse aiResponse){
         ReportDto.Post post = new ReportDto.Post();
@@ -27,6 +28,8 @@ public interface ReportMapper {
         return post;
 
     }
+
+    //ChatResponse -> ReportDto.Post 매핑
     default Report reportPostToReport(ReportDto.Post post){
          Report report = new Report();
          report.setTitle(post.getTitle());
