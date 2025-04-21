@@ -89,6 +89,8 @@ public class ClovaSpeechService {
             throw new RuntimeException("Clova STT 요청 중 오류 발생", e);
         }
         // 최종 문자열을 반환
+        // 이걸 GPT 한테 넘겨줘야함
         return response.toString();
+
     }
 }

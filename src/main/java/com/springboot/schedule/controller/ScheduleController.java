@@ -53,7 +53,10 @@ public class ScheduleController {
     @PostMapping("/audio-schedules")
     public ResponseEntity postAudioSchedule(@Valid @RequestBody SchedulePostDto schedulePostDto,
                                             @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-
+            // 가입된 회원인지 검증
+            Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
+            // 정상적인 상태인지 검증
+            memberService.validateMemberStatus(member);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
