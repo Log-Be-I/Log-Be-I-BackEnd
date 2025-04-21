@@ -75,4 +75,7 @@ clova:
   api:
     key: ${CLOVA_API_SECRET}
     id: ${CLOVA_CLIENT_ID}
+google:
+  api:
+    key: ${GOOGLE_APPLICATION_CREDENTIALS}
 
