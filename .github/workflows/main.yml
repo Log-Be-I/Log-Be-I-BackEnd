@@ -60,13 +60,13 @@ jobs:
               'sudo docker pull 6feetlife/logbei:${GITHUB_SHA::7}',
               'sudo docker tag 6feetlife/logbei:${GITHUB_SHA::7} logbei',
               'sudo docker run -d --name server -p 8080:8080 \\
-                  -e JWT_SECRET_KEY=${ secrets.JWT_SECRET_KEY } \\
-                  -e GOOGLE_CLIENT_ID=${ secrets.GOOGLE_CLIENT_ID } \\
-                  -e GOOGLE_CLIENT_SECRET=${ secrets.GOOGLE_CLIENT_SECRET } \\
-                  -e CLOVA_API_SECRET=${ secrets.CLOVA_API_SECRET } \\
-                  -e CLOVA_API_SECRET=${ secrets.CLOVA_API_SECRET } \\
-                  -e GOOGLE_APPLICATION_CREDENTIALS=${ secrets.GOOGLE_APPLICATION_CREDENTIALS } \\
-                  -e OPENAI_API_KEY=${ secrets.OPENAI_API_KEY } \\
+                  -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \\
+                  -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \\
+                  -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \\
+                  -e CLOVA_API_SECRET=${{ secrets.CLOVA_API_SECRET }} \\
+                  -e CLOVA_API_SECRET=${{ secrets.CLOVA_API_SECRET }} \\
+                  -e GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} \\
+                  -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \\
                   logbei'
             ]" \
             --output text
