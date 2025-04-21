@@ -64,10 +64,10 @@ jobs:
                   -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \\
                   -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \\
                   -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \\
-                  -e CLOVA_API_SECRET=${{CLOVA_API_SECRET}} \\
-                  -e CLOVA_API_SECRET: ${{CLOVA_API_SECRET}} \\
-                  -e GOOGLE_APPLICATION_CREDENTIALS: ${{GOOGLE_APPLICATION_CREDENTIALS}} \\
-                  -e OPENAI_API_KEY: ${{OPENAI_API_KEY}} \\
+                  -e CLOVA_API_SECRET=${{ secrets.CLOVA_API_SECRET }} \\
+                  -e CLOVA_API_SECRET: ${{ secrets.CLOVA_API_SECRET }} \\
+                  -e GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} \\
+                  -e OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} \\
                   logbei'
             ]" \
             --output text
