@@ -45,10 +45,10 @@ jobs:
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}       #ec2(docker 로 보내기! 추가 작성, 설정 X -> github 까지만 사용됨 )
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          CLOVA_API_SECRET: ${{CLOVA_API_SECRET}}
-          CLOVA_CLIENT_ID: ${{CLOVA_CLIENT_ID}}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{GOOGLE_APPLICATION_CREDENTIALS}}
-          OPENAI_API_KEY: ${{OPENAI_API_KEY}}
+          CLOVA_API_SECRET: ${{ secrets.CLOVA_API_SECRET }}
+          CLOVA_CLIENT_ID: ${{ secrets.CLOVA_CLIENT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           aws ssm send-command \
             --instance-ids i-0b18f5134cc5231ad \
