@@ -5,7 +5,6 @@ import com.springboot.monthlyreport.entity.MonthlyReport;
 import com.springboot.monthlyreport.mapper.MonthlyReportMapper;
 import com.springboot.monthlyreport.service.MonthlyReportService;
 import com.springboot.responsedto.ListResponseDto;
-import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
 import lombok.RequiredArgsConstructor;
 

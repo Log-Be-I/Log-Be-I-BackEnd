@@ -1,5 +1,6 @@
 package com.springboot.report.scheduler;
 
+import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.record.entity.Record;
 import com.springboot.record.service.RecordService;
 import com.springboot.report.dto.ReportAnalysisRequest;
@@ -8,21 +9,23 @@ import com.springboot.utils.ReportUtil;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Map;
+
 
 @Component
 public class ReportScheduler {
     private ReportService reportService;
     private RecordService recordService;
-//    private AiService aiService;
+    private OpenAiService openAiService;
+
 
     //매주 월요일 07:00에 실행
     @Scheduled(cron = "0 0 7 * * MON")
-    public void sendWeeklyRecordsToAi() {
+    public void sendWeeklyRecordsToAi() throws IOException { //OpenAiService 내부에서 HTTP 요청 시 IOException 발생할 수 있음
         //오늘이 4/14(월) 라면, 전 주 월요일은 4/7
         LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
@@ -37,13 +40,13 @@ public class ReportScheduler {
 //            Map<String, List<Record>> weeklyTitleRecords = ReportUtil.groupRecordsByWeek(weeklyRecords);
             List<ReportAnalysisRequest> weekly = ReportUtil.createWeeklyReportRequests(weeklyRecords);
             //ai에 해당 데이터 전달
-            //aiservice.sendWeeklyReport(weekly);
+           openAiService.sendWeeklyReport(weekly);
         }
 
     }
 
     @Scheduled(cron = "0 0 0 1 * *")
-    public void sendMonthlyRecordsToAi() {
+    public void sendMonthlyRecordsToAi() throws IOException {
 
         YearMonth lastMonth = YearMonth.now().minusMonths(1);
         //전 달 1일 00:00:00
@@ -58,10 +61,10 @@ public class ReportScheduler {
             //월간 데이터 준비 및 AI에 전달
             List<Record> monthlyRecords = recordService.getMonthlyRecords(monthStart, monthEnd);
 //            Map<String, List<Record>> monthlyTitleRecords = ReportUtil.groupRecordsByYearMonthWeek(monthlyRecords);
-            List<ReportAnalysisRequest> weekly = ReportUtil.createMonthlyReportRequests(monthlyRecords);
+            List<ReportAnalysisRequest> monthly = ReportUtil.createMonthlyReportRequests(monthlyRecords);
 
             //ai에 해당 데이터 전달
-//        aiservice.sendWeeklyReport(monthly);
+            openAiService.sendMonthlyReport(monthly);
         }
 
 
