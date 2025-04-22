@@ -48,35 +48,22 @@ public class ScheduleService {
     private final MemberService memberService;
     private final ClovaSpeechService clovaSpeechService;
     private final RecordRepository recordRepository;
-    // 일정 등록 - 음성
-    public void postVoiceSchedule (File voiceFile, CustomPrincipal customPrincipal) throws IOException {
-        // 유효한 회원인지 검증
-        memberService.validateExistingMember(customPrincipal.getMemberId());
+//    // 일정 등록 - 음성
+//    public void postVoiceSchedule (File voiceFile, CustomPrincipal customPrincipal) throws IOException {
+//        // 유효한 회원인지 검증
+//        memberService.validateExistingMember(customPrincipal.getMemberId());
+//
+//        // clova 로 speech to text 변환
+//        String speechToText = clovaSpeechService.recognizeSpeech(voiceFile);
+//
+//        // 변환된 text 를 Gpt로 전달
+////        String text = speechToText;
+//
+//        // Gpt 로 부터 전달받은 데이터를 Schedule 과 Record 를 분류해주는 로직에 speechToText 넣기
+//        handleResponse(speechToText);
+//    }
 
-        // clova 로 speech to text 변환
-        String speechToText = clovaSpeechService.recognizeSpeech(voiceFile);
 
-        // 변환된 text 를 Gpt로 전달
-//        String text = speechToText;
-
-        // Gpt 로 부터 전달받은 데이터를 Schedule 과 Record 를 분류해주는 로직에 speechToText 넣기
-        handleResponse(speechToText);
-    }
-
-    // 타입이 뭐든 일단 받아서 분기 처리
-    public void handleResponse(Object response) {
-        // response 타입이 Schedule 이라면
-        if (response instanceof Schedule) {
-            Schedule schedule = (Schedule) response;
-            // Schedule 에 저장
-            scheduleRepository.save(schedule);
-
-            // 만약 Record 타입이라면
-        } else if (response instanceof Record) {
-            Record record = (Record) response;
-            recordRepository.save(record);
-        }
-    }
 
 
 

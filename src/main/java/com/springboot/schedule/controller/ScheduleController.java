@@ -58,6 +58,8 @@ public class ScheduleController {
             // 정상적인 상태인지 검증
             memberService.validateMemberStatus(member);
 
+
+
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

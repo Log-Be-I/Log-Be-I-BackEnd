@@ -45,7 +45,7 @@ public class Notice extends BaseEntity {
 
     public enum IsPinned {
         NONE("고정되지 않음"),
-        PINNED_("상단 고정"),
+        PINNED("상단 고정"),
         URGENT_PINNED("긴급 고정");
 
         @Getter
