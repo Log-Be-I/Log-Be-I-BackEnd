@@ -68,10 +68,7 @@ public class NoticeDto {
         private Notice.NoticeType noticeType;
         private Notice.NoticeStatus noticeStatus;
         private Notice.IsPinned isPinned;
-<<<<<<< HEAD
         private LocalDateTime createdAt;
-=======
-//        private LocalDateTime createdAt;
->>>>>>> ef4bb15 (voice input으로 일정등록과 일기 작성까지)
+
     }
 }

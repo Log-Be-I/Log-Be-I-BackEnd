@@ -51,7 +51,8 @@ public class RecordController {
     public ResponseEntity uploadAndRecognize(@RequestParam("audio") MultipartFile audioFile,
                                              @AuthenticationPrincipal CustomPrincipal customPrincipal) throws IOException {
 
-        Map<String, String> result = clovaSpeechService.textToMap( clovaSpeechService.voiceToText(audioFile));
+        //사용자 입력 음성 -> text -> Map<String, String> 타입 변환
+        Map<String, String> result = openAiService.createRecordOrSchedule( clovaSpeechService.voiceToText(audioFile));
         Object response = recordService.saveByType(result, customPrincipal);
 
         // response 타입이 Schedule 이라면

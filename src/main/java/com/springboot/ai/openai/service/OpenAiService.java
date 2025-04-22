@@ -43,7 +43,7 @@ public class OpenAiService {
     private final ReportService reportService;
 
 
-    //최종 : List<Report> -> ReportService
+    //Report 최종 : List<Report> -> ReportService
     public List<Report> createReportsFromAi(List<ReportAnalysisRequest> requests) {
           return reportService.createReport(requests.stream()
                   .map(request -> generateReportFromAi(request))
@@ -51,6 +51,7 @@ public class OpenAiService {
 
     }
 
+    //Report
     //ReportAnalysisRequest -> JSON 문자열 -> aiRequest -> aiResponse. content -> Report
     public Report generateReportFromAi(ReportAnalysisRequest request){
         try {
@@ -59,7 +60,9 @@ public class OpenAiService {
             OpenAiRequest aiRequest = buildChatRequest(prompt);
             OpenAiResponse aiResponse = sendToGpt(aiRequest);
             String content =  extractContent(aiResponse);
-            return reportService.aiRequestToReport(request, content);
+            // JSON -> Map
+            Map<String, String> contentMap = jsonToMap(content);
+            return reportService.aiRequestToReport(request, contentMap);
 
         } catch (IOException e) {
             log.error("GPT 분석 실패 - memberId: " + request.getMemberId(), e);
@@ -67,28 +70,35 @@ public class OpenAiService {
         }
     }
 
-    //최종 조립 메서드 예시 : ReportAnalysisResponse 반환
-    public String sendRecord(String prompt) throws IOException{
+    //audio-Record 최종
+    // 문장을 우리가 원하는 key value 형태로 변환
+    public Map<String, String> createRecordOrSchedule(String text) throws IOException {
 
-            // 사용자의 기록 리스트를 JSON 직렬화
-//            String recordJson = serializeRecords(record);
-            // 프롬프트 설정
-//            String prompt = chatWithWeeklyPrompt(record);
-            // GPT 요청 객체 생성
-            OpenAiRequest chatRequest = buildChatRequest(prompt);
-            // 실제 GPT 서버에 요청 보내고 응답 받기
-            OpenAiResponse chatResponse = sendToGpt(chatRequest);
-            // 응답 중 필요한 텍스트만 추출
-            String content = extractContent(chatResponse);
+        // 사용자 입력 text -> JSON 으로 변경
+        String prompt = chatWithScheduleAndRecord(text);
+        // GPT 요청 객체 생성
+        OpenAiRequest chatRequest = buildChatRequest(prompt);
+        // 실제 GPT 서버에 요청 보내고 응답 받기
+        OpenAiResponse chatResponse = sendToGpt(chatRequest);
+        // 응답 중 필요한 텍스트만 추출
+        String content = extractContent(chatResponse);
 
-        return content;
+        // json 역직렬화 (JSON -> Map)
+        return jsonToMap(content);
     }
 
-    //기록 리스트 JSON 문자열로 반환
+    //기록 리스트 JSON 문자열로 직렬화 (객체 -> JSON)
     public String serializeRecords(List<Record> records) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(records);
     }
+
+    // JSON 을 역직렬화 (JSON -> 객체)
+    public Map<String, String> jsonToMap (String json) throws IOException{
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {});
+    }
+
 
     //ReportAnalysisRequest 의 ReportType = Weekly or Monthly 인 경우 타입에 맞는 prompt 반환
     public String reportTypeWeeklyOrMonthly(ReportAnalysisRequest request, String recordJson) {
@@ -102,14 +112,6 @@ public class OpenAiService {
         }
 
     }
-
-    // JSON 을 역직렬화
-    public Map<String, String> jsonToString (String json) throws IOException{
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {});
-    }
-
-
     // 단일 기록 JSON 문자열로 반환
 //    public String serializeClovaText(String clovaText) throws JsonProcessingException {
 //        ObjectMapper objectMapper = new ObjectMapper();
