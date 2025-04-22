@@ -40,7 +40,7 @@ public class OpenAiService {
     //최종 조립 메서드 예시 : ReportAnalysisResponse 반환
     public List<ReportAnalysisResponse> sendWeeklyReport(List<ReportAnalysisRequest> requests) throws IOException{
 
-
+        // 응답을 받는 리스트 생성
         List<ReportAnalysisResponse>  responses = new ArrayList<>();
 
         for (ReportAnalysisRequest request : requests) {
