@@ -37,7 +37,10 @@ public class ReportController {
     private final static String REPORT_DEFAULT_URL = "/reports";
     private final ReportService reportService;
     private final ReportMapper mapper;
+
     private final MemberService memberService;
+
+
 //    private final ChatGptService chatGptService;
 
     private final GoogleTextToSpeechService googleTextToSpeechService;
@@ -50,7 +53,6 @@ public class ReportController {
         Report report = reportService.createReport(mapper.reportPostToReport(post), customPrincipal.getMemberId());
         URI location = UriCreator.createUri(REPORT_DEFAULT_URL);
         return ResponseEntity.created(location).body(new SingleResponseDto<>(mapper.reportToReportResponse(report)));
-    }
 
 
     // 구글 TTS (유저가 선택한 reportId 리스트를 받는다)
@@ -102,6 +104,9 @@ public class ReportController {
 //                    .body("음성 생성 중 오류가 발생했습니다.");
 //        }
 //    }
+
+//     }
+
 
 //    @PostMapping("/gpt-test")
 //    public ResponseEntity testGpt(@RequestBody GptRequest request) {
