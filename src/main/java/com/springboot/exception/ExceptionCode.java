@@ -31,7 +31,9 @@ public enum ExceptionCode {
     RECORD_NOT_FOUND(404, "Record not found"),
     MONTHLY_REPORT_NOT_FOUND(404, "Monthly report not found"),
     REPORT_EXISTS(409, "Report already exists"),
-    NOT_FOUND(404, "Not Found");
+    NOT_FOUND(404, "Not Found"),
+    REPORT_GENERATION_FAILED(500, "GPT analysis error"),
+    INVALID_REPORT_TYPE(500, "Invalid Report type");
 
 
     @Getter

@@ -2,23 +2,32 @@ package com.springboot.report.controller;
 
 import com.springboot.ai.googleTTS.GoogleTextToSpeechService;
 import com.springboot.auth.utils.CustomPrincipal;
+
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.report.dto.ReportDto;
+
 import com.springboot.report.entity.Report;
 import com.springboot.report.mapper.ReportMapper;
 import com.springboot.report.service.ReportService;
+import com.springboot.responsedto.ListResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
 import com.springboot.utils.AuthorizationUtils;
 import com.springboot.utils.UriCreator;
 import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.constraints.Positive;
+import java.time.LocalDate;
+import java.util.List;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -34,17 +43,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Validated
 public class ReportController {
-    private final static String REPORT_DEFAULT_URL = "/reports";
+
     private final ReportService reportService;
     private final ReportMapper mapper;
-
-    private final MemberService memberService;
-
-
-//    private final ChatGptService chatGptService;
-
     private final GoogleTextToSpeechService googleTextToSpeechService;
-//    private final ChatGptService chatGptService;
+
+
 
     @PostMapping
     public ResponseEntity postReport(@RequestBody ReportDto.Post post,
@@ -108,40 +112,24 @@ public class ReportController {
 //     }
 
 
-//    @PostMapping("/gpt-test")
-//    public ResponseEntity testGpt(@RequestBody GptRequest request) {
-////        try {
-////            String content = request.getContent();
-////            String response = chatGptService.getGptResponse(content).block(); // 여기서 예외 터지면 catch 됨
-////            System.out.println("🎯 GPT 응답: " + response);
-////            return ResponseEntity.ok(response);
-////        } catch (Exception e) {
-////            System.out.println("❌ 예외 발생: " + e.getMessage());
-////            e.printStackTrace();
-////            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("GPT 호출 실패: " + e.getMessage());
-////        }
+
+//    @GetMapping
+//    public ResponseEntity getReportList(@Positive @RequestParam(value = "year", required = false) Integer year,  // year를 안보내도 기본값 처리 하도록 설정
+//                                         @AuthenticationPrincipal CustomPrincipal customPrincipal){
+//        //year 값이 설정되지 않았다면 올해 기준으로 정렬
+//        int searchYear =(year != null) ? year : LocalDate.now().getYear();
 //
-////                String content = request.getContent();
-////        ReportAnalysisResponse response = chatGptService.getGptResponse(content).block();
-////        Mono<ReportAnalysisResponse> response = chatGptService.getGptResponse(request.getContent());
+//        List<Report> reports = reportService.findMonthlyReports(searchYear, customPrincipal.getMemberId());
 //
-////        String content = request.getContent();
-////        ReportAnalysisResponse response = chatGptService.getGptResponse(content).block();
-////        ReportAnalysisResponse response = chatGptService.getGptResponse(content)
-////                .doOnNext(result -> System.out.println("✅ GPT 결과 수신 완료"))
-////                .doOnError(error -> {
-////                    System.err.println("❌ GPT 호출 중 에러: " + error.getMessage());
-////                    error.printStackTrace();
-////                })
-////                .block();
+//        return new ResponseEntity<>(new ListResponseDto<>(mapper.monthliesToMonthlyResponses(monthlyReports)), HttpStatus.OK);
+//    }
 //
-//        return ResponseEntity.ok(response);
-////        return chatGptService.getGptResponse(content)
-////
-//// 분석결과를 200(OK) 로 감싸줌
-////                .map(result -> ResponseEntity.ok(result))
-////               //동기 -> 결과가 나올때까지 기다린다.
-////                .block();
 //
+//    @GetMapping("{monthly-id}")
+//    public ResponseEntity getReport(@Positive @PathVariable("monthly-id") long monthlyId,
+//                                     @AuthenticationPrincipal CustomPrincipal customPrincipal){
+//
+//        MonthlyReport monthlyReport = monthlyReportService.findMonthlyReport(monthlyId, customPrincipal.getMemberId());
+//        return new ResponseEntity<>( new SingleResponseDto<>(mapper.monthlyToMonthlyResponse(monthlyReport)), HttpStatus.OK);
 //    }
 }

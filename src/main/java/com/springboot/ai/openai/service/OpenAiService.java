@@ -6,15 +6,17 @@ import com.springboot.ai.openai.OpenAiProperties;
 import com.springboot.ai.openai.dto.OpenAiMessage;
 import com.springboot.ai.openai.dto.OpenAiRequest;
 import com.springboot.ai.openai.dto.OpenAiResponse;
+import com.springboot.exception.BusinessLogicException;
+import com.springboot.exception.ExceptionCode;
 import com.springboot.record.entity.Record;
-import com.springboot.report.controller.ReportController;
 import com.springboot.report.dto.ReportAnalysisRequest;
-import com.springboot.report.dto.ReportAnalysisResponse;
-import com.springboot.report.mapper.ReportMapper;
+import com.springboot.report.entity.Report;
+import com.springboot.report.service.ReportService;
 import lombok.RequiredArgsConstructor;
 
 import java.nio.charset.StandardCharsets;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -24,9 +26,10 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OpenAiService {
@@ -34,66 +37,54 @@ public class OpenAiService {
     private final OpenAiProperties properties;
     //JSON 직렬화/역직렬화 도구
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final ReportMapper reportMapper;
-    private final ReportController reportController;
+    private final ReportService reportService;
 
-    //최종 조립 메서드 예시 : ReportAnalysisResponse 반환
-    public List<ReportAnalysisResponse> sendWeeklyReport(List<ReportAnalysisRequest> requests) throws IOException{
 
-        // 응답을 받는 리스트 생성
-        List<ReportAnalysisResponse>  responses = new ArrayList<>();
+    //최종 : List<Report> -> ReportService
+    public List<Report> createReportsFromAi(List<ReportAnalysisRequest> requests) {
 
-        for (ReportAnalysisRequest request : requests) {
-            String recordJson = serializeRecords(request.getRecords());
-            String prompt = chatWithWeeklyPrompt(recordJson);
-            OpenAiRequest chatRequest = buidChatRequest(prompt);
-            OpenAiResponse chatResponse = sendToGpt(chatRequest);
-            String content = extractContent(chatResponse);
+          return reportService.createReport(requests.stream()
+                  .map(request -> generateReportFromAi(request))
+                  .collect(Collectors.toList()));
 
-            //Map<Long, Map<String, List<Record>>> 형태
-            //ReportAnalysisRequest -> re
-            responses.add(new ReportAnalysisResponse(
-                    request.getMemberId(),
-                    request.getMonthlyReportTitle(),
-                    request.getReportTitle(),
-                    content
-            ));
-        }
 
-        return responses;
     }
 
-    //최종 조립 메서드 예시 : ReportAnalysisResponse 반환
-    public List<ReportAnalysisResponse> sendMonthlyReport(List<ReportAnalysisRequest> requests) throws IOException{
-
-        List<ReportAnalysisResponse>  responses = new ArrayList<>();
-
-        for (ReportAnalysisRequest request : requests) {
+    //ReportAnalysisRequest -> JSON 문자열 -> aiRequest -> aiResponse. content -> Report
+    public Report generateReportFromAi(ReportAnalysisRequest request){
+        try {
             String recordJson = serializeRecords(request.getRecords());
-            String prompt = chatWithWeeklyPrompt(recordJson);
-            OpenAiRequest chatRequest = buidChatRequest(prompt);
-            OpenAiResponse chatResponse = sendToGpt(chatRequest);
-            String content = extractContent(chatResponse);
+            String prompt = reportTypeWeeklyOrMonthly(request, recordJson);
+            OpenAiRequest aiRequest = buildChatRequest(prompt);
+            OpenAiResponse aiResponse = sendToGpt(aiRequest);
+            String content =  extractContent(aiResponse);
+            return reportService.aiRequestToReport(request, content);
 
-            //Map<Long, Map<String, List<Record>>> 형태
-            //ReportAnalysisRequest -> re
-            responses.add(new ReportAnalysisResponse(
-                    request.getMemberId(),
-                    request.getMonthlyReportTitle(),
-                    request.getReportTitle(),
-                    content
-            ));
+        } catch (IOException e) {
+            log.error("GPT 분석 실패 - memberId: " + request.getMemberId(), e);
+            throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED);
         }
-
-        return responses;
     }
 
     //기록 리스트 JSON 문자열로 반환
-    public String serializeRecords(List<Record> records) throws JsonProcessingException {
+    public String serializeRecords (List<Record> records) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(records);
     }
 
+    //ReportAnalysisRequest 의 ReportType = Weekly or Monthly 인 경우 타입에 맞는 prompt 반환
+    public String reportTypeWeeklyOrMonthly(ReportAnalysisRequest request, String recordJson) {
+
+        if(request.getReportType().equals(Report.ReportType.REPORT_WEEKLY)) {
+            return chatWithWeeklyPrompt(recordJson);
+        } else if(request.getReportType().equals(Report.ReportType.REPORT_MONTHLY)) {
+            return chatWithMonthlyReport(recordJson);
+        } else {
+            throw new BusinessLogicException(ExceptionCode.INVALID_REPORT_TYPE);
+        }
+
+    }
+  
     //주간 프롬프트 - Json 문자열을 param으로 받음
     public String chatWithWeeklyPrompt(String recordJson) {
 
@@ -149,7 +140,7 @@ public class OpenAiService {
     }
 
 //    GPT 서버에 요청보내기 (ChatRequest 생성)
-    public OpenAiRequest buidChatRequest(String prompt) {
+    public OpenAiRequest buildChatRequest(String prompt) {
         //메세지 구성 : system + user prompt
         List<OpenAiMessage> messages = List.of(
                 new OpenAiMessage("system", "You are a helpful assistant."),
@@ -164,6 +155,7 @@ public class OpenAiService {
 
     }
 
+    //List<Report> 생성
     // GPT 서버에 요청을 보내고 응답 content를 반환하는 메서드
     public OpenAiResponse sendToGpt(OpenAiRequest request) throws IOException {
         //GPT API에 보낼 POST 요청 생성
@@ -183,8 +175,6 @@ public class OpenAiService {
             //JSON 문자열을 ChatResponse 객체로 역직렬화
             return objectMapper.readValue(json, OpenAiResponse.class);
         }
-
-
     }
 
     //content만 꺼내서 파싱

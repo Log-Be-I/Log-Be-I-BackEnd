@@ -6,7 +6,7 @@ import com.springboot.category.entity.Category;
 import com.springboot.keyword.entity.Keyword;
 import com.springboot.question.entity.Question;
 import com.springboot.record.entity.Record;
-import com.springboot.monthlyreport.entity.MonthlyReport;
+import com.springboot.report.entity.Report;
 import com.springboot.schedule.entity.Schedule;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -70,7 +70,7 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     @JsonManagedReference
-    private List<MonthlyReport> monthlyReports = new ArrayList<>();
+    private List<Report> reports = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     private List<Category> categories = new ArrayList<>();
@@ -145,13 +145,13 @@ public class Member extends BaseEntity {
         }
     }
 
-    // monthlyReport 영속성
-    public void setMonthlyReport(MonthlyReport monthlyReport) {
-        if(monthlyReport.getMember() != this) {
-            monthlyReport.setMember(this);
+    // Report 영속성
+    public void setMonthlyReport(Report report) {
+        if(report.getMember() != this) {
+            report.setMember(this);
         }
-        if(!this.monthlyReports.contains(monthlyReport)) {
-            monthlyReports.add(monthlyReport);
+        if(!this.reports.contains(report)) {
+            reports.add(report);
         }
     }
 }

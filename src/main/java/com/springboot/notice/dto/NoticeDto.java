@@ -68,5 +68,6 @@ public class NoticeDto {
         private Notice.NoticeType noticeType;
         private Notice.NoticeStatus noticeStatus;
         private Notice.IsPinned isPinned;
+        private LocalDateTime createdAt;
     }
 }
