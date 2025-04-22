@@ -2,6 +2,7 @@ package com.springboot.utils;
 
 import com.springboot.record.entity.Record;
 import com.springboot.report.dto.ReportAnalysisRequest;
+import com.springboot.report.entity.Report;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -87,6 +88,7 @@ public class ReportUtil {
     public static List<ReportAnalysisRequest> createWeeklyReportRequests(List<Record> records) {
         // Map<memberId, Map<주차/월별 title, List<Record>>>
         Map<Long, Map<String, List<Record>>> grouped = new HashMap<>();
+        Report.ReportType reportType = Report.ReportType.REPORT_WEEKLY;
 
         //records순회하면서
         for (Record record : records) {
@@ -109,7 +111,7 @@ public class ReportUtil {
                 List<Record> recs = reportEntry.getValue();
                 String monthlyTitle = getMonthlyReportTitle(recs.get(0).getRecordDateTime());
 
-                result.add(new ReportAnalysisRequest(reportTitle, monthlyTitle, memberId, recs));
+                result.add(new ReportAnalysisRequest(reportTitle, monthlyTitle, memberId, reportType, recs));
             }
         }
 
@@ -119,7 +121,7 @@ public class ReportUtil {
     public static List<ReportAnalysisRequest> createMonthlyReportRequests(List<Record> records) {
         // Map<memberId, Map<월별 title, List<Record>>>
         Map<Long, Map<String, List<Record>>> grouped = new HashMap<>();
-
+        Report.ReportType reportType = Report.ReportType.REPORT_MONTHLY;
         for (Record record : records) {
             Long memberId = record.getMember().getMemberId(); // 또는 record.getMemberId()
             String monthlyTitle = getMonthlyReportTitle(record.getRecordDateTime());
@@ -140,7 +142,7 @@ public class ReportUtil {
                 List<Record> recs = reportEntry.getValue();
 
                 // 월간 보고서는 주간 title이 없으므로 같은 title로 채움
-                result.add(new ReportAnalysisRequest(monthlyTitle, monthlyTitle, memberId, recs));
+                result.add(new ReportAnalysisRequest(monthlyTitle, monthlyTitle, memberId, reportType, recs));
             }
         }
 

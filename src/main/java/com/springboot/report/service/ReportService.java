@@ -1,31 +1,42 @@
 package com.springboot.report.service;
 
-
-import com.springboot.monthlyreport.entity.MonthlyReport;
-import com.springboot.monthlyreport.service.MonthlyReportService;
+import com.springboot.member.entity.Member;
+import com.springboot.member.service.MemberService;
+import com.springboot.report.dto.ReportAnalysisRequest;
+import com.springboot.report.dto.ReportAnalysisResponse;
 import com.springboot.report.entity.Report;
+import com.springboot.report.mapper.ReportMapper;
 import com.springboot.report.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
+import java.util.List;
 
 
 @Service
 @RequiredArgsConstructor
 public class ReportService {
+    private final MemberService memberService;
     private final ReportRepository repository;
-    private final MonthlyReportService monthlyReportService;
 
-    public Report createReport(Report report, long memberId) {
-        //Report 를 MonthlyReport 에 추가하는 로직
-        monthlyReportService.addReportToMonthlyReport(report, memberId);
+    public Report aiRequestToReport(ReportAnalysisRequest request, String content) {
+       Member member = memberService.validateExistingMember(request.getMemberId());
 
+       Report report = new Report();
+       report.setTitle(request.getReportTitle());
+       report.setMonthlyTitle(request.getMonthlyReportTitle());
+       report.setMember(member);
+       report.setContent(content);
         //해당 report가 주간인지 월간인지 구분
-        report.setPeriodNumber(extractPeriodNumber(report.getTitle()));
-        setReportType(report);
+       report.setPeriodNumber(extractPeriodNumber(request.getReportTitle()));
+       setReportType(report);
+       return report;
+    }
 
-        return repository.save(report);
+    public List<Report> createReport(List<Report> reports) {
+
+        return repository.saveAll(reports);
     }
 
     //report title 에서 주차별 월별 구분
@@ -69,6 +80,13 @@ public class ReportService {
                 Report.ReportType.REPORT_WEEKLY, yearMonthPrefix + "%", "주차");
     }
 
+//    //이미 존재하는 Report의 경우 추가하지 않는다.
+//    public void verifyExistsReport(MonthlyReport monthlyReport, Report report) {
+//        if(monthlyReport.getReports().contains(report)) {
+//            repository.findById(report.getReportId()).orElseThrow(
+//                    ()->new BusinessLogicException(ExceptionCode.REPORT_EXISTS));
+//        }
+//    }
 
 
 }

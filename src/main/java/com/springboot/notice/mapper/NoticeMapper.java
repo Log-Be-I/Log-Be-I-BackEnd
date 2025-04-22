@@ -14,6 +14,22 @@ public interface NoticeMapper {
    Notice noticePostToNotice(NoticeDto.Post post);
    Notice noticePatchToNotice(NoticeDto.Patch patch);
    @Mapping(target = "memberId", source = "member.memberId")
-   NoticeDto.Response noticeToNoticeResponse(Notice notice);
+//   NoticeDto.Response noticeToNoticeResponse(Notice notice);
+
+   default NoticeDto.Response noticeToNoticeResponse(Notice notice){
+      NoticeDto.Response response = new NoticeDto.Response(
+              notice.getNoticeId(),
+              notice.getTitle(),
+              notice.getContent(),
+              notice.getImage(),
+              notice.getMember().getMemberId(),
+              notice.getNoticeType(),
+              notice.getNoticeStatus(),
+              notice.getIsPinned(),
+              notice.getCreatedAt()
+      );
+      return response;
+   }
+
    List<NoticeDto.Response> noticesToNoticeResponses(List<Notice> notices);
 }
