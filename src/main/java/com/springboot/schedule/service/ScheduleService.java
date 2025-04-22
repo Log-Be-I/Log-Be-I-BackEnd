@@ -5,6 +5,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
+import com.springboot.ai.clova.ClovaSpeechService;
 import com.springboot.auth.utils.CustomAuthorityUtils;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
@@ -12,17 +13,26 @@ import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
+import com.springboot.record.entity.Record;
+import com.springboot.record.repository.RecordRepository;
 import com.springboot.redis.RedisService;
+import com.springboot.schedule.dto.ScheduleResponseDto;
 import com.springboot.schedule.entity.HistoricalSchedule;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.repository.HistoricalScheduleRepository;
 import com.springboot.schedule.repository.ScheduleRepository;
 import com.springboot.utils.AuthorizationUtils;
+import io.grpc.stub.ServerCalls;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.jni.Local;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,8 +46,38 @@ public class ScheduleService {
     private final HistoricalScheduleRepository historicalScheduleRepository;
     private final RedisService redisService;
     private final MemberService memberService;
-
+    private final ClovaSpeechService clovaSpeechService;
+    private final RecordRepository recordRepository;
     // 일정 등록 - 음성
+    public void postVoiceSchedule (File voiceFile, CustomPrincipal customPrincipal) throws IOException {
+        // 유효한 회원인지 검증
+        memberService.validateExistingMember(customPrincipal.getMemberId());
+
+        // clova 로 speech to text 변환
+        String speechToText = clovaSpeechService.recognizeSpeech(voiceFile);
+
+        // 변환된 text 를 Gpt로 전달
+//        String text = speechToText;
+
+        // Gpt 로 부터 전달받은 데이터를 Schedule 과 Record 를 분류해주는 로직에 speechToText 넣기
+        handleResponse(speechToText);
+    }
+
+    // 타입이 뭐든 일단 받아서 분기 처리
+    public void handleResponse(Object response) {
+        // response 타입이 Schedule 이라면
+        if (response instanceof Schedule) {
+            Schedule schedule = (Schedule) response;
+            // Schedule 에 저장
+            scheduleRepository.save(schedule);
+
+            // 만약 Record 타입이라면
+        } else if (response instanceof Record) {
+            Record record = (Record) response;
+            recordRepository.save(record);
+        }
+    }
+
 
 
     // 일정 등록 - text
@@ -61,18 +101,44 @@ public class ScheduleService {
 
         //정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
-        String target = String.format("%d-%02d", year, month);
 
-        // memberId 로 일정 찾기
+//        String target = String.format("%d-%02d", year, month);
+        List<String> date = dayOrMonthGetDate(year, month);
+//        String target = date.get(0);
+        LocalDateTime targetStart = LocalDateTime.parse(date.get(1));
+        LocalDateTime targetEnd = LocalDateTime.parse(date.get(2));
+
+                // memberId 로 일정 찾기
         List<Schedule> scheduleList = scheduleRepository.findAllByMember_MemberId(customPrincipal.getMemberId());
 
         // "year" 과 "month" 가 포함된 모든 일정 조회
         List<Schedule> findScheduleList = scheduleList.stream()
-                .filter(schedule -> schedule.getStartDateTime().startsWith(target))
                 .filter(schedule -> schedule.getScheduleStatus() != Schedule.ScheduleStatus.SCHEDULE_DELETED)
+                .filter(schedule ->
+                        !LocalDateTime.parse(schedule.getEndDateTime().replaceAll("\\+.*", "")).isBefore(targetStart) &&
+                                !LocalDateTime.parse(schedule.getStartDateTime().replaceAll("\\+.*", "")).isAfter(targetEnd)
+                )
                 .collect(Collectors.toList());
 
         return findScheduleList;
+    }
+
+    public List<String> dayOrMonthGetDate(int year, int month) {
+        if(year == 0 || month == 0) {
+            int newYear = LocalDateTime.now().getYear();
+            int newMonth = LocalDateTime.now().getMonth().getValue();
+            String today = String.format("%d-%02d-%02d", newYear, newMonth, LocalDateTime.now().getDayOfMonth());
+            String start = LocalDate.parse(today).atStartOfDay().toString();
+            String end = LocalDate.parse(today).atTime(23, 59, 59).toString();
+            List<String> date = List.of(today, start, end);
+            return date;
+        } else {
+            String newMonth = String.format("%d-%02d", year, month);
+            String targetStart = YearMonth.of(year, month).atDay(1).atStartOfDay().toString();
+            String targetEnd = YearMonth.of(year, month).atEndOfMonth().atTime(23, 59, 59).toString();
+            List<String> date = List.of(newMonth, targetStart,targetEnd);
+           return date;
+        }
     }
 
     // 일정 수정( 구글 )
@@ -80,7 +146,7 @@ public class ScheduleService {
         // 일정 찾기
         Schedule findSchedule = validateExistingSchedule(scheduleId);
 
-        Event schedule = getEvent(findSchedule.getEventId());
+        Event schedule = getEvent(findSchedule.getEventId(), customPrincipal.getEmail());
 
         // 데이터 수정
         if(Objects.equals(customPrincipal.getEmail(), findSchedule.getMember().getEmail())){
@@ -182,11 +248,10 @@ public class ScheduleService {
     }
 
     // 단일 조회
-    public Event getEvent (String eventId) throws GeneralSecurityException, IOException {
+    public Event getEvent (String eventId, String email) throws GeneralSecurityException, IOException {
 
-        String calendarId = "6feetlife56@gmail.com";
         // accessToken 가져오기
-        String accessToken = redisService.getGoogleAccessToken(calendarId);
+        String accessToken = redisService.getGoogleAccessToken(email);
         GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
 
         Calendar calendar = new Calendar.Builder(
@@ -196,8 +261,10 @@ public class ScheduleService {
         ).setApplicationName("LogBeI").build();
 
         // 기존 이벤트 불러오기
-        Event event = calendar.events().get(calendarId, eventId).execute();
+        Event event = calendar.events().get(email, eventId).execute();
 
         return event;
     }
+
+
 }

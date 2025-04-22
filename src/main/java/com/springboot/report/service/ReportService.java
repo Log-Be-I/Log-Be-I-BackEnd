@@ -3,6 +3,12 @@ package com.springboot.report.service;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.report.dto.ReportAnalysisRequest;
+
+import com.springboot.exception.BusinessLogicException;
+import com.springboot.exception.ExceptionCode;
+import com.springboot.monthlyreport.entity.MonthlyReport;
+import com.springboot.monthlyreport.service.MonthlyReportService;
+
 import com.springboot.report.entity.Report;
 import com.springboot.report.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +23,7 @@ import java.util.List;
 public class ReportService {
     private final MemberService memberService;
     private final ReportRepository repository;
+
 
     public Report aiRequestToReport(ReportAnalysisRequest request, String content) {
        Member member = memberService.validateExistingMember(request.getMemberId());
@@ -77,14 +84,12 @@ public class ReportService {
         return repository.countWeeklyReportsByTitle(
                 Report.ReportType.REPORT_WEEKLY, yearMonthPrefix + "%", "주차");
     }
-
-//    //이미 존재하는 Report의 경우 추가하지 않는다.
-//    public void verifyExistsReport(MonthlyReport monthlyReport, Report report) {
-//        if(monthlyReport.getReports().contains(report)) {
-//            repository.findById(report.getReportId()).orElseThrow(
-//                    ()->new BusinessLogicException(ExceptionCode.REPORT_EXISTS));
-//        }
-//    }
+  
+    // report 단건 조회
+    public Report findReport(long reportId) {
+        return repository.findById(reportId).orElseThrow(
+                () -> new BusinessLogicException(ExceptionCode.REPORT_NOT_FOUND));
+    }
 
 
 }

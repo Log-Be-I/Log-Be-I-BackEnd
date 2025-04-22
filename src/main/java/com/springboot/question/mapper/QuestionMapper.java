@@ -7,7 +7,10 @@ import com.springboot.question.entity.Question;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface QuestionMapper {
@@ -46,5 +49,12 @@ public interface QuestionMapper {
                 );
         return questionResponse;
     }
-    List<QuestionDto.Response> questionsToQuestionResponses(List<Question> questions);
+    default List<QuestionDto.Response> questionsToQuestionResponses(List<Question> questions) {
+
+            return questions.stream().filter(question -> question.getQuestionStatus() == Question.QuestionStatus.QUESTION_REGISTERED)
+                    .map(question -> questionToQuestionResponse(question))
+                    .sorted(Comparator.comparing(QuestionDto.Response::getCreatedAt))
+                    .collect(Collectors.toList());
+
+    }
 }

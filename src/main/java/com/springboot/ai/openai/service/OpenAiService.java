@@ -47,6 +47,7 @@ public class OpenAiService {
                   .map(request -> generateReportFromAi(request))
                   .collect(Collectors.toList()));
 
+
     }
 
     //ReportAnalysisRequest -> JSON 문자열 -> aiRequest -> aiResponse. content -> Report
@@ -83,6 +84,7 @@ public class OpenAiService {
         }
 
     }
+  
     //주간 프롬프트 - Json 문자열을 param으로 받음
     public String chatWithWeeklyPrompt(String recordJson) {
 
