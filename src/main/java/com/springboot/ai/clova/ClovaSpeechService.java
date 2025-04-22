@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ClovaSpeechService {
 
-    private final OpenAiService openAiService;
-
     @Value("${clova.api.key}")
     private String API_KEY;
     @Value("${clova.api.id}")
@@ -146,15 +144,4 @@ public class ClovaSpeechService {
         return result;
     }
 
-    // 문장을 우리가 원하는 key value 형태로 변환
-    public Map<String, String> textToMap (String text) throws IOException {
-        // 결과 값을 JSON 으로 변경
-        String prompt = openAiService.chatWithScheduleAndRecord(text);
-
-        // prompt 넣어주기
-        String json = openAiService.sendRecord(prompt);
-
-        // json 역직렬화
-        return openAiService.jsonToString(json);
-    }
 }

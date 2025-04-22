@@ -1,38 +1,42 @@
 package com.springboot.report.service;
 
+import com.springboot.ai.googleTTS.GoogleTextToSpeechService;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.report.dto.ReportAnalysisRequest;
 
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
-import com.springboot.monthlyreport.entity.MonthlyReport;
-import com.springboot.monthlyreport.service.MonthlyReportService;
 
 import com.springboot.report.entity.Report;
 import com.springboot.report.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
     private final MemberService memberService;
     private final ReportRepository repository;
+    private final GoogleTextToSpeechService googleTextToSpeechService;
 
 
-    public Report aiRequestToReport(ReportAnalysisRequest request, String content) {
+    public Report aiRequestToReport(ReportAnalysisRequest request, Map<String, String> contentMap) {
        Member member = memberService.validateExistingMember(request.getMemberId());
 
        Report report = new Report();
        report.setTitle(request.getReportTitle());
        report.setMonthlyTitle(request.getMonthlyReportTitle());
        report.setMember(member);
-       report.setContent(content);
+       report.setContent(contentMap);
         //해당 report가 주간인지 월간인지 구분
        report.setPeriodNumber(extractPeriodNumber(request.getReportTitle()));
        setReportType(report);
@@ -42,6 +46,41 @@ public class ReportService {
     public List<Report> createReport(List<Report> reports) {
 
         return repository.saveAll(reports);
+    }
+
+    public List<String> reportToClovaAudio(List<Long> reportsId, long memberId){
+        // 유효한 회원인지 검증
+        Member member = memberService.validateExistingMember(memberId);
+        //활동중인 회원인지 확인
+        memberService.validateMemberStatus(member);
+
+        try {
+            // reportId 로 report 를 찾아서 List<Report> 생성
+            List<Report> reportList = reportsId.stream()
+                    .map(reportId -> findReport(reportId))
+                    .collect(Collectors.toList());
+            // 생성된 파일 이름을 담을 리스트
+            List<String> filePathList = new ArrayList<>();
+            // 리포트 리스트를 돌면서 하나하나 TTS 변환기에 넣기
+            reportList.stream().forEach(record ->
+            {
+                try {
+                    // UUID 로 겹치지 않는 파일명 생성
+                    String fileName = UUID.randomUUID().toString() + ".mp3";
+                    // 제목과 내용을 같이 전달해서 시작하는 글의 날짜를 말하게 함
+                    googleTextToSpeechService.synthesizeText(record.getTitle() + record.getContent(), fileName);
+                    // 생성된 파일 경로 복사
+                    filePathList.add(fileName);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return filePathList;
+        } catch (Exception e) {
+            log.error("Google TTS 오류 발생", e);
+            // 에러 터졌을때는 빈배열 반환
+          throw new BusinessLogicException(ExceptionCode.INVALID_SERVER_ERROR);
+        }
     }
 
     //report title 에서 주차별 월별 구분

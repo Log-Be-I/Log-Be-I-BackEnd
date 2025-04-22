@@ -9,6 +9,7 @@ import lombok.Setter;
 import net.minidev.json.annotate.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.Map;
 
 @Entity
 @Getter
