@@ -71,6 +71,9 @@ springdoc:
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
+    org.springframework.http.client: DEBUG
+    org.apache.http: DEBUG
 clova:
   api:
     key: ${CLOVA_API_SECRET}
