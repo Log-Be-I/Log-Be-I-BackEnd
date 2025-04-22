@@ -122,6 +122,7 @@ public class ReportUtil {
         // Map<memberId, Map<월별 title, List<Record>>>
         Map<Long, Map<String, List<Record>>> grouped = new HashMap<>();
         Report.ReportType reportType = Report.ReportType.REPORT_MONTHLY;
+
         for (Record record : records) {
             Long memberId = record.getMember().getMemberId(); // 또는 record.getMemberId()
             String monthlyTitle = getMonthlyReportTitle(record.getRecordDateTime());
