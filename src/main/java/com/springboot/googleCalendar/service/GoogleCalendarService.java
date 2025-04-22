@@ -87,6 +87,7 @@ public class GoogleCalendarService {
     // 구글 캘린더 조회 요청 (월 기준 조회)
     public List<Event> getEventsFromGoogleCalendar(String timeMin, String timeMax, CustomPrincipal customPrincipal) {
         try {
+
             // 엑세스 토큰 받아오기
             String accessToken = redisService.getGoogleAccessToken(customPrincipal.getEmail());
             // 받은 accessToken 으로 GoogleCredential 객체 생성
@@ -129,6 +130,15 @@ public class GoogleCalendarService {
                 .atEndOfMonth()
                 .atTime(23, 59, 59);
         return endOfMonth.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+    }
+
+    public String getEndOfDay(int year, int month, int day) {
+        LocalDateTime endOfDay = LocalDate.of(year, month, day).atTime(23, 59, 59);
+        return endOfDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+    }
+    public String getStartOfDay(int year, int month, int day) {
+        LocalDateTime startOfDay = LocalDate.of(year, month, day).atTime(00, 00, 00);
+        return startOfDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 
     public String updateGoogleCalendarEvent(Schedule schedule) {
@@ -182,8 +192,12 @@ public class GoogleCalendarService {
                 .collect(Collectors.toMap(Schedule::getEventId, schedule -> schedule));
 
         // ✅ 3. 해당 월의 시작과 끝 날짜 구하기
-        String timeMin = getStartOfMonth(year, month);
-        String timeMax = getEndOfMonth(year, month);
+        // /main 인 경우 임의값 설정하여 이럴때 하루 일정 조회로 변경되게 작성
+//        String timeMin = getStartOfMonth(year, month);
+//        String timeMax = getEndOfMonth(year, month);
+        List<String> time = dayOrMonthTime(year, month);
+        String timeMin = time.get(0);
+        String timeMax = time.get(1);
 
         // ✅ 4. 구글 캘린더에서 일정 가져오기
         List<Event> googleList = getEventsFromGoogleCalendar(timeMin, timeMax, principal);
@@ -272,6 +286,23 @@ public class GoogleCalendarService {
                 .toLocalDateTime();
     }
 
+    public List<String> dayOrMonthTime(int year, int month) {
+        if(year == 0 || month == 0){
+            int newYear = LocalDateTime.now().getYear();
+            int newMonth = LocalDateTime.now().getMonth().getValue();
+            int day = LocalDateTime.now().getDayOfMonth();
+            String timeMin = getStartOfDay(newYear, newMonth, day);
+            String timeMax = getEndOfDay(newYear, newMonth, day);
+            List<String> timeList = List.of(timeMin, timeMax);
+            return timeList;
+        } else {
+            String timeMin = getStartOfMonth(year, month);
+            String timeMax = getEndOfMonth(year, month);
+            List<String> timeList = List.of(timeMin, timeMax);
+            return timeList;
+        }
+    }
+
     // 삭제 요청
     public void deleteGoogleCalendarEvent(String eventId, String email) {
         try {
@@ -296,5 +327,6 @@ public class GoogleCalendarService {
             throw new RuntimeException("Google Calendar 이벤트 삭제 실패: " + e.getMessage(), e);
         }
     }
+
 
 }

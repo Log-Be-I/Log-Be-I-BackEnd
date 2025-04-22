@@ -1,6 +1,8 @@
 package com.springboot.report.service;
 
 
+import com.springboot.exception.BusinessLogicException;
+import com.springboot.exception.ExceptionCode;
 import com.springboot.monthlyreport.entity.MonthlyReport;
 import com.springboot.monthlyreport.service.MonthlyReportService;
 import com.springboot.report.entity.Report;
@@ -16,6 +18,7 @@ import java.time.YearMonth;
 public class ReportService {
     private final ReportRepository repository;
     private final MonthlyReportService monthlyReportService;
+
 
     public Report createReport(Report report, long memberId) {
         //Report 를 MonthlyReport 에 추가하는 로직
@@ -69,6 +72,10 @@ public class ReportService {
                 Report.ReportType.REPORT_WEEKLY, yearMonthPrefix + "%", "주차");
     }
 
-
+    // report 단건 조회
+    public Report findReport(long reportId) {
+        return repository.findById(reportId).orElseThrow(
+                () -> new BusinessLogicException(ExceptionCode.REPORT_NOT_FOUND));
+    }
 
 }
