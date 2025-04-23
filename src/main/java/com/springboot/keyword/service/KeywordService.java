@@ -31,11 +31,10 @@ public class KeywordService {
         if(keywordList.isEmpty() || !keywords.isEmpty()){
             // 기존 키워드 상태 전부 "삭제 상태"로 변경
             keywords.stream().forEach(keyword -> {
-                keyword.setKeywordStatus(Keyword.KeywordStatus.KEYWORD_DELETED);
-//                keyword.setMember(member);
-                keywordRepository.save(keyword);
+                keywordRepository.delete(keyword);
             });
         }
+
         keywordList.stream().forEach(keyword -> {
             keyword.setMember(member);
             keywordRepository.save(keyword);
@@ -49,9 +48,7 @@ public class KeywordService {
         Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
 
         // 키워드 찾기
-        List<Keyword> keywords = keywordRepository.findAllByMember_MemberId(member.getMemberId())
-                .stream().filter(keyword -> keyword.getKeywordStatus() == Keyword.KeywordStatus.KEYWORD_REGISTERED)
-                .collect(Collectors.toList());
+        List<Keyword> keywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
         return keywords;
     }
 }
