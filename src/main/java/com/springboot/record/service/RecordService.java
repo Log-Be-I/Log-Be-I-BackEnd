@@ -1,7 +1,6 @@
 package com.springboot.record.service;
 
 import com.google.api.services.calendar.model.Event;
-import com.springboot.ai.clova.ClovaSpeechService;
 import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.category.service.CategoryService;
@@ -27,7 +26,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +39,10 @@ public class RecordService {
     private final RecordRepository repository;
     private final HistoricalRecordRepository historicalRecordRepository;
     private final MemberService memberService;
+    private final GoogleCalendarService googleCalendarService;
     private final OpenAiService openAiService;
     private final ScheduleRepository scheduleRepository;
     private final CategoryService categoryService;
-    private final GoogleCalendarService googleCalendarService;
 
     @Value("${clova.api.key}")
     private String API_KEY;
@@ -200,9 +198,9 @@ public class RecordService {
         return repository.findByRecordDateTimeBetween(start, end);
     }
 
-    public List<Record> nonDeletedRecordAndAuth (List<Record> records, CustomPrincipal customPrincipal, String sortBy) {
+    public List<Record> nonDeletedRecordAndAuth (List<Record> records, CustomPrincipal customPrincipal) {
         return records.stream().filter(record -> record.getRecordStatus() != Record.RecordStatus.RECORD_DELETED)
-                .filter(record -> record.getCategory().getName().equals(sortBy))
+//                .filter(record -> record.getCategory().getName().equals(sortBy))
                 .peek(record ->
                         // 관리자 or owner 가 아니라면 예외 처리
                 AuthorizationUtils.isAdminOrOwner(record.getMember().getMemberId(), customPrincipal.getMemberId())
@@ -226,6 +224,16 @@ public class RecordService {
 //            // record 레포 save 로직
 //        }
     }
+
+    // 타입이 뭐든 일단 받아서 분기 처리
+    public void handleResponse(Object response) {
+        // response 타입이 Schedule 이라면
+        if (response instanceof Schedule) {
+            Schedule schedule = (Schedule) response;
+        }
+    }
+    // Schedule 에 저장
+
 
 //    // 타입이 뭐든 일단 받아서 분기 처리
 //    public void handleResponse(Object response) {

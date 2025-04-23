@@ -48,6 +48,19 @@ public class ReportService {
         return repository.saveAll(reports);
     }
 
+    //연도별 전체조회
+    public List<Report> findMonthlyReports(long memberId,int year) {
+        String yearStr = year + "년";
+        return repository.findByMember_MemberIdAndMonthlyTitleStartingWith(memberId, yearStr);
+    }
+
+    //Report
+    public List<Report> findMonthlyTitleWithReports(String monthlyTitle, long memberId) {
+        return repository.findByMember_MemberIdAndMonthlyTitle(memberId, monthlyTitle);
+
+    }
+
+
     public List<String> reportToClovaAudio(List<Long> reportsId, long memberId){
         // 유효한 회원인지 검증
         Member member = memberService.validateExistingMember(memberId);

@@ -4,7 +4,6 @@ import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.record.entity.Record;
 import com.springboot.record.service.RecordService;
 import com.springboot.report.dto.ReportAnalysisRequest;
-import com.springboot.report.entity.Report;
 import com.springboot.report.service.ReportService;
 import com.springboot.utils.ReportUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Component

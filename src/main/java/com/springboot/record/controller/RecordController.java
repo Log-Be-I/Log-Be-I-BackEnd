@@ -127,7 +127,7 @@ public class RecordController {
 
         return new ResponseEntity<>( new MultiResponseDto<>(
                 // 삭제상태가 아닌 record 만 필터링, 관리자 및 본인만 접근 가능
-                mapper.recordsToRecordResponses(recordService.nonDeletedRecordAndAuth(records, customPrincipal, sortBy)),
+                mapper.recordsToRecordResponses(recordService.nonDeletedRecordAndAuth(records, customPrincipal)),
                 recordPage), HttpStatus.OK);
     }
 
