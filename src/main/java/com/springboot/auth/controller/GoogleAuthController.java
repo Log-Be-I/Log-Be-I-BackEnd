@@ -2,6 +2,9 @@ package com.springboot.auth.controller;
 
 import com.springboot.auth.dto.GoogleTokenResponse;
 import com.springboot.auth.service.GoogleOAuthService;
+import com.springboot.member.dto.MemberResponseDto;
+import com.springboot.member.entity.Member;
+import com.springboot.member.mapper.MemberMapper;
 import com.springboot.member.service.MemberService;
 import com.springboot.oauth.GoogleInfoDto;
 import com.springboot.oauth.OAuthService;
@@ -19,13 +22,15 @@ public class GoogleAuthController {
     private final OAuthService oAuthService;
     private final MemberService memberService;
     private final GoogleOAuthService googleOAuthService;
+    private final MemberMapper memberMapper;
 
     public GoogleAuthController(OAuthService oAuthService,
                                 MemberService memberService,
-                                GoogleOAuthService googleOAuthService) {
+                                GoogleOAuthService googleOAuthService, MemberMapper memberMapper) {
         this.oAuthService = oAuthService;
         this.memberService = memberService;
         this.googleOAuthService = googleOAuthService;
+        this.memberMapper = memberMapper;
     }
 
     @PostMapping("/google/code")
@@ -52,10 +57,13 @@ public class GoogleAuthController {
                 // 4. 유저 로그인 처리 및 우리 토큰 발급
                 Map<String, String> tokens = googleOAuthService.processUserLogin(userInfo, refreshToken);
 
+                Member member = memberService.findMemberByEmail(userInfo.getEmail());
+                MemberResponseDto memberResponseDto = memberMapper.memberToMemberResponseDto(member);
+
                 return ResponseEntity.ok(Map.of(
                         "status", "login",
                         "token", tokens.get("accessToken"),
-                        "user", userInfo
+                        "user", memberResponseDto
                 ));
             } else {
                 // 6. 회원가입 필요 시 -> 이메일과 이름만 리턴, GoogleRefreshToken은 redis에 임시 저장
