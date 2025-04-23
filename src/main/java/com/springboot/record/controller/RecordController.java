@@ -83,8 +83,6 @@ public class RecordController {
         Record textRecord = mapper.recordPostDtoToRecord(post);
         //LocalDate 타입으로 변경된 RecordTime set
 //        textRecord.setRecordDateTime(recordDateTime);
-
-
         Record record =recordService.createRecord(textRecord, customPrincipal.getMemberId());
       
 //        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
@@ -104,7 +102,6 @@ public class RecordController {
 //        textRecord.setRecordDateTime(recordDateTime);
         Record record = recordService.updateRecord(textRecord, customPrincipal.getMemberId());
         return new ResponseEntity<>( new SingleResponseDto<>(mapper.recordToRecordResponse(record)), HttpStatus.OK);
-
     }
 
     @GetMapping("/records/{record-id}")
@@ -137,5 +134,4 @@ public class RecordController {
         recordService.deleteRecord(recordId, customPrincipal.getMemberId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
 }
