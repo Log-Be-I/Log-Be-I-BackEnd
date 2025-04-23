@@ -69,7 +69,7 @@ public class CategoryService {
     public Category findCategory (Long categoryId, Long memberId) {
         Category findCategory = findVerifiedCategory(categoryId);
         //조회자가 작성자 or 관리자 인지 확인, 아니라면 예외처리
-        AuthorizationUtils.isAdminOrOwner(findCategory.getCategoryId(), memberId);
+//        AuthorizationUtils.isAdminOrOwner(findCategory.getMember().getMemberId(), memberId);
         return findCategory;
     }
 

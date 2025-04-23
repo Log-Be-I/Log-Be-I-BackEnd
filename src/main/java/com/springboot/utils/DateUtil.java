@@ -46,19 +46,16 @@ public class DateUtil {
             //입력 값이 있다면 문자열을 변환
         } else {
             // 기본 포맷(yyyy-MM-dd HH:mm:ss)으로 파싱
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
             return LocalDateTime.parse(dateTimeStr, formatter);
         }
     }
 
-//    public static LocalDateTime parseToLocalDateTime(String dateTimeStr, String pattern) {
-//        //해당 문자열에 입력값이 있을 때 타입 변환
-//        if (dateTimeStr != null && !dateTimeStr.isBlank()) {
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-//            return LocalDateTime.parse(dateTimeStr, formatter);
-//        }
-//        return
-//    }
+    public static LocalDateTime parseToLocalDateTime(String dateTimeStr, String pattern) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+            return LocalDateTime.parse(dateTimeStr, formatter);
+
+    }
 
 
 }

@@ -36,7 +36,7 @@ public class ReportService {
        report.setTitle(request.getReportTitle());
        report.setMonthlyTitle(request.getMonthlyReportTitle());
        report.setMember(member);
-       report.setContent(contentMap);
+//       report.setContent(contentMap);
         //해당 report가 주간인지 월간인지 구분
        report.setPeriodNumber(extractPeriodNumber(request.getReportTitle()));
        setReportType(report);

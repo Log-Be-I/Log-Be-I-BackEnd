@@ -27,7 +27,6 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -201,7 +200,8 @@ public class OpenAiService {
                 "※ 정확한 날짜와 또는 시간이 명시되어있어도 행위에 대한 내용이 없다면 schedule로 분류하지않는다 \n" +
                 "※ 시간이 명시되어있지않고 주말 이라는 단어로만 명시한다면 일요일로 설정하고 분석한다 \n" +
                 "※ .\n" +
-                "응답 형식은 아래 중 하나여야 합니다:\n\n" +
+                "응답 형식은 JSON으로 줘야하며 양식은 아래 중 하나여야 합니다:\n\n" +
+                "절대로 JSON 을 제외한 다른 문장이나 문자, 기호등은 응답데이터에 포함시키지 말아야한다. 설명 또한 금지한다\n\n" +
                 "record:\n" +
                 "{\n" +
                 "  \"type\": \"record\",\n" +

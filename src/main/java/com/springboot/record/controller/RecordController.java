@@ -13,12 +13,14 @@ import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.mapper.ScheduleMapper;
+import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -117,12 +119,16 @@ public class RecordController {
     @GetMapping("/records")
     public ResponseEntity getRecords(@Positive @RequestParam("page") int page,
                                      @Positive @RequestParam("size") int size,
+                                     @RequestParam("sortBy") String sortBy,
+                                     @RequestParam("orderBy") String orderBy,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId());
+        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(),sortBy, orderBy);
         List<Record> records = recordPage.getContent();
 
         return new ResponseEntity<>( new MultiResponseDto<>(
-                mapper.recordsToRecordResponses(records), recordPage), HttpStatus.OK);
+                // 삭제상태가 아닌 record 만 필터링, 관리자 및 본인만 접근 가능
+                mapper.recordsToRecordResponses(recordService.nonDeletedRecordAndAuth(records, customPrincipal, sortBy)),
+                recordPage), HttpStatus.OK);
     }
 
     @DeleteMapping("/records/{record-id}")

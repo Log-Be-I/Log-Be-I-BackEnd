@@ -7,6 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface NoticeMapper {
@@ -31,5 +32,9 @@ public interface NoticeMapper {
       return response;
    }
 
-   List<NoticeDto.Response> noticesToNoticeResponses(List<Notice> notices);
+   default List<NoticeDto.Response> noticesToNoticeResponses(List<Notice> notices) {
+      return notices.stream().filter(notice -> notice.getNoticeStatus() != Notice.NoticeStatus.NOTICE_DELETED)
+              .map(notice -> noticeToNoticeResponse(notice))
+              .collect(Collectors.toList());
+   }
 }

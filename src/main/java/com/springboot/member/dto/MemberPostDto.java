@@ -19,7 +19,7 @@ public class MemberPostDto {
 
     @Schema(description = "닉네임", example = "방울이")
     @NotBlank
-    @Pattern(regexp = "^[가-힣a-z]{2,8}$", message = "한글과 영어 소문자만 사용 가능합니다.")
+    @Pattern(regexp = "^[가-힣a-zA-Z]{2,8}$", message = "한글과 영어 소문자만 사용 가능합니다.")
     private String nickname;
 
     @Schema(description = "이메일", example = "girogi@gmail.com")

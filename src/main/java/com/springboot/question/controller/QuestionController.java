@@ -164,7 +164,7 @@ public class QuestionController {
                                          @RequestParam String orderBy,
                                          @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-        Page<Question> questionPage = questionService.findMyQuestions(page, size, customPrincipal.getMemberId());
+        Page<Question> questionPage = questionService.findMyQuestions(page, size, customPrincipal.getMemberId(), orderBy);
         List<Question> questions = questionPage.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>
                 (questionMapper.questionsToQuestionResponses(questions), questionPage), HttpStatus.OK);
