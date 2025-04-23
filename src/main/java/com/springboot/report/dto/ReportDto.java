@@ -5,6 +5,7 @@ import com.springboot.report.entity.Report;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -13,7 +14,7 @@ public class ReportDto {
     @Getter
     @AllArgsConstructor
     public static class summaryResponse{
-        private Long reportId;
+        private List<Long> reportIds;
         private String monthlyTitle;
     }
 

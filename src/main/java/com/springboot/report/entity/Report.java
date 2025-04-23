@@ -2,6 +2,7 @@ package com.springboot.report.entity;
 
 import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;
+import com.springboot.utils.ContentMapConverter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,13 +24,17 @@ public class Report extends BaseEntity {
     private Long reportId;
 
     @Column(nullable = false)
+    private String monthlyTitle;
+
+    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
-    private String content;
+//JPA가 알아서 저장 시 JSON String, 조회 시 Map<String, String>으로 바꿔줌
+    //Utils -> ContentMapConverte class 정의함
+    @Convert(converter = ContentMapConverter.class)
+    private Map<String, String> content;
 
-    @Column(nullable = false)
-    private String monthlyTitle;
 
     @Enumerated(value = EnumType.STRING)
     private ReportType reportType = ReportType.REPORT_WEEKLY;

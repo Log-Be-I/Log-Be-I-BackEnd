@@ -14,7 +14,7 @@ public interface NoticeMapper {
    @Mapping(target = "member.memberId", source = "memberId")
    Notice noticePostToNotice(NoticeDto.Post post);
    Notice noticePatchToNotice(NoticeDto.Patch patch);
-   @Mapping(target = "memberId", source = "member.memberId")
+//   @Mapping(target = "memberId", source = "member.memberId")
 //   NoticeDto.Response noticeToNoticeResponse(Notice notice);
 
    default NoticeDto.Response noticeToNoticeResponse(Notice notice){
