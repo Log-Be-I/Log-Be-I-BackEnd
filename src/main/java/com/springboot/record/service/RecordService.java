@@ -3,11 +3,13 @@ package com.springboot.record.service;
 import com.google.api.services.calendar.model.Event;
 import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
+import com.springboot.category.entity.Category;
 import com.springboot.category.service.CategoryService;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.googleCalendar.dto.GoogleEventDto;
 import com.springboot.googleCalendar.service.GoogleCalendarService;
+import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.HistoricalRecord;
 import com.springboot.record.entity.Record;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.OrderBy;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -152,18 +155,21 @@ public class RecordService {
     }
 
     //기록 전체 조회
-    public Page<Record> findRecords(int page, int size, long memberId, String sortBy, String orderBy) {
-        memberService.validateExistingMember(memberId);
+    public Page<Record> findRecords(int page, int size, long memberId, long categoryId) {
+        // category 확인을 위한 유저 찾기
 
-        Sort.Direction direction = orderBy.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by("recordDateTime").descending());
 
         if(page < 1) {
             throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
         }
-
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by(direction, sortBy));
-        //특정 회원이 작성한 질문 목록 조회
-        return repository.findAllByMember_MemberId(memberId, pageable);
+        if(categoryId <= 0){
+            //특정 회원이 작성한 질문 목록 조회
+            return repository.findAllByMember_MemberId(memberId, pageable);
+        } else{
+            // 값이 존재하는 값의 키로 벨류를 조회하여 설정
+            return repository.findAllByMember_MemberIdAndCategory_CategoryId(memberId, categoryId, pageable);
+        }
     }
 
     //기록 카테고리별 조회

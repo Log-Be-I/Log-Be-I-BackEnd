@@ -116,10 +116,9 @@ public class RecordController {
     @GetMapping("/records")
     public ResponseEntity getRecords(@Positive @RequestParam("page") int page,
                                      @Positive @RequestParam("size") int size,
-                                     @RequestParam("sortBy") String sortBy,
-                                     @RequestParam("orderBy") String orderBy,
+                                     @RequestParam("sortBy") Long sortBy,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(),sortBy, orderBy);
+        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(),sortBy);
         List<Record> records = recordPage.getContent();
 
         return new ResponseEntity<>( new MultiResponseDto<>(
