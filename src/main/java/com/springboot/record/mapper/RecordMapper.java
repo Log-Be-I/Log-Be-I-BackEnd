@@ -32,13 +32,13 @@ public interface RecordMapper {
             //입력 값이 있다면 문자열을 변환
         } else {
             // 기본 포맷(yyyy-MM-dd HH:mm:ss)으로 파싱
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
             return LocalDateTime.parse(dateTimeStr, formatter);
         }
     }
     //PatchDto의 recordDateTime (String -> LocalDateTime) 타입 변환 메서드
     default LocalDateTime updateStringToLocalDateTime(String dateTimeStr){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return LocalDateTime.parse(dateTimeStr, formatter);
 
     }

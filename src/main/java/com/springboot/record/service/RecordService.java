@@ -1,5 +1,6 @@
 package com.springboot.record.service;
 
+import com.google.api.services.calendar.model.Event;
 import com.springboot.ai.clova.ClovaSpeechService;
 import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
@@ -7,6 +8,7 @@ import com.springboot.category.service.CategoryService;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.googleCalendar.dto.GoogleEventDto;
+import com.springboot.googleCalendar.service.GoogleCalendarService;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.HistoricalRecord;
 import com.springboot.record.entity.Record;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +44,7 @@ public class RecordService {
     private final OpenAiService openAiService;
     private final ScheduleRepository scheduleRepository;
     private final CategoryService categoryService;
+    private final GoogleCalendarService googleCalendarService;
 
     @Value("${clova.api.key}")
     private String API_KEY;
@@ -64,17 +68,21 @@ public class RecordService {
             googleEventDto.setEndDateTime(schedule.getEndDateTime());
             googleEventDto.setSummary(schedule.getTitle());
             googleEventDto.setCalendarId(customPrincipal.getEmail());
-            // 스케쥴 저장
+            // 구글 캘린더 등록 요청
+            Event googleEvent = googleCalendarService.sendEventToGoogleCalendar(googleEventDto);
+            // 3. eventId 반영 후 다시 저장
+            schedule.setEventId(googleEvent.getId());
             scheduleRepository.save(schedule);
             // 스케쥴 객체 리턴
-            return schedule;
+            return scheduleRepository.save(schedule);
         } else if (data.get("type").equals("record")) {
             // record 레포 save 로직
             Record record = new Record();
             record.setContent(data.get("content"));
             record.setRecordDateTime(DateUtil.parseToLocalDateTime(data.get("recordDateTime")));
             record.setCategory(categoryService.findCategory(Long.parseLong(data.get("categoryId")), customPrincipal.getMemberId()));
-            return record;
+            record.setMember(memberService.validateExistingMember(customPrincipal.getMemberId()));
+            return repository.save(record);
         } else {
             throw new BusinessLogicException(ExceptionCode.GPT_FAILED);
         }
@@ -137,18 +145,25 @@ public class RecordService {
         Record findRecord = findVerifiedRecord(recordId);
         //작성자 or 관리지만 조회 가능
         AuthorizationUtils.isAdminOrOwner(findRecord.getMember().getMemberId(), memberId);
-        return findRecord;
+        // 삭제 상태가 아니라면 record 반환
+        if(findRecord.getRecordStatus() != Record.RecordStatus.RECORD_DELETED) {
+            return findRecord;
+        }
+        // 삭제 상태라면 예외 처리
+        throw new BusinessLogicException(ExceptionCode.NOT_FOUND);
     }
 
     //기록 전체 조회
-    public Page<Record> findRecords(int page, int size, long memberId) {
+    public Page<Record> findRecords(int page, int size, long memberId, String sortBy, String orderBy) {
         memberService.validateExistingMember(memberId);
+
+        Sort.Direction direction = orderBy.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
 
         if(page < 1) {
             throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
         }
 
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by("recordTime"));
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by(direction, sortBy));
         //특정 회원이 작성한 질문 목록 조회
         return repository.findAllByMember_MemberId(memberId, pageable);
     }
@@ -185,38 +200,46 @@ public class RecordService {
         return repository.findByRecordDateTimeBetween(start, end);
     }
 
+    public List<Record> nonDeletedRecordAndAuth (List<Record> records, CustomPrincipal customPrincipal, String sortBy) {
+        return records.stream().filter(record -> record.getRecordStatus() != Record.RecordStatus.RECORD_DELETED)
+                .filter(record -> record.getCategory().getName().equals(sortBy))
+                .peek(record ->
+                        // 관리자 or owner 가 아니라면 예외 처리
+                AuthorizationUtils.isAdminOrOwner(record.getMember().getMemberId(), customPrincipal.getMemberId())
+                ).collect(Collectors.toList());
+
     // Json 으로 schedule 과 record 구분하여 저장
-    public void voiceTextTo(String result) throws IOException {
+//    public void voiceTextTo(String result) throws IOException {
         // 결과 값을 JSON 으로 변경
-        String prompt = openAiService.chatWithScheduleAndRecord(result);
+//        String prompt = openAiService.chatWithScheduleAndRecord(result);
 
         // prompt 넣어주기
-        String json = openAiService.sendRecord(prompt);
+//        String json = openAiService.sendRecord(prompt);
 
         // json 역직렬화
-        Map<String, String> response = openAiService.jsonToString(json);
-
-        // type 뽑기
-        if(response.get("type").equals("schedule")) {
-            // 스케쥴 레포 save 로직
-        } else if(response.get("type").equals("record")) {
-            // record 레포 save 로직
-        }
+//        Map<String, String> response = openAiService.createRecordOrSchedule(result);
+//
+//        // type 뽑기
+//        if(response.get("type").equals("schedule")) {
+//            // 스케쥴 레포 save 로직
+//        } else if(response.get("type").equals("record")) {
+//            // record 레포 save 로직
+//        }
     }
 
-    // 타입이 뭐든 일단 받아서 분기 처리
-    public void handleResponse(Object response) {
-        // response 타입이 Schedule 이라면
-        if (response instanceof Schedule) {
-            Schedule schedule = (Schedule) response;
-            // Schedule 에 저장
-
-
-            // 만약 Record 타입이라면
-        } else if (response instanceof Record) {
-            Record record = (Record) response;
-            repository.save(record);
-        }
-    }
+//    // 타입이 뭐든 일단 받아서 분기 처리
+//    public void handleResponse(Object response) {
+//        // response 타입이 Schedule 이라면
+//        if (response instanceof Schedule) {
+//            Schedule schedule = (Schedule) response;
+//            // Schedule 에 저장
+//
+//
+//            // 만약 Record 타입이라면
+//        } else if (response instanceof Record) {
+//            Record record = (Record) response;
+//            repository.save(record);
+//        }
+//    }
 
 }
