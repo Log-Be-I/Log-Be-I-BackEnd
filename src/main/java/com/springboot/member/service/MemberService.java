@@ -54,14 +54,14 @@ public class MemberService {
         List<Record> records = new ArrayList<>();
         List<String> categoryNames = List.of("일상", "소비", "건강", "할 일", "기타");
         List<Category> categoryList = categoryNames.stream()
-                .map(categoryName -> new Category(categoryName, "url", member,true))
-                        .collect(Collectors.toList());
+                .map(categoryName -> new Category(categoryName, "url", member, true))
+                .collect(Collectors.toList());
         categoryList.stream().map(category -> categoryRepository.save(category));
 
         member.setCategories(categoryList);
         memberRepository.save(member);
 
-        return googleOAuthService.processUserLogin(new GoogleInfoDto(member.getEmail(),member.getName()), member.getRefreshToken());
+        return googleOAuthService.processUserLogin(new GoogleInfoDto(member.getEmail(), member.getName()), member.getRefreshToken());
 
     }
 
@@ -74,7 +74,7 @@ public class MemberService {
         String isOwnerEmail = findMember.getEmail();
 
         // 만약 요청한 사용자의 이메일과 변경하고자하는 유저정보의 owner 의 이메일이 같다면 변경 실행
-        if(Objects.equals(email, isOwnerEmail)){
+        if (Objects.equals(email, isOwnerEmail)) {
             findMember.setNickname(
                     Optional.ofNullable(member.getNickname())
                             .orElse(findMember.getNickname()));
@@ -127,7 +127,7 @@ public class MemberService {
         Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
 
         // 페이지네이션 양식 생성
-        Pageable pageable =  PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         // 값이 존재하는 값의 키로 벨류를 조회하여 설정
         Page<Member> members;
@@ -162,7 +162,7 @@ public class MemberService {
     public void deleteMember(long memberId, long loginMemberId, String memberEmail, String response) {
         // 존재하는 회원인지 검증
         Member member = validateExistingMember(memberId);
-        AuthorizationUtils.isAdminOrOwner(memberId,loginMemberId);
+        AuthorizationUtils.isAdminOrOwner(memberId, loginMemberId);
         //memberId와 email이 같은 회원의 정보인지 확인
         checkMemberIdentityByIdAndEmail(member, memberEmail);
         // 회원 상태가 활동중인지 검증
@@ -177,7 +177,7 @@ public class MemberService {
         // 만약 요청한 사용자의 이메일과 변경하고자하는 유저 정보의 owner 의 이메일이 동일하거나 admin 일 경우 변경 실행
         boolean value = authentication.stream().anyMatch(email -> Objects.equals(memberEmail, email));
         //탈퇴 요청을 보낸 회원이 사용자 본인 또는 관리자라면 true
-        if(value){
+        if (value) {
             // 회원 상태 변경
             member.setMemberStatus(Member.MemberStatus.MEMBER_DELETEED);
             // 회원이 작성한 질문글 상태 변경
@@ -197,13 +197,12 @@ public class MemberService {
         }
 
 
-
     }
 
     // 이미 가입된 회원인지 중복 가입 예외처리
     public void isMemberAlreadyRegistered(String email) {
         Optional<Member> findMember = memberRepository.findByEmail(email);
-        if(findMember.isPresent()) {
+        if (findMember.isPresent()) {
             throw new BusinessLogicException(ExceptionCode.EXISTING_MEMBER);
         }
     }
@@ -211,7 +210,7 @@ public class MemberService {
     // 이미 사용중인 닉네임인지 닉네임 예외처리
     public void isNicknameAlreadyUsed(Member member) {
         Optional<Member> findMember = memberRepository.findByNickname(member.getNickname());
-        if(findMember.isPresent()) {
+        if (findMember.isPresent()) {
             throw new BusinessLogicException(ExceptionCode.NICKNAME_ALREADY_USED);
         }
     }
@@ -231,7 +230,7 @@ public class MemberService {
     }
 
     //memberId로 찾은 회원과 email로 찾은 회원이 서로 같지않다면 예외발생
-    public void checkMemberIdentityByIdAndEmail(Member member ,String memberEmail) {
+    public void checkMemberIdentityByIdAndEmail(Member member, String memberEmail) {
         Member wishDeleteMember = validateExistingMemberUsedEmail(memberEmail);
         if (!member.getEmail().equals(wishDeleteMember.getEmail())) {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
@@ -240,7 +239,7 @@ public class MemberService {
 
     // 회원 상태 검증
     public void validateMemberStatus(Member member) {
-        if (member.getMemberStatus() == Member.MemberStatus.MEMBER_DELETEED){
+        if (member.getMemberStatus() == Member.MemberStatus.MEMBER_DELETEED) {
             throw new BusinessLogicException(ExceptionCode.MEMBER_DELETED);
 
         } else if (member.getMemberStatus() != Member.MemberStatus.MEMBER_ACTIVE) {
@@ -250,17 +249,23 @@ public class MemberService {
     }
 
     // 탈퇴 회원 재가입 가능한지 검증
-    public void validateRejoinableMember (Member member) {
+    public void validateRejoinableMember(Member member) {
         // 회원 id 로 탈퇴 내역있는지 조회
         Optional<DeletedMember> deletedMember = deletedMemberRepository.findByEmail(member.getEmail());
         // 탈퇴한 내역이 있다면
-        if(deletedMember.isPresent()) {
+        if (deletedMember.isPresent()) {
             //탈퇴 후 6개월이 지나지 않았다면 회원가입 불가
             if (LocalDateTime.now().isBefore(deletedMember.get().getDeletedAt().plusMonths(6))) {
                 throw new BusinessLogicException(ExceptionCode.CANCEL_MEMBERSHIP);
 
             }
         }
+    }
+
+    public Member findMemberByEmail(String email) {
+        return memberRepository.findByEmail(email).orElseThrow(
+                () -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND)
+        );
     }
 
     // 구글 인증 정보로 유저 유무 확인
