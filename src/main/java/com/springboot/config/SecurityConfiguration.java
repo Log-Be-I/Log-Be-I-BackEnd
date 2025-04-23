@@ -95,7 +95,7 @@ public class SecurityConfiguration {
                         .antMatchers("/hello").permitAll()
                         // 접근 권한과 상관없이 post 요청이라면 허용한다
                         .antMatchers(HttpMethod.POST, "/*/members").permitAll()
-                        .antMatchers(HttpMethod.POST, "/*/questions").hasRole("USER")
+                        .antMatchers(HttpMethod.POST, "/*/questions").permitAll()
                         .antMatchers(HttpMethod.POST, "/*/answers").hasRole("ADMIN")
                         // 정보 수정 요청은 USER 권한만 가능하다
                         .antMatchers(HttpMethod.PATCH,"/*/members/**").hasRole("USER")
