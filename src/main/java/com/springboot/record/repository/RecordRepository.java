@@ -22,4 +22,5 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     //start 이상 end 이하인 기록 데이터를 가져온다.
     List<Record> findByRecordDateTimeBetween(LocalDateTime start, LocalDateTime end);
 
+    Page<Record> findAllByMember_MemberIdAndCategory_CategoryId(Long memberId, Long categoryId, Pageable pageable);
 }

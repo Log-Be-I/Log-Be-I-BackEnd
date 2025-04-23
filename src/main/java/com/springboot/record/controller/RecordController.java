@@ -83,8 +83,6 @@ public class RecordController {
         Record textRecord = mapper.recordPostDtoToRecord(post);
         //LocalDate 타입으로 변경된 RecordTime set
 //        textRecord.setRecordDateTime(recordDateTime);
-
-
         Record record =recordService.createRecord(textRecord, customPrincipal.getMemberId());
       
 //        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
@@ -104,7 +102,6 @@ public class RecordController {
 //        textRecord.setRecordDateTime(recordDateTime);
         Record record = recordService.updateRecord(textRecord, customPrincipal.getMemberId());
         return new ResponseEntity<>( new SingleResponseDto<>(mapper.recordToRecordResponse(record)), HttpStatus.OK);
-
     }
 
     @GetMapping("/records/{record-id}")
@@ -119,10 +116,9 @@ public class RecordController {
     @GetMapping("/records")
     public ResponseEntity getRecords(@Positive @RequestParam("page") int page,
                                      @Positive @RequestParam("size") int size,
-                                     @RequestParam("sortBy") String sortBy,
-                                     @RequestParam("orderBy") String orderBy,
+                                     @RequestParam("sortBy") Long sortBy,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(),sortBy, orderBy);
+        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(),sortBy);
         List<Record> records = recordPage.getContent();
 
         return new ResponseEntity<>( new MultiResponseDto<>(
@@ -137,5 +133,4 @@ public class RecordController {
         recordService.deleteRecord(recordId, customPrincipal.getMemberId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
 }
