@@ -8,7 +8,9 @@ import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 
+import com.springboot.report.dto.ReportAnalysisResponse;
 import com.springboot.report.entity.Report;
+import com.springboot.report.mapper.ReportMapper;
 import com.springboot.report.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,27 +28,55 @@ import java.util.stream.Collectors;
 public class ReportService {
     private final MemberService memberService;
     private final ReportRepository repository;
+    private final ReportMapper mapper;
     private final GoogleTextToSpeechService googleTextToSpeechService;
 
+    //ai가 분석한 content 타입변환 ReportAnalysisRequest -> ReportAnalysisResponse 변환
+    public ReportAnalysisResponse aiRequestToReport(ReportAnalysisRequest request, Map<String, String> contentMap) {
 
-    public Report aiRequestToReport(ReportAnalysisRequest request, Map<String, String> contentMap) {
-       Member member = memberService.validateExistingMember(request.getMemberId());
+        //ReportAnalysisRequest -> ReportAnalysisResponse 매핑
+        ReportAnalysisResponse response = new ReportAnalysisResponse();
+        response.setMemberId(request.getMemberId());
+        response.setReportTitle(request.getReportTitle());
+        response.setMonthlyReportTitle(request.getMonthlyReportTitle());
+        response.setContent(contentMap);
 
-       Report report = new Report();
-       report.setTitle(request.getReportTitle());
-       report.setMonthlyTitle(request.getMonthlyReportTitle());
-       report.setMember(member);
-//       report.setContent(contentMap);
-        //해당 report가 주간인지 월간인지 구분
-       report.setPeriodNumber(extractPeriodNumber(request.getReportTitle()));
-       setReportType(report);
-       return report;
+        return response;
     }
 
-    public List<Report> createReport(List<Report> reports) {
+    public Report analysisResponseToReport(ReportAnalysisResponse response) {
 
+        Report report = new Report();
+        report.setTitle(response.getReportTitle());
+        report.setMonthlyTitle(response.getMonthlyReportTitle());
+        report.getMember().setMemberId(response.getMemberId());
+        report.setContent(response.getContent());
+        //해당 report가 주간인지 월간인지 구분
+        report.setPeriodNumber(extractPeriodNumber(response.getReportTitle()));
+        setReportType(report);
+
+        return report;
+    }
+
+    //ai 응답 -> Report
+    public List<Report> analysisResponseToReportList(List<ReportAnalysisResponse> responses) {
+
+        List<Report> reports = responses.stream().map(
+                response -> analysisResponseToReport(response)).collect(Collectors.toList());
+
+        //생성된 List<Report> DB 저장
         return repository.saveAll(reports);
     }
+
+//    public List<Report> createReport(List<ReportAnalysisResponse> responses) {
+//
+//
+//        //mapper 로 매핑 List<ReportAnalysisResponse> -> List<Report> 변환
+//        List<Report> reports = mapper.analysisResponseToReportList(responses);
+//        reports.stream().map(report -> report.setPeriodNumber(extractPeriodNumber(response.getReportTitle()));)
+//
+//        return repository.saveAll(reports);
+//    }
 
     //연도별 전체조회
     public List<Report> findMonthlyReports(long memberId,int year) {

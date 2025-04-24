@@ -47,6 +47,8 @@ public class CategoryDto {
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
+    @Setter
     public static class Response{
         private Long categoryId;
         private String name;

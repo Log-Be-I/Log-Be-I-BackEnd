@@ -1,5 +1,7 @@
 package com.springboot.record.mapper;
 
+import com.springboot.category.dto.CategoryDto;
+import com.springboot.category.entity.Category;
 import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.Record;
 import org.mapstruct.Mapper;
@@ -9,6 +11,7 @@ import org.mapstruct.Mapping;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface RecordMapper {
@@ -21,8 +24,33 @@ public interface RecordMapper {
     @Mapping(target = "category.categoryId", source = "categoryId")
     @Mapping(target = "recordDateTime", expression = "java(updateStringToLocalDateTime(patch.getRecordDateTime()))")
     Record recordPatchDtoToRecord(RecordDto.Patch patch);
-    RecordDto.Response recordToRecordResponse(Record record);
-    List<RecordDto.Response> recordsToRecordResponses(List<Record> records);
+//    @Mapping(target = "categoryId", source = "category.categoryId")
+//    RecordDto.Response recordToRecordResponse(Record record);
+
+    default RecordDto.Response recordToRecordResponse(Record record) {
+        RecordDto.Response response = new RecordDto.Response(
+                record.getRecordId(), record.getRecordDateTime(),
+                record.getContent(),
+                record.getRecordStatus(),
+                record.getMember().getMemberId(),
+                categoryToCategoryResponse(record.getCategory())
+
+        );
+        return response;
+    }
+    default CategoryDto.Response categoryToCategoryResponse(Category category) {
+        CategoryDto.Response categoryResponseDto = new CategoryDto.Response();
+        categoryResponseDto.setCategoryId(category.getCategoryId());
+        categoryResponseDto.setName(category.getName());
+       return categoryResponseDto;
+    }
+
+    default List<RecordDto.Response> recordsToRecordResponses(List<Record> records) {
+        return records.stream().map(
+                record -> recordToRecordResponse(record))
+                .collect(Collectors.toList());
+
+    }
 
     //PostDto의 recordDateTime (String -> LocalDateTime) 타입 변환 메서드
     default LocalDateTime stringToLocalDateTime(String dateTimeStr) {

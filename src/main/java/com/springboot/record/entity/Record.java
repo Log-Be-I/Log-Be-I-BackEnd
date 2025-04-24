@@ -1,5 +1,6 @@
 package com.springboot.record.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.springboot.audit.BaseEntity;
 import com.springboot.category.entity.Category;
 import com.springboot.member.entity.Member;
@@ -34,7 +35,9 @@ public class Record extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private RecordStatus recordStatus = RecordStatus.RECORD_REGISTERED;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    @JsonBackReference
     private Member member;
 
     @ManyToOne
@@ -55,11 +58,11 @@ public class Record extends BaseEntity {
     }
 
     // member 영속성
-    public void setMember(Member member) {
-        this.member = member;
-        if(!member.getRecords().contains(this)) {
-            member.setRecord(this);
-        }
-    }
+//    public void setMember(Member member) {
+//        this.member = member;
+//        if(!member.getRecords().contains(this)) {
+//            member.setRecord(this);
+//        }
+//    }
 
 }

@@ -15,5 +15,5 @@ public class ReportAnalysisRequest { // Entity와 바로 매핑 가능하지만,
     private String monthlyReportTitle;
     private Long memberId;
     private Report.ReportType reportType;
-    private List<Record> records;
+    private List<RecordForAnalysisDto> analysisDtoList;
 }

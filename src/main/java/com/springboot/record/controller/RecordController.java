@@ -5,6 +5,8 @@ import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.entity.Member;
+import com.springboot.member.service.MemberService;
 import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.Record;
 import com.springboot.record.mapper.RecordMapper;
@@ -47,7 +49,7 @@ public class RecordController {
     private final ClovaSpeechService clovaSpeechService;
     private final OpenAiService openAiService;
     private final ScheduleMapper scheduleMapper;
-
+    private final MemberService memberService;
 
     @PostMapping("/audio-records")
     public ResponseEntity uploadAndRecognize(@RequestParam("audio") MultipartFile audioFile,
@@ -74,7 +76,7 @@ public class RecordController {
     @PostMapping("/text-records")
     public ResponseEntity postRecord(@RequestBody RecordDto.Post post,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        post.setMemberId(customPrincipal.getMemberId());
+//        post.setMemberId(customPrincipal.getMemberId());
 
         //RecordDateTime을 입력 값이 있다면, 해당 문자열을 LocalDateTime으로 변환
         //문자열을 LocalDateTime 로 변환
@@ -86,7 +88,10 @@ public class RecordController {
         Record record =recordService.createRecord(textRecord, customPrincipal.getMemberId());
       
 //        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
-        return new ResponseEntity<>(new SingleResponseDto<>(mapper.recordToRecordResponse(record)), HttpStatus.CREATED);
+        RecordDto.Response response = mapper.recordToRecordResponse(record);
+//        Member member = memberService.validateExistingMember(response.);
+//        response.set
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PatchMapping("/records/{record-id}")

@@ -27,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.OrderBy;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -92,8 +91,8 @@ public class RecordService {
 
     public Record createRecord(Record record, long memberId){
 
-        memberService.validateExistingMember(memberId);
-
+       Member member = memberService.validateExistingMember(memberId);
+       record.setMember(member);
 
         return repository.save(record);
     }
@@ -137,6 +136,8 @@ public class RecordService {
         Optional.ofNullable(record.getCategory())
                 .ifPresent(category -> findRecord.setCategory(category));
 
+        Category category = categoryService.findVerifiedCategory(record.getCategory().getCategoryId());
+        findRecord.setCategory(category);
         //수정 데이터 저장
         return repository.save(findRecord);
     }
@@ -144,6 +145,10 @@ public class RecordService {
     //기록 단일 조회
     public Record findRecord(long recordId, long memberId) {
         Record findRecord = findVerifiedRecord(recordId);
+        Category category = categoryService.findVerifiedCategory(findRecord.getCategory().getCategoryId());
+        findRecord.getRecordDateTime();
+        findRecord.setCategory(category);
+
         //작성자 or 관리지만 조회 가능
         AuthorizationUtils.isAdminOrOwner(findRecord.getMember().getMemberId(), memberId);
         // 삭제 상태가 아니라면 record 반환
@@ -157,7 +162,7 @@ public class RecordService {
     //기록 전체 조회
     public Page<Record> findRecords(int page, int size, long memberId, long categoryId) {
         // category 확인을 위한 유저 찾기
-
+        Category category = categoryService.findVerifiedCategory(categoryId);
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("recordDateTime").descending());
 
         if(page < 1) {
@@ -165,10 +170,14 @@ public class RecordService {
         }
         if(categoryId <= 0){
             //특정 회원이 작성한 질문 목록 조회
-            return repository.findAllByMember_MemberId(memberId, pageable);
+           Page<Record> recordPage = repository.findAllByMember_MemberId(memberId, pageable);
+           recordPage.forEach(record -> record.setCategory(category));
+            return recordPage;
         } else{
             // 값이 존재하는 값의 키로 벨류를 조회하여 설정
-            return repository.findAllByMember_MemberIdAndCategory_CategoryId(memberId, categoryId, pageable);
+            Page<Record> recordPage =  repository.findAllByMember_MemberIdAndCategory_CategoryId(memberId, categoryId, pageable);
+            recordPage.forEach(record -> record.setCategory(category));
+            return recordPage;
         }
     }
 
@@ -195,13 +204,16 @@ public class RecordService {
     // weekStart: 한 주의 기록
     public List<Record> getWeeklyRecords(LocalDateTime weekStart, LocalDateTime weekEnd) {
        // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
-        return repository.findByRecordDateTimeBetween(weekStart, weekEnd);
+        List<Record> findRecords = repository.findRegisteredRecordsWithMemberBetween(weekStart, weekEnd, Record.RecordStatus.RECORD_REGISTERED);
+
+//        memberService.validateExistingMember()
+        return findRecords;
     }
 
     // month : 월별 기록
     public List<Record> getMonthlyRecords(LocalDateTime start, LocalDateTime end) {
         // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
-        return repository.findByRecordDateTimeBetween(start, end);
+        return repository.findRegisteredRecordsWithMemberBetween(start, end, Record.RecordStatus.RECORD_REGISTERED);
     }
 
     public List<Record> nonDeletedRecordAndAuth (List<Record> records, CustomPrincipal customPrincipal) {

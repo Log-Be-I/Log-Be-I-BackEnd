@@ -1,9 +1,8 @@
 package com.springboot.report.dto;
 
-import com.springboot.record.entity.Record;
 import lombok.*;
 
-import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -13,9 +12,9 @@ import java.util.List;
 public class ReportAnalysisResponse {
     //content 안에 있는 내용물(JSON)을 담는 그릇
     private Long memberId;
-    private String monthlyReportTitle;
     private String reportTitle;
-    private String content;
+    private String monthlyReportTitle;
+    private Map<String, String> content;
 //    private String summary;          // ✅ 기록한 총 횟수, 많이 한 활동
 //    private String emotionRatio;     // 😊 긍정/중립/부정 비율
 //    private String insight;          // 🧠 자주 쓴 단어, 반복된 키워드
