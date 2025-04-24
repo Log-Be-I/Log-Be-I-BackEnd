@@ -66,9 +66,10 @@ public class Member extends BaseEntity {
     private List<Schedule> schedules = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
+    @JsonManagedReference
     private List<Record> records = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "member")
     @JsonManagedReference
     private List<Report> reports = new ArrayList<>();
 
@@ -106,14 +107,14 @@ public class Member extends BaseEntity {
     }
 
     // record 영속성
-    public void setRecord(Record record){
-        if(record.getMember() != this) {
-            record.setMember(this);
-        }
-        if (!this.records.contains(record)) {
-            records.add(record);
-        }
-    }
+//    public void setRecord(Record record){
+//        if(record.getMember() != this) {
+//            record.setMember(this);
+//        }
+//        if (!this.records.contains(record)) {
+//            records.add(record);
+//        }
+//    }
 
     // category 영속성
     public void setCategory(Category category){

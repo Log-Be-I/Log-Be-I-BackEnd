@@ -3,14 +3,18 @@ package com.springboot.ai.openai.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.springboot.ai.openai.OpenAiProperties;
 import com.springboot.ai.openai.dto.OpenAiMessage;
 import com.springboot.ai.openai.dto.OpenAiRequest;
 import com.springboot.ai.openai.dto.OpenAiResponse;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.entity.Member;
 import com.springboot.record.entity.Record;
 import com.springboot.report.dto.ReportAnalysisRequest;
+import com.springboot.report.dto.ReportAnalysisResponse;
 import com.springboot.report.entity.Report;
 import com.springboot.report.service.ReportService;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +48,8 @@ public class OpenAiService {
 
     //Report 최종 : List<Report> -> ReportService
     public List<Report> createReportsFromAi(List<ReportAnalysisRequest> requests) {
-          return reportService.createReport(requests.stream()
+
+          return reportService.analysisResponseToReportList(requests.stream()
                   .map(request -> generateReportFromAi(request))
                   .collect(Collectors.toList()));
 
@@ -52,9 +57,10 @@ public class OpenAiService {
 
     //Report
     //ReportAnalysisRequest -> JSON 문자열 -> aiRequest -> aiResponse. content -> Report
-    public Report generateReportFromAi(ReportAnalysisRequest request){
+    public ReportAnalysisResponse generateReportFromAi(ReportAnalysisRequest request){
+//        request.getRecords().forEach(record -> record.setMember(new Member()));
         try {
-            String recordJson = serializeRecords(request.getRecords());
+            String recordJson = serializeRecords(request);
             String prompt = reportTypeWeeklyOrMonthly(request, recordJson);
             OpenAiRequest aiRequest = buildChatRequest(prompt);
             OpenAiResponse aiResponse = sendToGpt(aiRequest);
@@ -87,14 +93,17 @@ public class OpenAiService {
     }
 
     //기록 리스트 JSON 문자열로 직렬화 (객체 -> JSON)
-    public String serializeRecords(List<Record> records) throws JsonProcessingException {
+    public String serializeRecords(ReportAnalysisRequest request) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(records);
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return objectMapper.writeValueAsString(request);
     }
 
     // JSON 을 역직렬화 (JSON -> 객체)
-    public Map<String, String> jsonToMap (String json) throws IOException{
+    public Map<String, String> jsonToMap(String json) throws IOException{
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {});
     }
 
@@ -105,7 +114,7 @@ public class OpenAiService {
         if(request.getReportType().equals(Report.ReportType.REPORT_WEEKLY)) {
             return chatWithWeeklyPrompt(recordJson);
         } else if(request.getReportType().equals(Report.ReportType.REPORT_MONTHLY)) {
-            return chatWithMonthlyReport(recordJson);
+            return chatWithMonthlyPrompt(recordJson);
         } else {
             throw new BusinessLogicException(ExceptionCode.INVALID_REPORT_TYPE);
         }
@@ -120,106 +129,277 @@ public class OpenAiService {
     //주간 프롬프트 - Json 문자열을 param으로 받음
     public String chatWithWeeklyPrompt(String recordJson) {
 
-       return   "다음은 사용자의 일상 기록입니다. 이 내용을 분석하여 아래 항목을 각각 한 문단으로 분석해주세요.\n" +
-                "각 항목 앞에는 큰따옴표로 키워드를 붙여주세요.\n" +
-                "너무 긴 문장은 피하고, 적절한 길이(1~2줄)마다 줄바꿈을 넣어주세요.\n" +
-                "출력은 사용자에게 읽기 편하도록 구성해야 하며, 프론트는 이 키워드들을 기준으로 파싱합니다.\n\n" +
-                "출력 형식 예시는 다음과 같습니다:\n\n" +
-                "\"요약\n" +
-                "이번 주에는 산책과 독서 등 다양한 활동이 있었습니다.\n" +
-                "기록은 총 10회였고, 그중 산책이 4회로 가장 많았습니다.\n\n" +
-                "감정\n" +
-                "전반적으로 긍정적인 감정이 많이 드러났습니다.\n" +
-                "특히 사람들과의 만남이 감정을 끌어올리는 데 도움을 주었습니다.\n\n" +
-                "인사이트\n" +
-                "‘산책’, ‘운동’, ‘기분 좋음’이라는 키워드가 반복적으로 등장했습니다.\n" +
-                "기록은 주로 아침 시간대에 집중되어 있습니다.\n\n" +
-                "\"제안 다음 주에는 주말에도 가벼운 활동을 넣어 리듬을 유지해보세요.\"\n\n" +
-                "<사용자 기록>\n" +
-                "---\n" +
-                recordJson + "\n" +
-                "---";
+       return  "다음은 사용자의 한 주간 기록 데이터야. 이를 기반으로 다음 6가지 항목을 분석해야해.\n" +
+               "출력은 사용자가 읽기 편하게 작성하며, 각 문장은 1~2줄마다 줄바꿈을 해야해.\n" +
+               "분석 결과는 Map<String, String> 형태로 저장해줘.\n\n" +
 
+               "[summary]\n" +
+               "6개의 기록 분류(일상, 소비, 할 일, 건강, 메모, 일정) 중에서\n" +
+               "가장 많이 기록된 분류와 총 횟수, 그 안에서 가장 많이 수행된 활동 하나를 알려줘.\n" +
+               "형식: ‘가장 많이 기록된 Category’ [건강], ‘총 횟수’ [25], ‘주요 활동’ [스트레칭]\n\n" +
+
+               "[emotionRatio]\n" +
+               "- 감정 표현은 ‘기쁨, 행복, 쾌활, 편안, 슬픔, 불만, 버럭, 불안’ 중 최소 3개~최대 5개 선택\n" +
+               "- 각 감정은 0~10 점수로 표현\n" +
+               "- 마지막에 긍정/중립/부정 비율을 백분율로 표시 (합계 100%)\n" +
+               "형식 예시:\n" +
+               "‘기쁨’ : 6, ‘불만’ : 4, ‘편안’ : 7\n" +
+               "[긍정 : 60%, 중립 : 30%, 부정 : 10%]\n\n" +
+
+               "[insight]\n" +
+               "- 자주 사용한 단어(1~3개), 반복된 키워드(1~3개) 각각 알려줘\n" +
+               "- 자주 사용한 단어는 일상어 위주로 하되, '오늘', '어제', '내일', '아침', '점심', '저녁' 등\n" +
+               "  날짜나 시간대를 단순히 지칭하는 단어는 제외해줘.\n" +
+               "- 반복된 키워드는 사용자의 행동 습관 또는 관심 주제 중심으로 분석해줘\n" +
+               "형식:\n" +
+               "‘자주 사용한 단어’ : 진짜, 너무, 음\n" +
+               "‘반복된 키워드’ : 저녁 산책, 친구 통화, 출근길 커피\n\n" +
+
+               "[suggestion]\n" +
+               "- 한 달간 리듬이 깨졌던 요일이나 이상 패턴을 분석\n" +
+               "- 다음 달에 도움이 될 제안을 1~2문장 작성\n" +
+               "형식:\n" +
+               "\"수요일 저녁에 집중력이 자주 낮아졌습니다.\n" +
+               "루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때?\"\n\n" +
+
+               "분석 결과는 Map<String, String> 형태로 저장됩니다.\n" +
+               "- 출력은 반드시 JSON만 출력합니다.\n" +
+               "- Map<String, String> 구조이며, 설명/코드블럭/주석 없이 JSON으로만 출력하세요.\n" +
+               "각 항목의 key는 summary, emotionRatio, insight, suggestion, categoryStat, pattern 이며,\n" +
+               "value는 사람이 읽기 좋은 문장입니다.\n" +
+               "출력은 반드시 JSON만 출력하세요. 코드블럭(```json) 없이 JSON만 응답하세요.\n" +
+               "출력 형식 예시는 아래와 같습니다:\n\n" +
+               "{\n" +
+               "  \"summary\": \"...\",\n" +
+               "  \"emotionRatio\": \"...\",\n" +
+               "  \"insight\": \"...\",\n" +
+               "  \"suggestion\": \"...\",\n" +
+               "  \"categoryStat\": \"...\",\n" +
+               "  \"pattern\": \"...\"\n" +
+               "}\n\n" +
+
+               "- 설명하지 마세요.\n" +
+               "- 출력 결과에 ```java 또는 Map 선언 코드도 포함하지 마세요.\n" +
+               "- 결과는 반드시 아래와 같은 JSON 구조로만 응답하세요.\n" +
+
+               "<사용자 기록>\n" +
+               "----\n" +
+               recordJson + "\n" +
+               "----";
     }
 
     //월간 프롬프트
-    public String chatWithMonthlyReport(String recordJson) {
-        return   "다음은 사용자의 한 달간의 일상 기록입니다. 이 내용을 분석하여 아래 항목을 각각 한 문단으로 작성해주세요.\n" +
-                "각 항목 앞에는 큰따옴표로 키워드를 붙여주세요.\n" +
-                "너무 긴 문장은 피하고, 1~2줄마다 줄바꿈을 넣어주세요.\n" +
-                "출력은 사용자에게 읽기 편해야 하며, 프론트에서는 해당 키워드를 기준으로 내용을 파싱합니다.\n\n" +
-                "출력 형식 예시는 다음과 같습니다:\n\n" +
-                "\"요약\n" +
-                "이번 달에는 운동, 독서, 모임 등 다양한 활동이 있었습니다.\n" +
-                "기록은 총 28회였고, 독서가 가장 많이 기록되었습니다.\n\n" +
-                "감정\n" +
-                "긍정적인 감정이 다수를 차지했지만,\n" +
-                "중간에 스트레스를 표현한 날도 일부 있었습니다.\n\n" +
-                "인사이트\n" +
-                "‘일찍 일어남’, ‘운동’, ‘계획 세움’ 같은 단어가 자주 반복되었습니다.\n" +
-                "기록은 주로 오전과 평일에 몰려 있었습니다.\n\n" +
-                "카테고리별 활동\n" +
+     public String chatWithMonthlyPrompt(String recordJson) {
+        return
+                "다음은 사용자의 한 달간 기록 데이터야. 이를 기반으로 다음 6가지 항목을 분석해야해.\n" +
+                "출력은 사용자가 읽기 편하게 작성하며, 각 문장은 1~2줄마다 줄바꿈을 해야해.\n" +
+                "분석 결과는 Map<String, String> 형태로 저장해줘.\n\n" +
+
+                "[summary]\n" +
+                "6개의 기록 분류(일상, 소비, 할 일, 건강, 메모, 일정) 중에서\n" +
+                "가장 많이 기록된 분류와 총 횟수, 그 안에서 가장 많이 수행된 활동 하나를 알려줘.\n" +
+                "형식: ‘가장 많이 기록된 Category’ [건강], ‘총 횟수’ [25], ‘주요 활동’ [스트레칭]\n\n" +
+
+                "[emotionRatio]\n" +
+                "- 감정 표현은 ‘기쁨, 행복, 쾌활, 편안, 슬픔, 불만, 버럭, 불안’ 중 최소 3개~최대 5개 선택\n" +
+                "- 각 감정은 0~10 점수로 표현\n" +
+                "- 마지막에 긍정/중립/부정 비율을 백분율로 표시 (합계 100%)\n" +
+                "형식 예시:\n" +
+                "‘기쁨’ : 6, ‘불만’ : 4, ‘편안’ : 7\n" +
+                "[긍정 : 60%, 중립 : 30%, 부정 : 10%]\n\n" +
+
+                "[insight]\n" +
+                "- 자주 사용한 단어(1~3개), 반복된 키워드(1~3개) 각각 알려줘\n" +
+                "- 자주 사용한 단어는 일상어 위주로 하되, '오늘', '어제', '내일', '아침', '점심', '저녁' 등\n" +
+                "  날짜나 시간대를 단순히 지칭하는 단어는 제외해줘.\n" +
+                "- 반복된 키워드는 사용자의 행동 습관 또는 관심 주제 중심으로 분석해줘\n" +
+                "형식:\n" +
+                "‘자주 사용한 단어’ : 진짜, 너무, 음\n" +
+                "‘반복된 키워드’ : 저녁 산책, 친구 통화, 출근길 커피\n\n" +
+
+                "[suggestion]\n" +
+                "- 한 달간 리듬이 깨졌던 요일이나 이상 패턴을 분석\n" +
+                "- 다음 달에 도움이 될 제안을 1~2문장 작성\n" +
+                "형식:\n" +
+                "\"수요일 저녁에 집중력이 자주 낮아졌습니다.\n" +
+                "루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때?\"\n\n" +
+
+                "[categoryStat]\n" +
+                "- 5개 카테고리(일상, 소비, 할 일, 건강, 메모)별 활동 비율을 백분율로 표현\n" +
+                "- 총합 100%, 해석도 함께 제공\n" +
+                "형식:\n" +
                 "일정 30%, 소비 25%, 건강 20%, 할일 25%로 나타났습니다.\n" +
                 "일정과 소비 항목이 상대적으로 많았습니다.\n\n" +
-                "패턴 분석\n" +
+
+                "[pattern]\n" +
+                "- 활동이 집중된 시간대(예: 오전/오후), 요일별 기록량 패턴을 분석\n" +
+                "- 제안도 함께 작성\n" +
+                "형식:\n" +
                 "기록 시간대는 오전(9~11시)에 집중되었고,\n" +
-                "요일별로는 화요일과 금요일에 활동이 많았습니다.\n\n" +
-                "\"제안 다음 달에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\"\n\n" +
+                "요일별로는 화요일과 금요일에 활동이 많았습니다.\n" +
+                "다음 달에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\n\n" +
+
+                "분석 결과는 Map<String, String> 형태로 저장됩니다.\n" +
+                "각 항목의 key는 summary, emotionRatio, insight, suggestion, categoryStat, pattern 이며,\n" +
+                "value는 사람이 읽기 좋은 문장입니다.\n" +
+                "출력 형식 예시는 아래와 같습니다:\n\n" +
+                "{\n" +
+                "  \"summary\": \"...\",\n" +
+                "  \"emotionRatio\": \"...\",\n" +
+                "  \"insight\": \"...\",\n" +
+                "  \"suggestion\": \"...\",\n" +
+                "  \"categoryStat\": \"...\",\n" +
+                "  \"pattern\": \"...\"\n" +
+                "}\n\n" +
+
                 "<사용자 기록>\n" +
-                "---\n" +
+                "----\n" +
                 recordJson + "\n" +
-                "---";
+                "----";
+
     }
 
     // schedule 과 record 구분
     public String chatWithScheduleAndRecord(String clovaJson) {
-        return "다음 문장을 읽고, \"record\" 또는 \"schedule\" 중 하나로 분류해 주세요.\n" +
-                "그에 따라 정확히 아래 JSON 구조를 사용해서 응답해 주세요.\n" +
-                "각 필드는 Java 서버의 DB 컬럼명과 일치해야 하며,\n" +
-                "\"record\" 타입의 경우 categoryId는 아래 기준에 따라 Long 타입 정수로 설정하세요.\n\n" +
-                "[ categoryId 기준표 ]\n" +
-                "1: 일상 — 일반적인 감정, 경험, 일상의 회고\n" +
-                "2: 소비 — 금전 소비나 지출에 대한 내용\n" +
-                "3: 할 일 — \"정확한 시간 또는 날짜\"와 \"행위\"가 함께 포함된 계획 (예: 내일 책 읽기, 3시에 은행 가기)\n" +
-                "4: 건강 — 운동, 식단, 수면 등 건강 관리 관련\n" +
-                "5: 기타 — 위 분류에 해당하지 않는 경우\n\n" +
-                "다른 카테고리에 속하지 못하고 지출과 관련된 내용이 있다면 소비로 분류한다\n" +
-                "※ record → recordDateTime은 해당 기록이 발생한 시간입니다.\n" +
-                "※ schedule → startDateTime은 사용자가 말한 일정의 시작 날짜 및 시간이며,\n" +
-                "endDateTime은 그 일정의 종료 날짜 및 시간입니다.\n\n" +
-                "날짜와 시간은 ISO 포맷을 사용하여 저장한다\n" +
-                "※ 시작시간만 언급하고 종료시간을 언급하지 않았다면 마지막 시간은 해당 날의 23시59분59초까지로 설정한다.\n" +
-                "※ 오늘, 내일과 같이 시간 내용 없이 특정 날만을 기록한다면 해당 날의 00시00분00초부터 23시:59분:59초로 설정한다.\n" +
-                "※ recordDateTime 기준 미래의 내용이여야만 할 일 또는 schedule로 구분된다.\n" +
-                "※ 소비와 schedule 둘다 성립할때는 할 일 또는 schedule로 구분한다.\n" +
-                "※ 소비로 분류되는 기준은 명확히 지출이 있었는지 샀다, 구매했다, 지출했다 와 같은 단어들을 글을 통해 알 수 있어야한다.\n" +
-                "※ 5번으로 분류되는 기준은 단순 메모와 같은 내용이어야한다. 예를 들면 노란색이 좋아, 준비물: 연필 과 같은 내용들만 5번으로 분류된다\n" +
-                "※ 날짜와 시간 둘다 명시되어있지않지만 미래에 대한 계획 내용이라면 3번으로 분류한다.\n" +
-                "※ 무언가를 한다는 행위 자체 또한 시간 또는 날짜가 포함되어있다면 schedule로 분류한다\n" +
-                "※ 본인이 아니어도 스케쥴의 조건에 부합하는 내용이라면 schedule로 분류한다.\n" +
-                "※ 정확한 날짜와 또는 시간이 명시되어있어도 행위에 대한 내용이 없다면 schedule로 분류하지않는다 \n" +
-                "※ 시간이 명시되어있지않고 주말 이라는 단어로만 명시한다면 일요일로 설정하고 분석한다 \n" +
-                "※ .\n" +
-                "응답 형식은 JSON으로 줘야하며 양식은 아래 중 하나여야 합니다:\n\n" +
-                "절대로 JSON 을 제외한 다른 문장이나 문자, 기호등은 응답데이터에 포함시키지 말아야한다. 설명 또한 금지한다\n\n" +
-                "record:\n" +
+        return "- 너는 다양한 사람들의 일기, 생활 기록, 메모 등을 분석하여 그 내용을 정확히 분류하는 **빅데이터 전문가야**\n" +
+                "- “input text”를 읽고 분석하여 1차 분류 이후, 분류된 항목에 맞는 2차 분류 기준에 따라 최종 분류하여 값을  3차 반환 기준이 안내하는 형태에 맞춰 최종 데이터를 반환한다.\n" +
+                "- base 기준은 모든 분류 기준 및 3차 반환에 적용되며 가장 우선적으로 적용되어야한다.\n" +
+                "- 모든 시간 관련 기록들은 KST 를 기준으로 작성하되 +09:00은 빼고 출력한다.이외에 모든 시간 관련된 데이터를 분석 및 출력하기전에 시간 데이터 분류 기준을 1순위로 참고하여 작성한다.\n" +
+                "- 입력 텍스트는 아래 순서에 따라 판단합니다:\n" +
+                "    1. **할 일 (record, categoryId = 3)**\n" +
+                "    2. **소비 (record, categoryId = 2)**\n" +
+                "    3. **건강 (record, categoryId = 4)**\n" +
+                "    4. **일상 (record, categoryId = 1)**\n" +
+                "    5. **기타 (record, categoryId = 5)**\n" +
+                "---\n" +
+                "**input text :**\n" +
+                "- “사용자가 작성한 글” or “사용자가 말한 음성 데이터를 변환한 text”\n" +
+                "---\n" +
+                "**base 기준 :**\n" +
+                "- 최종 반환 데이터는 JSON 으로 작성하여 반환한다.\n" +
+                "- 1번 및 2번 반환형태 를 JSON으로 변환한 데이터를 제외한 다른 문장, 단어, 등 일체 부가 설명은 응답 데이터에 포함시키않고 출력도 금지한다.\n" +
+                "---\n" +
+                "**1차 분류 :**\n" +
+                "- input text를 읽고  1차 분류 기준에 맞게 “record” 와 “schedule” 중 하나로 구분해야한다.\n" +
+                "- 각 필드는 Java Sever의 DB에 저장된 Colum name 과 동일해야한다.\n" +
+                "---\n" +
+                "**1차 분류 기준 :**\n" +
+                "- 분류 중 “schedule”은 앱 내에 있는 “calendar”에 작성되는 내용으로 명확한 시간/날짜 + 특정 행위/행동 을 포함한 내용만 분류한다. 이외 데이터들은 “record”로 분류하여 “2차 분류_record”에 따라 재분류된다.\n" +
+                "---\n" +
+                "**2차 분류_record :**\n" +
+                "- 2차 분류 기준_record 를 참고하여 제시된 글의 카테고리를 구분해야한다.\n" +
+                "- 문장의 내용이 하나의 카테고리를 특정하여 분류하기 애매하다면 “2차 분류 기준 참고 사항” 을 따른다.\n" +
+                "- categoryId는 아래 기준에 따라 Long 타입 정수로 설정한다.\n" +
+                "- 정확한 날짜/시간이 없더라도 오늘, 내일, 주말, 아침, 저녁, 점심 등 특정 기간 및 시간을 특정할 수 있다면 이는 불명확한 내용이 아니며, 이를 제외한 다른 문장 및 단어를 파악하여 분류하여야한다\n" +
+                "---\n" +
+                "**2차 분류 기준_record :**\n" +
+                "- “일상” 분류 기준\n" +
+                "    - 감정, 경험 일상의 회고 등\n" +
+                "    - 어느 카테고리에도 분류되지 않은 일상 기록으로 판된되는 것들은 일상 카테고리로 분류한다\n" +
+                "    - 일상으로도 분류가 어렵다면 그때 마지막 순위인 기타 카테고리 검증 단계로 넘긴다\n" +
+                "- “소비” 분류 기준\n" +
+                "    - 금전 소비, 지출 관련 내용\n" +
+                "    - 명확한 소비 계획이 입력되더라도 날짜와 시간이 명확한 미래의 계획이라면 “소비”로 분류하지 않는다.\n" +
+                "    - 입력된 시간 기준 과거의 소비 내용만 “소비”카테고리로 분류한다.\n" +
+                "- “할 일” 분류 기준\n" +
+                "    - 불명확한 날짜/시간 + 특정 행위 (예: 내일 책 읽기)\n" +
+                "    - 정확한 시간과 날짜가 없더라도 오늘, 내일, 주말 과 같은 특정 날짜를 지칭하는 단어가 들어가있다면 할 일 카테고리고 구분한다.\n" +
+                "    - ~었어, ~했었어 와 같은 과거형은 할 일 로 구분될 수 없으며 할 일 카테고리를 제외시키고 다시 재분류한다.\n" +
+                "- “건강” 분류 기준\n" +
+                "    - 운동, 식단, 수면 등 건강 관련 내용\n" +
+                "- “기타” 분류 기준\n" +
+                "    - 짧은 메모 불명확한 문장 (예: “노란색이 좋아”)\n" +
+                "    - “기타” 카테고리는 가장 최하단 분류 카테고리이며, 어떠한 카테고리에도 속하지 못하는 데이터는 “기타” 카테고리를 할당한다.\n" +
+                "---\n" +
+                "**2차 분류_schedule :**\n" +
+                "- 2차 분류 기준_schedule 를 참고하여 제시된 글의 시간과 목적을 작성해야한다.\n" +
+                "---\n" +
+                "**2차 분류 기준_schedule:**\n" +
+                "- 명확한 날짜/시간 + 특정 행위 (예: 내일 책 읽기)\n" +
+                "- 시작 날짜/시간 ~ 종료 날짜/시간 + 특정 행위 (예: 내일 책 읽기)\n" +
+                "---\n" +
+                "**2차 분류 기준 참고 사항 :**\n" +
+                "- LocalDateTime.now 한국시간 기준 입력된 지출 내용이 현재 보다 과거의 일이라면 “소비” 카테고리에 분류하고, 현재 또는 미래에 발생할 소비로 판단되면 “schedule”로 분류한다.\n" +
+                "- 날짜/시간이 아닌 “오늘”, “주말” 과 같은 단어들은 “시간 데이터 분류 기준” 항목 기준에 따른다\n" +
+                "---\n" +
+                "**시간 데이터 분류 기준:**\n" +
+                "시간 관련 기준은 모든 시간은 KST 기준 ISO 8601 Local Date-Time 형식 사용하며 한국 시간을 기준으로한다:\n" +
+                "[recordDateTime 설정 기준]\n" +
+                "- 모든 \"record\" 타입 데이터의 \"recordDateTime\"은 문장 내 날짜/시간 표현과 **무관하게**, 반드시 현재 시점(LocalDateTime.now())을 기준으로 작성해야 한다.\n" +
+                "- 예: \"저번달에 뭐 샀다\", \"오늘 뭐 했다\" 같은 문장이더라도 **항상 현재 시점 (LocalDateTime.now())을 기준으로, 한국 시간(KST) 기준 ISO 8601 포맷(yyyy-MM-ddTHH:mm:ss) 값**을 \\\"recordDateTime\\\"에 설정해야 한다.\\n" +
+                "- 절대로 문장 내 날짜(예: 3월 7일)를 기준으로 \"recordDateTime\"을 역산하지 않는다.\n" +
+                "---\n" +
+                "- \"schedule\"의 \"startDateTime\"과 \"endDateTime\"은 사용자의 발화에서 유추된 일정의 시간입니다.\n" +
+                "- \"오늘\" → 당일 00:00:00 ~ 23:59:59 설정\n" +
+                "- \"어제\" → 현재 시간 기준 -1일 00:00:00 ~ 23:59:59 설정\n" +
+                "- \"그제\", \"그저께\" → 현재 시간 기준 -2일 00:00:00 ~ 23:59:59 설정\n" +
+                "- \"내일\" → 현재 시간 기준 +1일 00:00:00 ~ 23:59:59 설정\n" +
+                "- \"모레\" → 현재 시간 기준 +2일 00:00:00 ~ 23:59:59 설정\n" +
+                "- \"글피\" → 현재 시간 기준 +3일 00:00:00 ~ 23:59:59 설정\n" +
+                "- \"내후일\" → 현재 시간 기준 +4일 00:00:00 ~ 23:59:59 설정\n" +
+                "- \"이번주\" → 현재 날짜가 포함된 주의 월요일 00:00:00 ~ 일요일 23:59:59 설정\n" +
+                "- \"다음주\" → 현재 날짜 기준 다음 주 월요일 00:00:00 ~ 일요일 23:59:59 설정\n" +
+                "- \"다다음주\" → 현재 날짜 기준 다다음 주 월요일 00:00:00 ~ 일요일 23:59:59 설정\n" +
+                "- \"이번달\" → 현재 날짜가 포함된 월의 1일 00:00:00 ~ 말일 23:59:59 설정\n" +
+                "- \"다음달\" → 현재 날짜 기준 다음 달 1일 00:00:00 ~ 말일 23:59:59 설정\n" +
+                "- \"주말\" → 가장 가까운 토요일 00:00:00 ~ 일요일 23:59:59 설정\n" +
+                "- \"저번달\", \"지난달\" → 현재 날짜 기준 -1개월 1일 00:00:00 ~ 말일 23:59:59 설정\n" +
+                "- \"저번주\", \"지난주\", \"전 주\" → 현재 날짜 기준 -1주 월요일 00:00:00 ~ 일요일 23:59:59 설정\n" +
+                "- \"금일\" → 현재 날짜 00:00:00 ~ 23:59:59 설정 (오늘과 동일)\n" +
+                "- \"익일\", \"차일\", \"명일\" → 현재 날짜 기준 +1일 00:00:00 ~ 23:59:59 설정 (내일과 동일)\n" +
+                "- \"작일\" → 현재 날짜 기준 -1일 00:00:00 ~ 23:59:59 설정 (어제와 동일)\n" +
+                "- 종료 시간이 언급되지 않으면 해당 날짜의 23:59:59로 자동 설정\n" +
+                "- 정확한 시간은 반드시 ISO 8601 포맷(`yyyy-MM-ddTHH:mm:ss`)으로 변환\n" +
+                "---\n" +
+                "**3차 반환 :**\n" +
+                "- 최종 데이터 반환으로 “3차 반환 기준”의 내용을 준수하며 응답데이터를 반환한다\n" +
+                "\n" +
+                "**3차 반환 기준 :**\n" +
+                "- 데이터의 반환 형태는 JSON 형태로 줘야하며, JSON 데이터 이외에 다른 설명 및 문장들은 응답 데이터에 포함시키지 않는다.\n" +
+                "- 만약 2차 분류 기준을 “record” 기준에 따랐다면 1번의 형태로 반환되며, “schedule” 기준에 따랐다면 2번의 형태로 반환된다.\n" +
+                "- 입력되는 텍스트는 한국어로 입력되며 분석 결과는 반드시 JSON 형식으로만 출력되어야 한다.\n" +
+                "---\n" +
+                "1번 반환 형태_”record”:\n" +
+                "- 각 컬럼에 작성될 데이터의 기준은 “1번 반환 형태 기준” 을 참고하여 아래의 예시 형태처럼 작성되어야 한다.\n" +
                 "{\n" +
                 "  \"type\": \"record\",\n" +
                 "  \"content\": \"텍스트 내용\",\n" +
-                "  \"recordDateTime\": \"2025-04-22T10:30:00\",\n" +
+                "  \"recordDateTime\": \"2025-04-22T14:00:00\",\n" +
                 "  \"categoryId\": 1\n" +
-                "}\n\n" +
-                "schedule:\n" +
+                "}\n" +
+                "---\n" +
+                "1번 반환 형태 기준:\n" +
+                "- \"type\" ⇒ 2차 분류기준 “record”로 분류되었다면 “record”로 작성된다\n" +
+                "- \"content\" ⇒ 입력된 텍스트 본문이 입력되어야 한다\n" +
+                "- \"recordDateTime\" ⇒  LocalDateTime.now() 로 적용한다 이때 시간은 한국시간 기준으로 작성되어야 한다.\n" +
+                "- \"categoryId\" ⇒ 아래에 정리된 categoryId를 참고하여 분류된 카테고리의 id 값을 Long 타입 숫자로 작성해준다.\n" +
+                "    - “일상” categoryId = 1\n" +
+                "    - “소비” categoryId = 2\n" +
+                "    - “할 일” categoryId = 3\n" +
+                "    - “건강” categoryId = 4\n" +
+                "    - “기타” categoryId = 5\n" +
+                "---\n" +
+                "2번 반환 형태_”schedule”:\n" +
+                "- 각 컬럼에 작성될 데이터의 기준은 “2번 반환 형태 기준” 을 참고하여 아래의 예시 형태처럼 작성되어야 한다.\n" +
                 "{\n" +
                 "  \"type\": \"schedule\",\n" +
-                "  \"title\": \"회의\",\n" +
+                "  \"title\": \"텍스트 내용\",\n" +
                 "  \"startDateTime\": \"2025-04-22T14:00:00\",\n" +
-                "  \"endDateTime\": \"2025-04-22T15:00:00\"\n" +
-                "}\n\n" +
-                "사용자 입력:\n" +
+                "  \"endDateTime\": \"2025-04-22T14:00:00\"\n" +
+                "}\n" +
+                "---\n" +
+                "2번 반환 형태 기준:\n" +
+                "- \"type\" ⇒ 2차 분류기준 “schedule”로 분류되었다면 “schedule”로 작성된다\n" +
+                "- \"title\" ⇒ 입력된 텍스트 본문이 입력되어야 한다\n" +
+                "- \"startDateTime\" ⇒ 입력된 행위/행동의 시작 날짜/시간을 한국시간 기준으로 입력한다.\n" +
+                "- \"endDateTime\" ⇒ 입력된 행위/행동의 종료 날짜/시간을 한국시간 기준으로 입력한다.\n" +
+                "- \"startDateTime\" 과 \"endDateTime\"의 형태는 ISO 8601 Local Date-Time 형식으로 작성되어야 한다.\n" +
+
+                "input text:\n" +
                 "---\n" +
                 clovaJson + "\n" +
                 "---";
+
     }
 
 //    GPT 서버에 요청보내기 (ChatRequest 생성)
@@ -257,8 +437,6 @@ public class OpenAiService {
             //JSON 문자열을 ChatResponse 객체로 역직렬화
             return objectMapper.readValue(json, OpenAiResponse.class);
         }
-
-
     }
 
     //content만 꺼내서 파싱

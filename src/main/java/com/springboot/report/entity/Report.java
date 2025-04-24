@@ -1,5 +1,6 @@
 package com.springboot.report.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;
 import com.springboot.utils.ContentMapConverter;
@@ -45,6 +46,7 @@ public class Report extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "member_id")
+    @JsonBackReference
     private Member member;
 
     public enum ReportType {

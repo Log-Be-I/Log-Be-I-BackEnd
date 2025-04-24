@@ -1,5 +1,6 @@
 package com.springboot.report.mapper;
 
+import com.springboot.member.entity.Member;
 import com.springboot.report.dto.ReportAnalysisResponse;
 
 import com.springboot.report.dto.ReportDto;
@@ -13,22 +14,6 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface ReportMapper {
 
-
-    //ai 응답 -> Report
-//    default List<Report> analysisResponseToEntityList(List<Report> reports) {
-//        return responses.stream()
-//                .map(response -> {
-//                    Report report = new Report();
-//                    report.getMember().setMemberId(response.getMemberId());
-//                    report.setMonthlyTitle(response.getMonthlyReportTitle());
-//                    report.setTitle(response.getReportTitle());
-//                    report.setContent(response.getContent());
-//                    report.setReportType(Report.ReportType.REPORT_WEEKLY); // or MONTHLY, 타입 필요 시 response에 추가
-//                    report.setPeriodNumber(0);
-//                    return report;
-//                })
-//                .collect(Collectors.toList());
-//    }
 
     //Report 전체 목록 조회
     default List<ReportDto.summaryResponse> reportTosummaryResponse (List<Report> reports){
@@ -49,9 +34,22 @@ public interface ReportMapper {
 
 
     //Report 상세 그룹조회
-    List<ReportDto.Response> reportsToReportsResponseDtos (List<Report> reports);
+    default List<ReportDto.Response> reportsToReportsResponseDtos (List<Report> reports){
+        return reports.stream().map(
+                report-> reportToReportResponseDto(report))
+                .collect(Collectors.toList());
+    }
 
 
-    ReportDto.Response reportToReportResponseDto(Report report);
+    default ReportDto.Response reportToReportResponseDto(Report report){
+        return new ReportDto.Response(
+                report.getReportId(),
+                report.getMonthlyTitle(),
+                report.getTitle(),
+                report.getContent(),
+                report.getReportType(),
+                report.getPeriodNumber()
+        );
+    }
 
 }

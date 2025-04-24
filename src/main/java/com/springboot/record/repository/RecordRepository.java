@@ -20,7 +20,13 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     Page<Record> findAllByMember_MemberId(Long memberId, Pageable pageable);
     //지정한 두 날짜(시각) 사이에 있는 Record 엔티티들을 모두 조회하는 역할
     //start 이상 end 이하인 기록 데이터를 가져온다.
-    List<Record> findByRecordDateTimeBetween(LocalDateTime start, LocalDateTime end);
+//    List<Record> findByRecordDateTimeBetween(LocalDateTime start, LocalDateTime end);
+//    @Query("SELECT r FROM Record r JOIN FETCH r.member WHERE r.recordDateTime BETWEEN :start AND :end")
+//    List<Record> findWithMemberByRecordDateTimeBetween(LocalDateTime start, LocalDateTime end);
+    @Query("SELECT r FROM Record r JOIN FETCH r.member WHERE r.recordDateTime BETWEEN :start AND :end AND r.recordStatus = :status")
+    List<Record> findRegisteredRecordsWithMemberBetween(LocalDateTime start, LocalDateTime end, Record.RecordStatus status);
+
 
     Page<Record> findAllByMember_MemberIdAndCategory_CategoryId(Long memberId, Long categoryId, Pageable pageable);
+
 }

@@ -4,8 +4,10 @@ import com.springboot.ai.googleTTS.GoogleTextToSpeechService;
 import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.member.entity.Member;
+import com.springboot.member.repository.MemberRepository;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.Record;
+import com.springboot.record.service.RecordService;
 import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.report.entity.Report;
 import com.springboot.report.mapper.ReportMapper;
@@ -23,7 +25,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,13 +44,24 @@ public class ReportController {
 
     private final ReportService reportService;
     private final ReportMapper mapper;
+    private final MemberService memberService;
     //postman Test 진행
     private final OpenAiService openAiService;
+    private final RecordService recordService;
     //test
     @PostMapping("/test")
-    public ResponseEntity testGenerateReports(@RequestBody List<Record> requests) {
+    public ResponseEntity testGenerateReports() {
 
-        List<ReportAnalysisRequest> weeklies = ReportUtil.createWeeklyReportRequests(requests);
+        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks(1).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+//        Member findMember = memberService.validateExistingMember(customPrincipal.getMemberId());
+        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+
+        List<ReportAnalysisRequest> weeklies = ReportUtil.createWeeklyReportRequests(weeklyRecords);
         // GPT 분석 → Report 생성 -> DB 저장
         List<Report> reports = openAiService.createReportsFromAi(weeklies);
 
