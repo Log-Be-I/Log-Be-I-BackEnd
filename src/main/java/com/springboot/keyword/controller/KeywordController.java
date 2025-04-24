@@ -82,14 +82,12 @@ public class KeywordController {
     public ResponseEntity getKeyword(@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) throws IOException {
 
         List<Keyword> keywordList = keywordService.getKeywords(customPrincipal);
-        System.out.println("조회된 키워드 수: " + keywordList.size());
         List<Map<String, Object>> response = new ArrayList<>();
 
         for (Keyword keyword : keywordList) {
             String newsJson = naverNewsApiService.searchNews(keyword.getName());
-            System.out.println("[" + keyword.getName() + "] 뉴스 JSON: " + newsJson);
+            // JSON 문자열을 리스트로 파싱
             List<Map<String, String>> newsList = new Gson().fromJson(newsJson, List.class);
-            System.out.println("[" + keyword.getName() + "] 파싱된 뉴스 리스트: " + newsList);
 
             Map<String, Object> keywordWithNews = new HashMap<>();
             keywordWithNews.put("keyword", keyword.getName());
@@ -97,10 +95,6 @@ public class KeywordController {
 
             response.add(keywordWithNews);
         }
-
-//        return new ResponseEntity<>(
-//                new ListResponseDto<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList)), HttpStatus.OK);
-//    }
         System.out.println("최종 Response 데이터: " + response);
         return new ResponseEntity<>(new ListResponseDto<>(response), HttpStatus.OK);
     }

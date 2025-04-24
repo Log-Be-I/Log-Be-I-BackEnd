@@ -2,6 +2,7 @@ package com.springboot.keyword.API;
 
 import com.google.gson.*;
 import okhttp3.*;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,11 @@ public class NaverNewsApiService {
     private String clientSecret;
 
     private final String apiUrl = "https://openapi.naver.com/v1/search/news.json";
+
+    private String cleanText(String text) {
+        String noHtml = text.replaceAll("<[^>]*>", "");
+        return StringEscapeUtils.unescapeHtml4(noHtml);
+    }
 
     public String searchNews(String keyword) throws IOException {
         OkHttpClient client = new OkHttpClient();
@@ -51,8 +57,8 @@ public class NaverNewsApiService {
         for (JsonElement item : items) {
             JsonObject obj = item.getAsJsonObject();
             Map<String, String> newsItem = new HashMap<>();
-            newsItem.put("title", removeHtmlTags(obj.get("title").getAsString()));
-            newsItem.put("description", obj.get("description").getAsString());
+            newsItem.put("title", cleanText(obj.get("title").getAsString()));
+            newsItem.put("description", cleanText(obj.get("description").getAsString()));
             newsItem.put("link", obj.get("link").getAsString());
             newsItem.put("pubDate", obj.get("pubDate").getAsString());
             result.add(newsItem);
@@ -61,9 +67,5 @@ public class NaverNewsApiService {
         return new Gson().toJson(result);
     }
 
-    // ✅ HTML 태그 제거 메서드 추가
-    private String removeHtmlTags(String input) {
-        return input.replaceAll("<[^>]*>", "");
-    }
 }
 // 조회된 API 주소를 log 찍자.
