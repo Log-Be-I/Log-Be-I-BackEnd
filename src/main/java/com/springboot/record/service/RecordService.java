@@ -1,15 +1,23 @@
 package com.springboot.record.service;
 
+import com.springboot.ai.clova.ClovaSpeechService;
+import com.springboot.ai.openai.service.OpenAiService;
+import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.category.service.CategoryService;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.googleCalendar.dto.GoogleEventDto;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.HistoricalRecord;
 import com.springboot.record.entity.Record;
 import com.springboot.record.repository.HistoricalRecordRepository;
 import com.springboot.record.repository.RecordRepository;
+import com.springboot.schedule.entity.Schedule;
+import com.springboot.schedule.repository.ScheduleRepository;
 import com.springboot.utils.AuthorizationUtils;
+import com.springboot.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +25,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -28,7 +38,47 @@ public class RecordService {
     private final RecordRepository repository;
     private final HistoricalRecordRepository historicalRecordRepository;
     private final MemberService memberService;
+    private final OpenAiService openAiService;
+    private final ScheduleRepository scheduleRepository;
     private final CategoryService categoryService;
+
+    @Value("${clova.api.key}")
+    private String API_KEY;
+    @Value("${clova.api.id}")
+    private String CLIENT_ID;
+
+
+    public Object saveByType (Map<String, String> data, CustomPrincipal customPrincipal) {
+
+        // type 뽑기
+        if(data.get("type").equals("schedule")) {
+            // 스케쥴 레포 save 로직
+            // 스케쥴 객체 생성
+            Schedule schedule = new Schedule();
+            schedule.setTitle(data.get("title"));
+            schedule.setStartDateTime(data.get("startDateTime"));
+            schedule.setEndDateTime(data.get("endDateTime"));
+
+            GoogleEventDto googleEventDto = new GoogleEventDto();
+            googleEventDto.setStartDateTime(schedule.getStartDateTime());
+            googleEventDto.setEndDateTime(schedule.getEndDateTime());
+            googleEventDto.setSummary(schedule.getTitle());
+            googleEventDto.setCalendarId(customPrincipal.getEmail());
+            // 스케쥴 저장
+            scheduleRepository.save(schedule);
+            // 스케쥴 객체 리턴
+            return schedule;
+        } else if (data.get("type").equals("record")) {
+            // record 레포 save 로직
+            Record record = new Record();
+            record.setContent(data.get("content"));
+            record.setRecordDateTime(DateUtil.parseToLocalDateTime(data.get("recordDateTime")));
+            record.setCategory(categoryService.findCategory(Long.parseLong(data.get("categoryId")), customPrincipal.getMemberId()));
+            return record;
+        } else {
+            throw new BusinessLogicException(ExceptionCode.GPT_FAILED);
+        }
+    }
 
 
     public Record createRecord(Record record, long memberId){
@@ -135,5 +185,38 @@ public class RecordService {
         return repository.findByRecordDateTimeBetween(start, end);
     }
 
+    // Json 으로 schedule 과 record 구분하여 저장
+    public void voiceTextTo(String result) throws IOException {
+        // 결과 값을 JSON 으로 변경
+        String prompt = openAiService.chatWithScheduleAndRecord(result);
+
+        // prompt 넣어주기
+        String json = openAiService.sendRecord(prompt);
+
+        // json 역직렬화
+        Map<String, String> response = openAiService.jsonToString(json);
+
+        // type 뽑기
+        if(response.get("type").equals("schedule")) {
+            // 스케쥴 레포 save 로직
+        } else if(response.get("type").equals("record")) {
+            // record 레포 save 로직
+        }
+    }
+
+    // 타입이 뭐든 일단 받아서 분기 처리
+    public void handleResponse(Object response) {
+        // response 타입이 Schedule 이라면
+        if (response instanceof Schedule) {
+            Schedule schedule = (Schedule) response;
+            // Schedule 에 저장
+
+
+            // 만약 Record 타입이라면
+        } else if (response instanceof Record) {
+            Record record = (Record) response;
+            repository.save(record);
+        }
+    }
 
 }

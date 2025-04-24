@@ -35,7 +35,6 @@ public class Record extends BaseEntity {
     private RecordStatus recordStatus = RecordStatus.RECORD_REGISTERED;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne

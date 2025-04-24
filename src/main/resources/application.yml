@@ -62,7 +62,6 @@ springdoc:
   auto-tag-classes: true #오토 태그 기능 활성화
   groups:
     enabled: false #api 그룹 기능, default는 true 이나 당장 사용하지 않기에 false 로 지정
-
   swagger-ui:
 #    tryItOutEnabled: true
     operationsSorter: method #method 기준으로 정렬, 그외 alpha 로 정렬 가능
@@ -74,6 +73,9 @@ clova:
   api:
     key: ${CLOVA_API_SECRET}
     id: ${CLOVA_CLIENT_ID}
+google:
+  api:
+    key: ${GOOGLE_APPLICATION_CREDENTIALS}
 openai:
   api-key: ${OPENAI_API_KEY}
   base-url: https://api.openai.com/v1/chat/completions

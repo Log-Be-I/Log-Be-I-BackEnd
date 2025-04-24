@@ -4,8 +4,10 @@ import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.record.entity.Record;
 import com.springboot.record.service.RecordService;
 import com.springboot.report.dto.ReportAnalysisRequest;
+import com.springboot.report.entity.Report;
 import com.springboot.report.service.ReportService;
 import com.springboot.utils.ReportUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,13 +16,15 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Component
+@RequiredArgsConstructor
 public class ReportScheduler {
-    private ReportService reportService;
-    private RecordService recordService;
-    private OpenAiService openAiService;
+    private final ReportService reportService;
+    private final RecordService recordService;
+    private final OpenAiService openAiService;
 
 
     //매주 월요일 07:00에 실행
@@ -37,15 +41,15 @@ public class ReportScheduler {
 
         //분석 조건 : 기록이 10개 이상일 때만 실행
         if (weeklyRecords.size() >= 10) {
-//            Map<String, List<Record>> weeklyTitleRecords = ReportUtil.groupRecordsByWeek(weeklyRecords);
-            List<ReportAnalysisRequest> weekly = ReportUtil.createWeeklyReportRequests(weeklyRecords);
+            //Map<String, List<Record>> weeklyTitleRecords = ReportUtil.groupRecordsByWeek(weeklyRecords);
+            List<ReportAnalysisRequest> weeklies = ReportUtil.createWeeklyReportRequests(weeklyRecords);
             //ai에 해당 데이터 전달
-           openAiService.sendWeeklyReport(weekly);
+            openAiService.createReportsFromAi(weeklies);
         }
 
     }
 
-    @Scheduled(cron = "0 0 0 1 * *")
+    @Scheduled(cron = "0 0 6 1 * *")
     public void sendMonthlyRecordsToAi() throws IOException {
 
         YearMonth lastMonth = YearMonth.now().minusMonths(1);
@@ -54,17 +58,16 @@ public class ReportScheduler {
         //전 달 말일 23:59:59
         LocalDateTime monthEnd = lastMonth.atEndOfMonth().atTime(23, 59, 59);
 
-        //월간분석 조건 검증 : 주간 분석 개수가 2개 이상인 경우에만 월간분석이 가능하다.
+        // 월간분석 조건 검증 : 주간 분석 개수가 2개 이상인 경우에만 월간분석이 가능하다.
         int weeklyReportCount = reportService.getWeeklyReportCount(lastMonth);
         // 2. 주간 분석이 2개 이상이면 월간 분석 진행
         if (weeklyReportCount >= 2) {
             //월간 데이터 준비 및 AI에 전달
             List<Record> monthlyRecords = recordService.getMonthlyRecords(monthStart, monthEnd);
-//            Map<String, List<Record>> monthlyTitleRecords = ReportUtil.groupRecordsByYearMonthWeek(monthlyRecords);
-            List<ReportAnalysisRequest> monthly = ReportUtil.createMonthlyReportRequests(monthlyRecords);
-
+            // Map<String, List<Record>> monthlyTitleRecords = ReportUtil.groupRecordsByYearMonthWeek(monthlyRecords);
+            List<ReportAnalysisRequest> monthlies = ReportUtil.createMonthlyReportRequests(monthlyRecords);
             //ai에 해당 데이터 전달
-            openAiService.sendMonthlyReport(monthly);
+            openAiService.createReportsFromAi(monthlies);
         }
 
 

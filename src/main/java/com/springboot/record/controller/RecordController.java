@@ -1,13 +1,18 @@
 package com.springboot.record.controller;
 
 import com.springboot.ai.clova.ClovaSpeechService;
+import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
+import com.springboot.exception.BusinessLogicException;
+import com.springboot.exception.ExceptionCode;
 import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.Record;
 import com.springboot.record.mapper.RecordMapper;
 import com.springboot.record.service.RecordService;
 import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
+import com.springboot.schedule.entity.Schedule;
+import com.springboot.schedule.mapper.ScheduleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -37,27 +43,30 @@ public class RecordController {
     private final RecordService recordService;
     private final RecordMapper mapper;
     private final ClovaSpeechService clovaSpeechService;
+    private final OpenAiService openAiService;
+    private final ScheduleMapper scheduleMapper;
 
-    @Value("${clova.api.key}")
-    private String API_KEY;
-    @Value("${clova.api.id}")
-    private String CLIENT_ID;
 
     @PostMapping("/audio-records")
-    public ResponseEntity<String> uploadAndRecognize(@RequestParam("audio") MultipartFile audioFile) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    public ResponseEntity uploadAndRecognize(@RequestParam("audio") MultipartFile audioFile,
+                                             @AuthenticationPrincipal CustomPrincipal customPrincipal) throws IOException {
 
-        headers.set("X-NCP-APIGW-API-KEY-ID", CLIENT_ID);  // 네이버 콘솔 Client ID
-        headers.set("X-NCP-APIGW-API-KEY", API_KEY);       // 네이버 콘솔 Secret Key
-        File tempFile = File.createTempFile("clova_", ".m4a");
-        audioFile.transferTo(tempFile);
+        //사용자 입력 음성 -> text -> Map<String, String> 타입 변환
+        Map<String, String> result = openAiService.createRecordOrSchedule( clovaSpeechService.voiceToText(audioFile));
+        Object response = recordService.saveByType(result, customPrincipal);
 
-        String result = clovaSpeechService.recognizeSpeech(tempFile);
-        tempFile.delete();
+        // response 타입이 Schedule 이라면
+        if (response instanceof Schedule) {
+            Schedule schedule = (Schedule) response;
 
-        return ResponseEntity.ok(result);
+            return ResponseEntity.ok( scheduleMapper.scheduleToscheduleResponseDto(schedule));
+            // 만약 Record 타입이라면
+        } else if (response instanceof Record) {
+            Record record = (Record) response;
+            return ResponseEntity.ok(mapper.recordToRecordResponse(record));
+        } else {
+            throw new BusinessLogicException(ExceptionCode.GPT_FAILED);
+        }
     }
 
     @PostMapping("/text-records")

@@ -49,15 +49,6 @@ public class ScheduleController {
     private final GoogleCalendarService googleCalendarService;
     private final GoogleEventMapper googleEventMapper;
 
-    // 일정 등록 - 음성
-    @PostMapping("/audio-schedules")
-    public ResponseEntity postAudioSchedule(@Valid @RequestBody SchedulePostDto schedulePostDto,
-                                            @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-
-
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
     //swagger API - 등록
     @Operation(summary = "일정 수동 등록", description = "일정을 수동 등록합니다")
     @ApiResponses(value = {
@@ -170,6 +161,7 @@ public class ScheduleController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
     })
+
     // 일정 전체 조회 (월 기준 조회)
     @GetMapping("/schedules")
     public ResponseEntity getSchedules(@Parameter(description = "조회할 연도", example = "2025")
@@ -182,6 +174,29 @@ public class ScheduleController {
     List<ScheduleResponseDto> scheduleResponseDtoList = scheduleMapper.schedulesToScheduleResponseDtos(syncedSchedules);
     return new ResponseEntity<>(scheduleResponseDtoList, HttpStatus.OK);
 }
+
+    //swagger API - 삭제
+    @Operation(summary = "일정 삭제", description = "일정을 삭제합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "일정이 삭제되었습니다."),
+            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
+    })
+
+    // 일정 하루 일정 조회
+    @GetMapping("/main")
+    public ResponseEntity getSchedule(@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) throws GeneralSecurityException, IOException {
+
+//        int year = LocalDateTime.now().getYear();
+//        int month = LocalDateTime.now().getMonth().getValue();
+        int year = 0;
+        int month = 0;
+
+        List<Schedule> syncedSchedules = googleCalendarService.syncSchedulesWithGoogleCalendar(year, month, customPrincipal);
+        List<ScheduleResponseDto> scheduleResponseDtoList = scheduleMapper.schedulesToScheduleResponseDtos(syncedSchedules);
+        return new ResponseEntity<>(scheduleResponseDtoList, HttpStatus.OK);
+    }
 
     //swagger API - 삭제
     @Operation(summary = "일정 삭제", description = "일정을 삭제합니다")
