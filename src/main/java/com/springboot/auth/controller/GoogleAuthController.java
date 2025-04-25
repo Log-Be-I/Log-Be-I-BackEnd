@@ -73,7 +73,35 @@ public class GoogleAuthController {
                         "user", userInfo
                 ));
             }
-        } catch (HttpClientErrorException e){
+        } catch (HttpClientErrorException e) {
+            System.out.println("💥 Google Token 요청 실패");
+            System.out.println("🔸 상태 코드: " + e.getStatusCode());
+            System.out.println("🔸 응답 본문: " + e.getResponseBodyAsString());
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("구글 인증 실패 : " + e.getMessage());
+        }
+    }
+
+    //test용 controller method
+    @PostMapping("/test")
+    public ResponseEntity<?> testLogin() {
+        GoogleInfoDto testUser = new GoogleInfoDto("taekho1225@gmail.com", "남택호");
+        try {
+
+            // 3. DB에 유저 존재 여부 확인
+            Member member = memberService.findMemberByEmail(testUser.getEmail());
+
+            Map<String, String> tokens = googleOAuthService.processUserLogin(testUser, member.getRefreshToken());
+
+            MemberResponseDto memberResponseDto = memberMapper.memberToMemberResponseDto(member);
+
+            return ResponseEntity.ok(Map.of(
+                    "status", "login",
+                    "token", tokens.get("accessToken"),
+                    "user", memberResponseDto
+            ));
+
+        } catch (HttpClientErrorException e) {
             System.out.println("💥 Google Token 요청 실패");
             System.out.println("🔸 상태 코드: " + e.getStatusCode());
             System.out.println("🔸 응답 본문: " + e.getResponseBodyAsString());
