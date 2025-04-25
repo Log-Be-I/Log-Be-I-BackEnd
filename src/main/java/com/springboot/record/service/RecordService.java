@@ -178,7 +178,7 @@ public class RecordService {
         }
 
 
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.ASC));
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.ASC, "recordDateTime"));
 
         if(categoryName.equals("전체")){
             return repository.findAllByMember_MemberIdAndRecordDateTimeBetween(memberId, startDate, endDate, pageable);
