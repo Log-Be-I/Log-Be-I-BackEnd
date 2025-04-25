@@ -19,7 +19,7 @@ public class ReportUtil {
      * @return 1~5 (1주차~5주차)
      */
     public static int getWeekOfMonth(LocalDateTime dateTime) {
-      //항상 월요일 시작으로 고정
+        //항상 월요일 시작으로 고정
         return dateTime.toLocalDate().get(WeekFields.of(DayOfWeek.MONDAY, 1).weekOfMonth());
     }
 
@@ -102,7 +102,7 @@ public class ReportUtil {
 //        //records순회하면서
 //        for (Record record : records) {
 //            if(record.getMember().getMemberId() != null) {
-////                Long memberId = record.getMember().getMemberId();
+    ////                Long memberId = record.getMember().getMemberId();
 //                String reportTitle = getWeeklyReportTitle(record.getRecordDateTime());
 //                String monthlyReportTitle = getMonthlyReportTitle(record.getRecordDateTime());
 //
@@ -170,8 +170,8 @@ public class ReportUtil {
 
     //List<Record> -> List<RecordForAnalysisDto>
     public static List<RecordForAnalysisDto> recordsToRecordsForAnalysisDto (List<Record> records) {
-       return records.stream().map(
-               record -> recordToRecordForAnalysisDto(record)).collect(Collectors.toList());
+        return records.stream().map(
+                record -> recordToRecordForAnalysisDto(record)).collect(Collectors.toList());
     }
 
     public static RecordForAnalysisDto recordToRecordForAnalysisDto(Record record) {
