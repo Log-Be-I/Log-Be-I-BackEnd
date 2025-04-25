@@ -35,6 +35,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -133,9 +135,14 @@ public class OpenAiService {
     //audio-Record 최종
     // 문장을 우리가 원하는 key value 형태로 변환
     public Map<String, String> createRecordOrSchedule(String text) throws IOException {
-
+        // 한국 시간대 기준으로 현재 시간 가져오기
+        ZoneId seoulZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime nowKST = LocalDateTime.now(seoulZone);  // ← 이렇게 해야 정확히 KST
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> map = mapper.readValue(text, new TypeReference<>() {});
+        String value = map.get("text");
         // 사용자 입력 text -> JSON 으로 변경
-        String prompt = chatWithScheduleAndRecord(text);
+        String prompt = chatWithScheduleAndRecord(value, nowKST.toString());
         // GPT 요청 객체 생성
         OpenAiRequest chatRequest = buildChatRequest(prompt);
         // 실제 GPT 서버에 요청 보내고 응답 받기
@@ -157,6 +164,10 @@ public class OpenAiService {
 
     // JSON 을 역직렬화 (JSON -> 객체)
     public Map<String, String> jsonToMap(String json) throws IOException{
+        // 마크다운 코드 블럭 제거
+        if (json.startsWith("```")) {
+            json = json.replaceAll("```json", "").replaceAll("```", "").trim();
+        }
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         //줄바꿈 문자(CTRL 문자) 허용 설정
@@ -367,7 +378,7 @@ public class OpenAiService {
     }
 
     // schedule 과 record 구분
-    public String chatWithScheduleAndRecord(String clovaJson) {
+    public String chatWithScheduleAndRecord(String clovaJson, String time) {
         return "- 너는 다양한 사람들의 일기, 생활 기록, 메모 등을 분석하여 그 내용을 정확히 분류하는 **빅데이터 전문가야**\n" +
                 "- “input text”를 읽고 분석하여 1차 분류 이후, 분류된 항목에 맞는 2차 분류 기준에 따라 최종 분류하여 값을  3차 반환 기준이 안내하는 형태에 맞춰 최종 데이터를 반환한다.\n" +
                 "- base 기준은 모든 분류 기준 및 3차 반환에 적용되며 가장 우선적으로 적용되어야한다.\n" +
@@ -380,7 +391,8 @@ public class OpenAiService {
                 "    5. **기타 (record, categoryId = 5)**\n" +
                 "---\n" +
                 "**input text :**\n" +
-                "- “사용자가 작성한 글” or “사용자가 말한 음성 데이터를 변환한 text”\n" +
+                "---\n" +
+                clovaJson + "\n" +
                 "---\n" +
                 "**base 기준 :**\n" +
                 "- 최종 반환 데이터는 JSON 으로 작성하여 반환한다.\n" +
@@ -435,6 +447,8 @@ public class OpenAiService {
                 "- 모든 \"record\" 타입 데이터의 \"recordDateTime\"은 문장 내 날짜/시간 표현과 **무관하게**, 반드시 현재 시점(LocalDateTime.now())을 기준으로 작성해야 한다.\n" +
                 "- 예: \"저번달에 뭐 샀다\", \"오늘 뭐 했다\" 같은 문장이더라도 **항상 현재 시점 (LocalDateTime.now())을 기준으로, 한국 시간(KST) 기준 ISO 8601 포맷(yyyy-MM-ddTHH:mm:ss) 값**을 \\\"recordDateTime\\\"에 설정해야 한다.\\n" +
                 "- 절대로 문장 내 날짜(예: 3월 7일)를 기준으로 \"recordDateTime\"을 역산하지 않는다.\n" +
+                "- 기준 날짜는 LocalDateTime.now() 기준으로" + time + "이며," + "해당 날짜를 기준으로 상대 시간 표현을 해석해야 한다.\n" +
+                "- \"다음달 X일\" → 현재 날짜 기준 다음 달의 X일로 설정한다. 예: 오늘이 4월이라면, \"다음달 11일\"은 5월 11일로 인식한다.\n" +
                 "---\n" +
                 "- \"schedule\"의 \"startDateTime\"과 \"endDateTime\"은 사용자의 발화에서 유추된 일정의 시간입니다.\n" +
                 "- \"오늘\" → 당일 00:00:00 ~ 23:59:59 설정\n" +
@@ -500,13 +514,7 @@ public class OpenAiService {
                 "- \"title\" ⇒ 입력된 텍스트 본문이 입력되어야 한다\n" +
                 "- \"startDateTime\" ⇒ 입력된 행위/행동의 시작 날짜/시간을 한국시간 기준으로 입력한다.\n" +
                 "- \"endDateTime\" ⇒ 입력된 행위/행동의 종료 날짜/시간을 한국시간 기준으로 입력한다.\n" +
-                "- \"startDateTime\" 과 \"endDateTime\"의 형태는 ISO 8601 Local Date-Time 형식으로 작성되어야 한다.\n" +
-
-                "input text:\n" +
-                "---\n" +
-                clovaJson + "\n" +
-                "---";
-
+                "- \"startDateTime\" 과 \"endDateTime\"의 형태는 ISO 8601 Local Date-Time 형식으로 작성되어야 한다.";
     }
 
 //    GPT 서버에 요청보내기 (ChatRequest 생성)

@@ -1,7 +1,9 @@
 package com.springboot.keyword.controller;
 
+import com.google.gson.Gson;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
+import com.springboot.keyword.API.NaverNewsApiService;
 import com.springboot.keyword.dto.KeywordPostDto;
 import com.springboot.keyword.dto.KeywordResponseDto;
 import com.springboot.keyword.entity.Keyword;
@@ -30,7 +32,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -42,6 +45,7 @@ public class KeywordController {
 
         private final KeywordMapper keywordMapper;
         private final KeywordService keywordService;
+        private final NaverNewsApiService naverNewsApiService;
 
     //swagger API - 등록
     @Operation(summary = "keyword 등록", description = "회원이 새로운 keyword를 등록합니다.")
@@ -77,11 +81,23 @@ public class KeywordController {
     })
     // 키워드 조회
     @GetMapping("/keywords")
-    public ResponseEntity getKeyword(@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+    public ResponseEntity getKeyword(@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) throws IOException {
 
         List<Keyword> keywordList = keywordService.getKeywords(customPrincipal);
+        List<Map<String, Object>> response = new ArrayList<>();
 
-        return new ResponseEntity<>(
-                new ListResponseDto<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList)), HttpStatus.OK);
+        for (Keyword keyword : keywordList) {
+            String newsJson = naverNewsApiService.searchNews(keyword.getName());
+            // JSON 문자열을 리스트로 파싱
+            List<Map<String, String>> newsList = new Gson().fromJson(newsJson, List.class);
+
+            Map<String, Object> keywordWithNews = new HashMap<>();
+            keywordWithNews.put("keyword", keyword.getName());
+            keywordWithNews.put("news", newsList);
+
+            response.add(keywordWithNews);
+        }
+        System.out.println("최종 Response 데이터: " + response);
+        return new ResponseEntity<>(new ListResponseDto<>(response), HttpStatus.OK);
     }
 }

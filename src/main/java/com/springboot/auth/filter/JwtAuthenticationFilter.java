@@ -3,6 +3,7 @@ package com.springboot.auth.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.auth.dto.LoginDto;
 import com.springboot.auth.jwt.JwtTokenizer;
+import com.springboot.auth.utils.MemberDetails;
 import com.springboot.member.entity.Member;
 import com.springboot.member.repository.MemberRepository;
 import com.springboot.oauth.OAuthAuthenticationToken;
@@ -67,7 +68,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 // 만들어진 토큰을 검증하여 성공하면 인증된 Authentication 객체를 반환하고 실패하면 예외를 발생시킨다.
                 return authenticationManager.authenticate(authenticationToken);
             }
-
         } catch (IOException e) {
             throw new RuntimeException("로그인 요청 파싱 실패", e);
         }
@@ -80,8 +80,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             Authentication authResult) throws ServletException, IOException {
         // .getPrincipal() = 인증된 사용자 정보를 가져와서 member 에 할당
         // 이때 UserDetails 타입으로 반환하는데 이때 member 클래스로 다운캐스팅 해야한다.
-
-        Optional<Member> findMember = memberRepository.findByEmail((String) authResult.getPrincipal());
+        MemberDetails memberDetails = (MemberDetails) authResult.getPrincipal();
+        Optional<Member> findMember = memberRepository.findByEmail(memberDetails.getEmail());
         Member member = findMember.orElse(null);
 
         // accessToken 생성
@@ -113,7 +113,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         // 쿠키로 refreshToken 전달
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-
     }
 
     // member 의 정보로 access 토큰 생성

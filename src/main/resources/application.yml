@@ -35,7 +35,10 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
 mail:
   address:
-    admin: admin@gmail.com
+    admin:
+      - admin1@gmail.com
+      - admin2@gmail.com
+      - admin3@gmail.com
   data:
     redis:
       host: 127.0.0.1  #Redis 서버 주소 지정
@@ -80,7 +83,6 @@ openai:
   api-key: ${OPENAI_API_KEY}
   base-url: https://api.openai.com/v1/chat/completions
   model: gpt-4-turbo
-
-
-
-
+naver:
+  client-id: ${NAVER_CLIENT_ID}
+  secret-key: ${NAVER_CLIENT_SECRET}

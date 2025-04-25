@@ -60,7 +60,9 @@ dependencies {
 	//ChatGPT
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.springframework.boot:spring-boot-configuration-processor'
-
+	// Naver 뉴스 호출
+	implementation 'com.google.code.gson:gson:2.8.9'
+	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 }
 
 tasks.named('test') {
