@@ -1,6 +1,7 @@
 package com.springboot.keyword.API;
 
 import com.google.gson.*;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
-
+@Slf4j
 @Service
 public class NaverNewsApiService {
 
@@ -62,6 +63,8 @@ public class NaverNewsApiService {
             newsItem.put("link", obj.get("link").getAsString());
             newsItem.put("pubDate", obj.get("pubDate").getAsString());
             result.add(newsItem);
+
+            log.info("link: {}" ,obj.get("link"));
         }
 
         return new Gson().toJson(result);

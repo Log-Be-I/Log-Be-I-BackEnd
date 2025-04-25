@@ -88,6 +88,7 @@ public class KeywordController {
 
         for (Keyword keyword : keywordList) {
             String newsJson = naverNewsApiService.searchNews(keyword.getName());
+            log.info("Request{}:{}", customPrincipal.getEmail(), keyword.getName());
             // JSON 문자열을 리스트로 파싱
             List<Map<String, String>> newsList = new Gson().fromJson(newsJson, List.class);
 
@@ -97,7 +98,9 @@ public class KeywordController {
 
             response.add(keywordWithNews);
         }
-        System.out.println("최종 Response 데이터: " + response);
+//        System.out.println("최종 Response 데이터: " + response);
+
+        log.info("Response{}", response);
         return new ResponseEntity<>(new ListResponseDto<>(response), HttpStatus.OK);
     }
 }
