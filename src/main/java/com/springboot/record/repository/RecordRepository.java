@@ -19,6 +19,7 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 //    List<Record> findWithMemberByRecordDateTimeBetween(LocalDateTime start, LocalDateTime end);
     @Query("SELECT r FROM Record r JOIN FETCH r.member WHERE r.recordDateTime BETWEEN :start AND :end AND r.recordStatus = :status")
     List<Record> findRegisteredRecordsWithMemberBetween(LocalDateTime start, LocalDateTime end, Record.RecordStatus status);
+   
 
 
     Page<Record> findAllByMember_MemberIdAndCategory_CategoryId(Long memberId, Long categoryId, Pageable pageable);
