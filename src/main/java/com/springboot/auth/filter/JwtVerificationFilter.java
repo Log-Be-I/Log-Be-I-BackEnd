@@ -57,7 +57,6 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
                 isTokenValidInRedis(claims);
                 setAuthenticationToContext(claims);
 
-
             } catch (Exception e) {
                 log.warn("🚨 JWT 인증 실패: {}", e.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");

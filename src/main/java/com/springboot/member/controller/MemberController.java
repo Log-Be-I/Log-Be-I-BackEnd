@@ -2,6 +2,7 @@ package com.springboot.member.controller;
 
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
+import com.springboot.member.dto.AdminPostDto;
 import com.springboot.member.dto.MemberPatchDto;
 import com.springboot.member.dto.MemberPostDto;
 import com.springboot.member.dto.MemberResponseDto;
@@ -79,8 +80,6 @@ public class MemberController {
                 .build();
         headers.set("Authorization", "Bearer " + tokens.get("accessToken"));
         headers.set(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-
-
 
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
