@@ -23,9 +23,6 @@ public class Keyword extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Enumerated(value = EnumType.STRING)
-    private KeywordStatus keywordStatus = KeywordStatus.KEYWORD_REGISTERED;
-
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
@@ -35,18 +32,6 @@ public class Keyword extends BaseEntity {
         this.member = member;
     }
 
-    public enum KeywordStatus {
-        KEYWORD_REGISTERED("키워드 등록"),
-        KEYWORD_DELETED("키워드 삭제");
-
-        @Getter
-        private String status;
-
-        KeywordStatus(String status) {
-            this.status = status;
-        }
-    }
-
     // member 영속성
     public void setMember(Member member) {
         this.member = member;
@@ -54,5 +39,4 @@ public class Keyword extends BaseEntity {
             member.setKeyword(this);
         }
     }
-
 }

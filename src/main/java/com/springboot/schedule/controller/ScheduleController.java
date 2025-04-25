@@ -47,16 +47,6 @@ public class ScheduleController {
     private final ScheduleRepository scheduleRepository;
     private final ScheduleMapper scheduleMapper;
     private final GoogleCalendarService googleCalendarService;
-    private final GoogleEventMapper googleEventMapper;
-
-    // 일정 등록 - 음성
-    @PostMapping("/audio-schedules")
-    public ResponseEntity postAudioSchedule(@Valid @RequestBody SchedulePostDto schedulePostDto,
-                                            @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-
-
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
 
     //swagger API - 등록
     @Operation(summary = "일정 수동 등록", description = "일정을 수동 등록합니다")

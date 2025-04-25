@@ -65,16 +65,22 @@ public class QuestionService {
     }
 
     //회원의 질문 글 전체 조회
-    public Page<Question> findMyQuestions(int page, int size, long memberId){
+    public Page<Question> findMyQuestions(int page, int size, long memberId, String orderBy){
         memberService.validateExistingMember(memberId);
 
-        if(page < 1){
-            throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
+        if(page < 1 && orderBy == "DESC"){
+            //페이징 및 정렬 정보 생성
+            Pageable pageable = PageRequest.of(page -1, size, Sort.by("createdAt").descending());
+            //특정 회원이 작성한 질문글을 페이징 처리하여 조회
+            return questionRepository.findAllByMember_MemberId(memberId, pageable);
+        } else {
+            //페이징 및 정렬 정보 생성
+            Pageable pageable = PageRequest.of(page -1, size, Sort.by("createdAt"));
+            //특정 회원이 작성한 질문글을 페이징 처리하여 조회
+            return questionRepository.findAllByMember_MemberId(memberId, pageable);
         }
-        //페이징 및 정렬 정보 생성
-        Pageable pageable = PageRequest.of(page -1, size, Sort.by("questionId").descending());
-        //특정 회원이 작성한 질문글을 페이징 처리하여 조회
-        return questionRepository.findAllByMember_MemberId(memberId, pageable);
+
+
     }
 
     //질문글 상세 조회

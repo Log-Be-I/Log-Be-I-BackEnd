@@ -1,13 +1,20 @@
 package com.springboot.ai.clova;
 
+import com.springboot.ai.openai.service.OpenAiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,11 +22,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ClovaSpeechService {
 
-    @Value("${clova.api.id}")
-    private String clientId;
-
     @Value("${clova.api.key}")
-    private String clientSecret;
+    private String API_KEY;
+    @Value("${clova.api.id}")
+    private String CLIENT_ID;
 
     // 클로바 STT API 에 오디오 파일을 전송하고, 텍스트로 변환된 결과를 받아오는 메서드
     public String recognizeSpeech(File voiceFile) throws IOException {
@@ -47,8 +53,8 @@ public class ClovaSpeechService {
             // 요청 본문의 데이터 타입 설정 -> 바이너리 데이터 전송 (음성 파일)
             conn.setRequestProperty("Content-Type", "application/octet-stream");
             // 인증용 헤더 작성
-            conn.setRequestProperty("X-NCP-APIGW-API-KEY-ID", clientId);
-            conn.setRequestProperty("X-NCP-APIGW-API-KEY", clientSecret);
+            conn.setRequestProperty("X-NCP-APIGW-API-KEY-ID", CLIENT_ID);
+            conn.setRequestProperty("X-NCP-APIGW-API-KEY", API_KEY);
             // 설정한 내용을 바탕으로 실제 서버 연결 시작
             conn.connect();
 
@@ -89,6 +95,53 @@ public class ClovaSpeechService {
             throw new RuntimeException("Clova STT 요청 중 오류 발생", e);
         }
         // 최종 문자열을 반환
+        // 이걸 GPT 한테 넘겨줘야함
         return response.toString();
     }
+
+    // 음성데이터를 text 로 변환
+    public String voiceToText (MultipartFile audioFile) throws IOException {
+        // CLOVA 에서 허용하는 음성데이터 확장자 목록
+        List<String> allowedExtensions = List.of("mp3", "acc", "ac3", "ogg", "flac", "wav", "m4a");
+
+        // 파일 이름에서 확장자 추출
+        String originalFilename = audioFile.getOriginalFilename();
+        // 확장자명을 담을 문자열 객체 생성
+        String extension = "";
+        // 확장자명이 비어있지 않고 . 을 포함하고있다면
+        if(originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename
+                    // 파일 이름에서 .의 인덱스 번호에 +1 을 더해 순수한 확장자 이름만 찾는다
+                    .substring(originalFilename.lastIndexOf(".") + 1)
+                    // 보통 소문자로 이뤄지지만 대문자가 섞일 수 있으니 소문자로 변경
+                    .toLowerCase(); // 컴퓨터는 확장자명의 대소문자 구분을 못함 ex) MP3 == mp3 => true
+        }
+
+        // 임시 파일 생성 (확장자 포함)
+        // 업로드된 MultipartFile(현재 로직에서는 음성데이터) 을 저장할 임시 파일 객체 생성
+        File tempFile = File.createTempFile("clova_", "." + extension);
+        // 사용자가 업로드한 오디오 파일 데이터를 임시 파일에 저장
+        audioFile.transferTo(tempFile); // 이렇게 담아줘야 file 객체로 API 에 보낼 수 있다.
+
+        // 네이버 클로바 음성인식 서버에 요청 보낼 때 사용할 헤더 설정
+        // header 객체 생성
+        HttpHeaders headers = new HttpHeaders();
+        // Content-Type 은 바이너리 데이터임으로 application/octet-stream
+        // 음성 파일은 사람이 직접 읽을 수 없는 0과 1의 데이터로 저장되기 때문이다.
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        // Accept = 응답 __ 응답을 JSON 으로 받겠다는 의미
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        // api 요청을 위한 key 설정
+        headers.set("X-NCP-APIGW-API-KEY-ID", CLIENT_ID);  // 네이버 콘솔 Client ID
+        headers.set("X-NCP-APIGW-API-KEY", API_KEY);       // 네이버 콘솔 Secret Key
+
+        // tempFile 을 CLOVA 에 전송해서 음성 -> 텍스트 변환 결과 받아오기
+        String result = recognizeSpeech(tempFile);
+        // CLOVA 전송을 위해 임시저장해둔 파일 삭제
+        tempFile.delete();
+
+        return result;
+    }
+
 }

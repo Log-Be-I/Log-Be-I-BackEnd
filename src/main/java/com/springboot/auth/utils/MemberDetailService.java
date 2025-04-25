@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Component
-public class MemberDetailService extends Member implements UserDetailsService {
+public class MemberDetailService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final CustomAuthorityUtils authorityUtils;
 

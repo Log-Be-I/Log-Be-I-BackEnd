@@ -1,5 +1,6 @@
 package com.springboot.category.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;
 import com.springboot.record.entity.Record;

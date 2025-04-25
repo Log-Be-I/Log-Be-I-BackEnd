@@ -5,21 +5,19 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-import com.springboot.auth.utils.CustomAuthorityUtils;
+import com.springboot.ai.clova.ClovaSpeechService;
 import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.auth.utils.MemberDetails;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
+import com.springboot.record.repository.RecordRepository;
 import com.springboot.redis.RedisService;
 import com.springboot.schedule.entity.HistoricalSchedule;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.repository.HistoricalScheduleRepository;
 import com.springboot.schedule.repository.ScheduleRepository;
-import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.jni.Local;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -40,8 +38,25 @@ public class ScheduleService {
     private final HistoricalScheduleRepository historicalScheduleRepository;
     private final RedisService redisService;
     private final MemberService memberService;
+    private final ClovaSpeechService clovaSpeechService;
+    private final RecordRepository recordRepository;
+//    // 일정 등록 - 음성
+//    public void postVoiceSchedule (File voiceFile, CustomPrincipal customPrincipal) throws IOException {
+//        // 유효한 회원인지 검증
+//        memberService.validateExistingMember(customPrincipal.getMemberId());
+//
+//        // clova 로 speech to text 변환
+//        String speechToText = clovaSpeechService.recognizeSpeech(voiceFile);
+//
+//        // 변환된 text 를 Gpt로 전달
+////        String text = speechToText;
+//
+//        // Gpt 로 부터 전달받은 데이터를 Schedule 과 Record 를 분류해주는 로직에 speechToText 넣기
+//        handleResponse(speechToText);
+//    }
 
-    // 일정 등록 - 음성
+
+
 
 
     // 일정 등록 - text
@@ -229,4 +244,6 @@ public class ScheduleService {
 
         return event;
     }
+
+
 }

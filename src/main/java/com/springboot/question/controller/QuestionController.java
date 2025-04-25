@@ -161,10 +161,10 @@ public class QuestionController {
     // 회원용 질문 목록 조회
     @GetMapping("/my")
     public ResponseEntity getMyQuestions(@Positive @RequestParam int page, @Positive @RequestParam int size,
+                                         @RequestParam String orderBy,
                                          @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-
-        Page<Question> questionPage = questionService.findMyQuestions(page, size, customPrincipal.getMemberId());
+        Page<Question> questionPage = questionService.findMyQuestions(page, size, customPrincipal.getMemberId(), orderBy);
         List<Question> questions = questionPage.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>
                 (questionMapper.questionsToQuestionResponses(questions), questionPage), HttpStatus.OK);

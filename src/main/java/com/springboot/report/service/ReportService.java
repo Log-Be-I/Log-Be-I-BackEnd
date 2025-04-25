@@ -1,31 +1,129 @@
 package com.springboot.report.service;
 
+import com.springboot.ai.googleTTS.GoogleTextToSpeechService;
+import com.springboot.member.entity.Member;
+import com.springboot.member.service.MemberService;
+import com.springboot.report.dto.ReportAnalysisRequest;
 
-import com.springboot.monthlyreport.entity.MonthlyReport;
-import com.springboot.monthlyreport.service.MonthlyReportService;
+import com.springboot.exception.BusinessLogicException;
+import com.springboot.exception.ExceptionCode;
+
+import com.springboot.report.dto.ReportAnalysisResponse;
 import com.springboot.report.entity.Report;
+import com.springboot.report.mapper.ReportMapper;
 import com.springboot.report.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
+import java.util.*;
+import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
+    private final MemberService memberService;
     private final ReportRepository repository;
-    private final MonthlyReportService monthlyReportService;
+    private final ReportMapper mapper;
+    private final GoogleTextToSpeechService googleTextToSpeechService;
 
-    public Report createReport(Report report, long memberId) {
-        //Report 를 MonthlyReport 에 추가하는 로직
-        monthlyReportService.addReportToMonthlyReport(report, memberId);
+    //ai가 분석한 content 타입변환 ReportAnalysisRequest -> ReportAnalysisResponse 변환
+    public ReportAnalysisResponse aiRequestToReport(ReportAnalysisRequest request, Map<String, String> contentMap) {
 
+        //ReportAnalysisRequest -> ReportAnalysisResponse 매핑
+        ReportAnalysisResponse response = new ReportAnalysisResponse();
+        response.setMemberId(request.getMemberId());
+        response.setReportTitle(request.getReportTitle());
+        response.setMonthlyReportTitle(request.getMonthlyReportTitle());
+        response.setContent(contentMap);
+
+        return response;
+    }
+
+    public Report analysisResponseToReport(ReportAnalysisResponse response) {
+
+        Report report = new Report();
+        report.setTitle(response.getReportTitle());
+        report.setMonthlyTitle(response.getMonthlyReportTitle());
+        report.getMember().setMemberId(response.getMemberId());
+        report.setContent(response.getContent());
         //해당 report가 주간인지 월간인지 구분
-        report.setPeriodNumber(extractPeriodNumber(report.getTitle()));
+        report.setPeriodNumber(extractPeriodNumber(response.getReportTitle()));
         setReportType(report);
 
-        return repository.save(report);
+        return report;
+    }
+
+    //ai 응답 -> Report
+    public List<Report> analysisResponseToReportList(List<ReportAnalysisResponse> responses) {
+
+        List<Report> reports = responses.stream().map(
+                response -> analysisResponseToReport(response)).collect(Collectors.toList());
+
+        //생성된 List<Report> DB 저장
+        return repository.saveAll(reports);
+    }
+
+//    public List<Report> createReport(List<ReportAnalysisResponse> responses) {
+//
+//
+//        //mapper 로 매핑 List<ReportAnalysisResponse> -> List<Report> 변환
+//        List<Report> reports = mapper.analysisResponseToReportList(responses);
+//        reports.stream().map(report -> report.setPeriodNumber(extractPeriodNumber(response.getReportTitle()));)
+//
+//        return repository.saveAll(reports);
+//    }
+
+    //연도별 전체조회
+    public List<Report> findMonthlyReports(long memberId,int year) {
+        String yearStr = year + "년";
+        return repository.findByMember_MemberIdAndMonthlyTitleStartingWith(memberId, yearStr);
+    }
+
+    //Report
+    public List<Report> findMonthlyTitleWithReports(String monthlyTitle, long memberId) {
+        return repository.findByMember_MemberIdAndMonthlyTitle(memberId, monthlyTitle);
+
+    }
+
+
+    public List<String> reportToClovaAudio(List<Long> reportsId, long memberId){
+        // 유효한 회원인지 검증
+        Member member = memberService.validateExistingMember(memberId);
+        //활동중인 회원인지 확인
+        memberService.validateMemberStatus(member);
+
+        try {
+            // reportId 로 report 를 찾아서 List<Report> 생성
+            List<Report> reportList = reportsId.stream()
+                    .map(reportId -> findReport(reportId))
+                    .collect(Collectors.toList());
+            // 생성된 파일 이름을 담을 리스트
+            List<String> filePathList = new ArrayList<>();
+            // 리포트 리스트를 돌면서 하나하나 TTS 변환기에 넣기
+            reportList.stream().forEach(record ->
+            {
+                try {
+                    // UUID 로 겹치지 않는 파일명 생성
+                    String fileName = UUID.randomUUID().toString() + ".mp3";
+                    // 제목과 내용을 같이 전달해서 시작하는 글의 날짜를 말하게 함
+                    googleTextToSpeechService.synthesizeText(record.getTitle() + record.getContent(), fileName);
+                    // 생성된 파일 경로 복사
+                    filePathList.add(fileName);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return filePathList;
+        } catch (Exception e) {
+            log.error("Google TTS 오류 발생", e);
+            // 에러 터졌을때는 빈배열 반환
+          throw new BusinessLogicException(ExceptionCode.INVALID_SERVER_ERROR);
+        }
     }
 
     //report title 에서 주차별 월별 구분
@@ -68,7 +166,12 @@ public class ReportService {
         return repository.countWeeklyReportsByTitle(
                 Report.ReportType.REPORT_WEEKLY, yearMonthPrefix + "%", "주차");
     }
-
+  
+    // report 단건 조회
+    public Report findReport(long reportId) {
+        return repository.findById(reportId).orElseThrow(
+                () -> new BusinessLogicException(ExceptionCode.REPORT_NOT_FOUND));
+    }
 
 
 }

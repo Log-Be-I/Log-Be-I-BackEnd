@@ -2,6 +2,7 @@ package com.springboot.member.controller;
 
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.auth.utils.MemberDetails;
+import com.springboot.member.dto.AdminPostDto;
 import com.springboot.member.dto.MemberPatchDto;
 import com.springboot.member.dto.MemberPostDto;
 import com.springboot.member.dto.MemberResponseDto;
@@ -94,12 +95,16 @@ public class MemberController {
         headers.set("Authorization", "Bearer " + tokens.get("accessToken"));
         headers.set(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
+
+
+
         MemberResponseDto memberResponseDto = memberMapper.memberToMemberResponseDto(member);
 
 
 
 
         return new ResponseEntity<>(new SingleResponseDto<>(memberResponseDto), headers, HttpStatus.CREATED);
+
     }
 
     //swagger API - 앱 푸쉬 알림 수신동의

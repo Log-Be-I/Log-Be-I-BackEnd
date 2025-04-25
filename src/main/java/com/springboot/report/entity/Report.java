@@ -2,7 +2,8 @@ package com.springboot.report.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.springboot.audit.BaseEntity;
-import com.springboot.monthlyreport.entity.MonthlyReport;
+import com.springboot.member.entity.Member;
+import com.springboot.utils.ContentMapConverter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 import net.minidev.json.annotate.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.Map;
 
 @Entity
 @Getter
@@ -23,23 +25,29 @@ public class Report extends BaseEntity {
     private Long reportId;
 
     @Column(nullable = false)
+    private String monthlyTitle;
+
+    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
-    private String content;
+//JPA가 알아서 저장 시 JSON String, 조회 시 Map<String, String>으로 바꿔줌
+    //Utils -> ContentMapConverte class 정의함
+    @Convert(converter = ContentMapConverter.class)
+    private Map<String, String> content;
+
 
     @Enumerated(value = EnumType.STRING)
     private ReportType reportType = ReportType.REPORT_WEEKLY;
 
     //월간(0), 주차(1~5)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private int periodNumber;
 
     @ManyToOne
-    @JoinColumn(name = "monthly_id")
+    @JoinColumn(name = "member_id")
     @JsonBackReference
-//    @JsonIgnore // 그냥 무시 : Json 응답에서 관계가 나오지 않아도 됨
-    private MonthlyReport monthlyReport;
+    private Member member;
 
     public enum ReportType {
         REPORT_WEEKLY("주간 분석 정보"),
@@ -53,11 +61,4 @@ public class Report extends BaseEntity {
         }
     }
 
-    // monthlyReport 영속성
-//    public void setMonthlyReport(MonthlyReport monthlyReport) {
-//        this.monthlyReport = monthlyReport;
-//        if(monthlyReport.getReports().contains(this)) {
-//            monthlyReport.setReport(this);
-//        }
-//    }
 }

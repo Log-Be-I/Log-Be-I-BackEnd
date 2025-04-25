@@ -43,9 +43,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'com.google.api-client:google-api-client:2.5.0'
 	implementation 'com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0'
+	//ChatGPT -> WebClient 사용 설정
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	implementation 'com.google.http-client:google-http-client-jackson2:1.43.3'
 //	implementation 'com.google.http-client:google-http-client-gson:1.43.3'
+	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.90.Final:osx-aarch_64'
 
 	// CLOVA
 	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
@@ -53,6 +56,19 @@ dependencies {
 	// Google 공식 BOM 사용
 	implementation platform("com.google.cloud:libraries-bom:26.23.0")
 	implementation 'com.google.cloud:google-cloud-texttospeech'
+  
+	//ChatGPT
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'org.springframework.boot:spring-boot-configuration-processor'
+	// Naver 뉴스 호출
+	implementation 'com.google.code.gson:gson:2.8.9'
+	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
+	// AWS
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	// Actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
