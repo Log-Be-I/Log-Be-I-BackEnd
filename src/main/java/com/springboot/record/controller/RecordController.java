@@ -5,7 +5,6 @@ import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
-import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.Record;
@@ -15,25 +14,19 @@ import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.mapper.ScheduleMapper;
-import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +42,7 @@ public class RecordController {
     private final ClovaSpeechService clovaSpeechService;
     private final OpenAiService openAiService;
     private final ScheduleMapper scheduleMapper;
-    private final MemberService memberService;
+
 
     @PostMapping("/audio-records")
     public ResponseEntity uploadAndRecognize(@RequestParam("audio") MultipartFile audioFile,
