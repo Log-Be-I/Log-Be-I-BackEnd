@@ -7,8 +7,11 @@ import com.springboot.category.entity.Category;
 import com.springboot.category.service.CategoryService;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+
 import com.springboot.googleCalendar.dto.GoogleEventDto;
 import com.springboot.googleCalendar.service.GoogleCalendarService;
+
+
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.HistoricalRecord;
@@ -28,6 +31,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -163,24 +167,24 @@ public class RecordService {
     }
 
     //기록 전체 조회
-    public Page<Record> findRecords(int page, int size, long memberId, Long categoryId) {
-        // category 확인을 위한 유저 찾기
-        Category category = categoryService.findVerifiedCategory(categoryId);
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by("recordDateTime").descending());
+
+    public Page<Record> findRecords(int page, int size, long memberId, String categoryName, LocalDate startDate, LocalDate endDate) {
+        Member foundmember = memberService.validateExistingMember(memberId);
+        categoryService.verifyExistsCategory(foundmember, categoryName);
+
 
         if(page < 1) {
             throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
         }
-        if(categoryId == null){
-            //특정 회원이 작성한 질문 목록 조회
-           Page<Record> recordPage = repository.findAllByMember_MemberId(memberId, pageable);
-           recordPage.forEach(record -> record.setCategory(category));
-            return recordPage;
-        } else{
-            // 값이 존재하는 값의 키로 벨류를 조회하여 설정
-            Page<Record> recordPage =  repository.findAllByMember_MemberIdAndCategory_CategoryId(memberId, categoryId, pageable);
-            recordPage.forEach(record -> record.setCategory(category));
-            return recordPage;
+
+
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.ASC));
+
+        if(categoryName.equals("전체")){
+            return repository.findAllByMember_MemberIdAndRecordDateBetween(memberId, startDate, endDate, pageable);
+        } else {
+            return repository.findAllByMember_MemberIdAndCategory_NameIdAndRecordDateBetween(memberId, categoryName, startDate, endDate, pageable);
+
         }
     }
 

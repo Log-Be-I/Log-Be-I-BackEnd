@@ -17,6 +17,7 @@ import com.springboot.schedule.mapper.ScheduleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +28,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.io.IOException;
+
+
+import java.time.LocalDate;
+import java.util.Collections;
+
 import java.util.List;
 import java.util.Map;
 
@@ -115,9 +121,12 @@ public class RecordController {
     @GetMapping("/records")
     public ResponseEntity getRecords(@Positive @RequestParam("page") int page,
                                      @Positive @RequestParam("size") int size,
-                                     @RequestParam("sortBy") Long sortBy,
+                                     @RequestParam("categoryName") String categoryName,
+                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(),sortBy);
+        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(), categoryName, startDate, endDate);
+
         List<Record> records = recordPage.getContent();
 
         return new ResponseEntity<>( new MultiResponseDto<>(

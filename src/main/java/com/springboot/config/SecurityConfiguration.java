@@ -101,7 +101,7 @@ public class SecurityConfiguration {
                         .antMatchers("/hello").permitAll()
                         // 접근 권한과 상관없이 post 요청이라면 허용한다
                         .antMatchers(HttpMethod.POST, "/*/members").permitAll()
-                        .antMatchers(HttpMethod.POST, "/*/questions").hasRole("USER")
+                        .antMatchers(HttpMethod.POST, "/*/questions").permitAll()
                         .antMatchers(HttpMethod.POST, "/*/answers").hasRole("ADMIN")
                         // 정보 수정 요청은 USER 권한만 가능하다
                         .antMatchers(HttpMethod.PATCH,"/*/members/**").hasRole("USER")
@@ -118,6 +118,7 @@ public class SecurityConfiguration {
                         .antMatchers(HttpMethod.DELETE, "/*/questions/**").hasRole("USER")
                         .antMatchers(HttpMethod.DELETE, "/*/answers/**").hasRole("ADMIN")
                         .antMatchers("/api/auth/google").permitAll()
+                        .antMatchers("/api/auth/google/code").permitAll()
                         .anyRequest().permitAll()
                 )
                 // OAuth2 기본 설정
@@ -156,7 +157,7 @@ public PasswordEncoder passwordEncoder() {
         // ex) AJAX 요청, Fetch API 등
         // 모든 출처(Origin)에 대해 스크립트 기반의 HTTP 통신을 허용하도록 설정
 //        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8081"));
 
         // 파라미터로 지정한 HTTP Method 에 대한 HTTP 통신을 허용
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));

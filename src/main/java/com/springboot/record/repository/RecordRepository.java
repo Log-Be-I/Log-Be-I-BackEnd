@@ -23,4 +23,21 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 
     Page<Record> findAllByMember_MemberIdAndCategory_CategoryId(Long memberId, Long categoryId, Pageable pageable);
 
+    // memberId, 날짜 범위, categoryId 받아서 데이터 탐색
+    Page<Record> findAllByMember_MemberIdAndCategory_NameIdAndRecordDateBetween(
+            Long memberId,
+            String categoryName,
+            LocalDate startDate,
+            LocalDate endDate,
+            Pageable pageable
+    );
+
+    // Category 전체 선택일 경우 memberId, 날짜 범위로만 탐색
+    Page<Record> findAllByMember_MemberIdAndRecordDateBetween(
+            Long memberId,
+            LocalDate startDate,
+            LocalDate endDate,
+            Pageable pageable
+    );
+
 }
