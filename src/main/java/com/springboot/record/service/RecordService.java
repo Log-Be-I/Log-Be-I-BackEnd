@@ -168,7 +168,7 @@ public class RecordService {
 
     //기록 전체 조회
 
-    public Page<Record> findRecords(int page, int size, long memberId, String categoryName, LocalDate startDate, LocalDate endDate) {
+    public Page<Record> findRecords(int page, int size, long memberId, String categoryName, LocalDateTime startDate, LocalDateTime endDate) {
         Member foundmember = memberService.validateExistingMember(memberId);
         categoryService.verifyExistsCategory(foundmember, categoryName);
 

@@ -31,6 +31,7 @@ import java.io.IOException;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 
 import java.util.List;
@@ -122,8 +123,8 @@ public class RecordController {
     public ResponseEntity getRecords(@Positive @RequestParam("page") int page,
                                      @Positive @RequestParam("size") int size,
                                      @RequestParam("categoryName") String categoryName,
-                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                                     @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+                                     @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
         Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(), categoryName, startDate, endDate);
 
