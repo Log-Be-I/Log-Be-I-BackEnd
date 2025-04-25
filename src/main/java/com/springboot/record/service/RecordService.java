@@ -183,7 +183,7 @@ public class RecordService {
         if(categoryName.equals("전체")){
             return repository.findAllByMember_MemberIdAndRecordDateTimeBetween(memberId, startDate, endDate, pageable);
         } else {
-            return repository.findAllByMember_MemberIdAndCategory_NameIdAndRecordDateTimeBetween(memberId, categoryName, startDate, endDate, pageable);
+            return repository.findAllByMember_MemberIdAndCategory_NameAndRecordDateTimeBetween(memberId, categoryName, startDate, endDate, pageable);
 
         }
     }
