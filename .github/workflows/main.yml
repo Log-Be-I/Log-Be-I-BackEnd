@@ -68,7 +68,12 @@ jobs:
                   -e CLOVA_CLIENT_ID=${{ secrets.CLOVA_CLIENT_ID }} \\
                   -e GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} \\
                   -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \\
+<<<<<<< HEAD
                   -e REDIRECT_URI=${{ secrets.REDIRECT_URI }} \\
+=======
+                  -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \\
+                  -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \\
+>>>>>>> c921ba0 (main.yml)
                   logbei'
             ]" \
             --output text

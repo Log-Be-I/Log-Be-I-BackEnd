@@ -1,19 +1,22 @@
 spring:
   data:
     redis:
-      host: 13.124.182.96
+      host: 127.0.0.1
       port: 6379
   application:
     name:  log-be-i
   h2:
     console:
-      enabled: true
+      enabled: false
       path: /h2
   datasource:
-    url: jdbc:h2:mem:test
+    url: jdbc:mysql://database-1.c10a226u86g0.ap-northeast-2.rds.amazonaws.com:3306/your_db_name?serverTimezone=Asia/Seoul
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create  # (1) 스키마 자동 생성
+      ddl-auto: update  # (1) 스키마 자동 생성
     show-sql: true      # (2) SQL 쿼리 출력
   sql:
     init:
@@ -25,7 +28,6 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: ${REDIRECT_URI}
             scope:
               - profile
               - email
