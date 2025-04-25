@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.minidev.json.annotate.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class Report extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
 //JPA가 알아서 저장 시 JSON String, 조회 시 Map<String, String>으로 바꿔줌
     //Utils -> ContentMapConverte class 정의함
     @Convert(converter = ContentMapConverter.class)
