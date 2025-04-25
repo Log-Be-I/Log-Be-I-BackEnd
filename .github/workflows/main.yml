@@ -51,6 +51,8 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         run: |
           aws ssm send-command \
             --instance-ids i-0b18f5134cc5231ad \
@@ -73,6 +75,8 @@ jobs:
                   -e REDIRECT_URI=${{ secrets.REDIRECT_URI }} \\
                   -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \\
                   -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \\
+                  -e NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }} \\
+                  -e NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }} \\
                   logbei'
             ]" \
             --output text
