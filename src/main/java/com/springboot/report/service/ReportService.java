@@ -12,6 +12,7 @@ import com.springboot.report.dto.ReportAnalysisResponse;
 import com.springboot.report.entity.Report;
 import com.springboot.report.mapper.ReportMapper;
 import com.springboot.report.repository.ReportRepository;
+import com.springboot.utils.ReportUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ public class ReportService {
     private final GoogleTextToSpeechService googleTextToSpeechService;
 
     //ai가 분석한 content 타입변환 ReportAnalysisRequest -> ReportAnalysisResponse 변환
-    public ReportAnalysisResponse aiRequestToReport(ReportAnalysisRequest request, Map<String, String> contentMap) {
+    public ReportAnalysisResponse aiRequestToResponse(ReportAnalysisRequest request, Map<String, String> contentMap) {
 
         //ReportAnalysisRequest -> ReportAnalysisResponse 매핑
         ReportAnalysisResponse response = new ReportAnalysisResponse();
@@ -45,28 +46,47 @@ public class ReportService {
     }
 
     public Report analysisResponseToReport(ReportAnalysisResponse response) {
+       //NPE 방지
+        Member member = new Member();
+        member.setMemberId(response.getMemberId());
 
         Report report = new Report();
         report.setTitle(response.getReportTitle());
         report.setMonthlyTitle(response.getMonthlyReportTitle());
-        report.getMember().setMemberId(response.getMemberId());
+        report.setMember(member);
         report.setContent(response.getContent());
         //해당 report가 주간인지 월간인지 구분
         report.setPeriodNumber(extractPeriodNumber(response.getReportTitle()));
         setReportType(report);
+        log.info("📌 변환된 Report: {}", report);
 
         return report;
     }
 
     //ai 응답 -> Report
-    public List<Report> analysisResponseToReportList(List<ReportAnalysisResponse> responses) {
-
-        List<Report> reports = responses.stream().map(
-                response -> analysisResponseToReport(response)).collect(Collectors.toList());
-
-        //생성된 List<Report> DB 저장
-        return repository.saveAll(reports);
+    public List<Report> analysisResponseToReportList(List<Report> reports) {
+//
+//        List<Report> reports = responses.stream().map(
+//                response -> analysisResponseToReport(response)).collect(Collectors.toList());
+//
+//        //생성된 List<Report> DB 저장
+//        return repository.saveAll(reports);
+        try {
+//            List<Report> reports = responses.stream()
+//                    .map(response -> analysisResponseToReport(response))
+//                    .collect(Collectors.toList());
+            log.info("📦 DB 저장 직전 - reports size: {}, titles: {}", reports.size(), reports.stream().map(Report::getTitle).collect(Collectors.toList()));
+            return repository.saveAll(reports);
+        } catch (Exception e) {
+            log.error("💥 Report 변환 중 에러 발생", e);
+            throw e;
+        }
     }
+
+
+
+
+
 
 //    public List<Report> createReport(List<ReportAnalysisResponse> responses) {
 //

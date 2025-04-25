@@ -19,6 +19,7 @@ import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.report.dto.ReportAnalysisResponse;
 import com.springboot.report.entity.Report;
 import com.springboot.report.service.ReportService;
+import com.springboot.utils.ReportUtil;
 import lombok.RequiredArgsConstructor;
 
 import java.nio.charset.StandardCharsets;
@@ -33,6 +34,7 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,14 +51,55 @@ public class OpenAiService {
 
 
     //Report 최종 : List<Report> -> ReportService
-    public List<Report> createReportsFromAi(List<ReportAnalysisRequest> requests) {
+//    public List<Report> createReportsFromAi(List<ReportAnalysisRequest> requests) {
+//// createReportsFromAi 내부 재귀함수 여부 테스트
+//        List<ReportAnalysisResponse> response = requests.stream().map(
+//                request -> {
+//                    log.info("🌀 요청 처리 중 - request title: {}, memberId: {}", request.getReportTitle(), request.getMemberId());
+//                    return generateReportFromAi(request);
+//                }
+//        ).collect(Collectors.toList());
+//
+//
+//
+//        //List<ReportAnalysisRequest> -> List<ReportAnalysisResponse> 변경
+////        List<ReportAnalysisResponse> response = requests.stream().map(
+////                request -> generateReportFromAi(request)).collect(Collectors.toList());
+////
+////        //List<ReportAnalysisResponse> -> List<Report>
+//        List<Report> reports = reportService.analysisResponseToReportList(response);
+//
+//        return reports;
+////          return reportService.analysisResponseToReportList(requests.stream()
+////                  .map(request -> generateReportFromAi(request))
+////                  .collect(Collectors.toList()));
+//
+//    }
 
-          return reportService.analysisResponseToReportList(requests.stream()
-                  .map(request -> generateReportFromAi(request))
-                  .collect(Collectors.toList()));
 
+    //GPT 분석 요청은 10명씩 끊어서 전달 : 토큰 절약 + 응답 지연 방지
+    public List<Report> createReportsFromAiInBatch(List<ReportAnalysisRequest> requests) {
+        // 요청을 10명 단위로 분할
+        List<List<ReportAnalysisRequest>> batches = ReportUtil.partitionList(requests, 10);
+        List<Report> allReports = new ArrayList<>();
+
+        //배치별로 GPT에 요청
+        for (List<ReportAnalysisRequest> batch : batches) {
+            List<Report> batchReports = processBatchWithGpt(batch);
+            allReports.addAll(batchReports);
+        }
+
+        // 3. DB에 저장
+        return reportService.analysisResponseToReportList(allReports);
     }
 
+    // GPT 호출 처리 (단일 배치)
+    private List<Report> processBatchWithGpt(List<ReportAnalysisRequest> batch) {
+        return batch.stream()
+                .map(this::generateReportFromAi)
+                .map(reportService::analysisResponseToReport)
+                .collect(Collectors.toList());
+    }
     //Report
     //ReportAnalysisRequest -> JSON 문자열 -> aiRequest -> aiResponse. content -> Report
     public ReportAnalysisResponse generateReportFromAi(ReportAnalysisRequest request){
@@ -75,8 +118,10 @@ public class OpenAiService {
 //            String aiContent =  extractContent(content);
             // JSON -> Map
             Map<String, String> contentMap = jsonToMap(content); //aiResponse = {OpenAiResponse@16415}
-           //결과 매핑
-            return reportService.aiRequestToReport(request, contentMap);
+            // generateReportFromAi 내부
+            log.info("✅ contentMap 파싱 성공 - memberId: {}, contentMap keys: {}", request.getMemberId(), contentMap.keySet());
+            //결과 매핑
+            return reportService.aiRequestToResponse(request, contentMap);
 
         } catch (IOException e) {
             log.error("GPT 분석 실패 - memberId: " + request.getMemberId(), e);
