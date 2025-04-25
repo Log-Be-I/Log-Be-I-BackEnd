@@ -1,18 +1,12 @@
 package com.springboot.record.repository;
 
-import com.springboot.category.entity.Category;
 import com.springboot.record.entity.Record;
-import com.springboot.report.entity.Report;
-import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.Year;
 import java.util.List;
 
 public interface RecordRepository extends JpaRepository<Record, Long> {
