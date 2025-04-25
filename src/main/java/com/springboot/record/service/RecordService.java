@@ -3,6 +3,7 @@ package com.springboot.record.service;
 import com.springboot.category.service.CategoryService;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.HistoricalRecord;
 import com.springboot.record.entity.Record;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -91,16 +93,21 @@ public class RecordService {
     }
 
     //기록 전체 조회
-    public Page<Record> findRecords(int page, int size, long memberId) {
-        memberService.validateExistingMember(memberId);
+    public Page<Record> findRecords(int page, int size, long memberId, String categoryName, LocalDate startDate, LocalDate endDate) {
+        Member foundmember = memberService.validateExistingMember(memberId);
+        categoryService.verifyExistsCategory(foundmember, categoryName);
 
         if(page < 1) {
             throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
         }
 
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by("recordTime"));
-        //특정 회원이 작성한 질문 목록 조회
-        return repository.findAllByMember_MemberId(memberId, pageable);
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.ASC));
+
+        if(categoryName.equals("전체")){
+            return repository.findAllByMember_MemberIdAndRecordDateBetween(memberId, startDate, endDate, pageable);
+        } else {
+            return repository.findAllByMember_MemberIdAndCategory_NameIdAndRecordDateBetween(memberId, categoryName, startDate, endDate, pageable);
+        }
     }
 
     //기록 카테고리별 조회
