@@ -62,10 +62,13 @@ public class RecordService {
             schedule.setTitle(data.get("title"));
             schedule.setStartDateTime(data.get("startDateTime"));
             schedule.setEndDateTime(data.get("endDateTime"));
+            Member member = new Member();
+            member.setMemberId(customPrincipal.getMemberId());
+            schedule.setMember(member);
 
             GoogleEventDto googleEventDto = new GoogleEventDto();
-            googleEventDto.setStartDateTime(schedule.getStartDateTime());
-            googleEventDto.setEndDateTime(schedule.getEndDateTime());
+            googleEventDto.setStartDateTime(schedule.getStartDateTime() + "+09:00");
+            googleEventDto.setEndDateTime(schedule.getEndDateTime() + "+09:00");
             googleEventDto.setSummary(schedule.getTitle());
             googleEventDto.setCalendarId(customPrincipal.getEmail());
             // 구글 캘린더 등록 요청
