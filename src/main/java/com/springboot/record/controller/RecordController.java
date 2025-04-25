@@ -128,7 +128,6 @@ public class RecordController {
         Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(), categoryName, startDate, endDate);
 
         List<Record> records = recordPage.getContent();
-
         return new ResponseEntity<>( new MultiResponseDto<>(
                 // 삭제상태가 아닌 record 만 필터링, 관리자 및 본인만 접근 가능
                 mapper.recordsToRecordResponses(recordService.nonDeletedRecordAndAuth(records, customPrincipal)),
