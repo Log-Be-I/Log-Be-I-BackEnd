@@ -16,6 +16,7 @@ public class MemberDetails extends Member implements UserDetails {
         this.setMemberId(member.getMemberId());
         this.setEmail(member.getEmail());
         this.setRoles(member.getRoles());
+        this.setRefreshToken(member.getRefreshToken());
         this.authorityUtils = authorityUtils;
     }
 
@@ -26,7 +27,7 @@ public class MemberDetails extends Member implements UserDetails {
 
     @Override
     public String getPassword() {
-        return "";
+        return getRefreshToken();
     }
 
     @Override

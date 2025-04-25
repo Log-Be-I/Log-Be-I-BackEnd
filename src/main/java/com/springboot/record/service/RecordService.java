@@ -160,7 +160,7 @@ public class RecordService {
     }
 
     //기록 전체 조회
-    public Page<Record> findRecords(int page, int size, long memberId, long categoryId) {
+    public Page<Record> findRecords(int page, int size, long memberId, Long categoryId) {
         // category 확인을 위한 유저 찾기
         Category category = categoryService.findVerifiedCategory(categoryId);
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("recordDateTime").descending());
@@ -168,7 +168,7 @@ public class RecordService {
         if(page < 1) {
             throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
         }
-        if(categoryId <= 0){
+        if(categoryId == null){
             //특정 회원이 작성한 질문 목록 조회
            Page<Record> recordPage = repository.findAllByMember_MemberId(memberId, pageable);
            recordPage.forEach(record -> record.setCategory(category));

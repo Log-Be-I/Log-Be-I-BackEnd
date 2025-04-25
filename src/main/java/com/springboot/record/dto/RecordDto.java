@@ -62,6 +62,8 @@ public class RecordDto {
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
+    @Setter
     public static class Response {
         private Long recordId;
         private LocalDateTime recordDateTime;

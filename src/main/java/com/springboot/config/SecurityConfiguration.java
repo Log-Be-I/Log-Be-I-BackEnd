@@ -4,6 +4,7 @@ import com.springboot.auth.filter.JwtAuthenticationFilter;
 import com.springboot.auth.filter.JwtVerificationFilter;
 import com.springboot.auth.handler.*;
 import com.springboot.auth.jwt.JwtTokenizer;
+import com.springboot.auth.utils.CustomAuthenticationProvider;
 import com.springboot.auth.utils.CustomAuthorityUtils;
 import com.springboot.auth.utils.MemberDetailService;
 import com.springboot.member.repository.MemberRepository;
@@ -24,13 +25,16 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
@@ -81,8 +85,10 @@ public class SecurityConfiguration {
                 // 예외 핸들링
                 .exceptionHandling()
                 // 인증 예외 포인트 설정
+
                 .authenticationEntryPoint(new MemberAuthenticationEntryPoint())
                 // 접근 거부 예외 설정
+
                 .accessDeniedHandler(new MemberAccessDeniedHandler())
                 .and()
                 .apply(new CustomFilterConfigurer())
@@ -127,13 +133,20 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    @Bean
-    // 비밀번호 암호화 역할을 하는 bean 을 생성하는 메서드
-    public PasswordEncoder passwordEncoder() {
-        // 자동으로 적절한 암호화 알고리즘을 선택하는 PasswordEncoder 생성
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
+//    @Bean
+//    // 비밀번호 암호화 역할을 하는 bean 을 생성하는 메서드
+//    public PasswordEncoder passwordEncoder() {
+//        // 자동으로 적절한 암호화 알고리즘을 선택하는 PasswordEncoder 생성
+//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+//    }
+@Bean
+public PasswordEncoder passwordEncoder() {
+    DelegatingPasswordEncoder delegatingPasswordEncoder =
+            (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    delegatingPasswordEncoder.setDefaultPasswordEncoderForMatches(new BCryptPasswordEncoder());
 
+    return delegatingPasswordEncoder;
+}
     @Bean
         // 구체적인 CORS 정책을 설정
     CorsConfigurationSource corsConfigurationSource() {
@@ -184,16 +197,36 @@ public class SecurityConfiguration {
 //    public OAuthAuthenticationProvider oAuthAuthenticationProvider(MemberRepository memberRepository) {
 //        return new OAuthAuthenticationProvider(memberRepository);
 //    }
+//
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        // {bcrypt} 형식의 prefix를 자동으로 붙여주는 DelegatingPasswordEncoder 생성
+//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+//    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+
+        // ✅ OAuth provider 등록
+        builder.authenticationProvider(new OAuthAuthenticationProvider(memberRepository));
+        // ✅ Form Login provider 등록
+        PasswordEncoder encoder = passwordEncoder();
+        builder.authenticationProvider(new CustomAuthenticationProvider(memberRepository, encoder));
+
+        return builder.build();
+    }
 
 //    @Bean
-//    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-//        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
-//        builder.authenticationProvider(new OAuthAuthenticationProvider(memberRepository));
-//        return builder.build();
+//    public PasswordEncoder passwordEncoder() {
+//        // {bcrypt} 형식의 prefix를 자동으로 붙여주는 DelegatingPasswordEncoder 생성
+//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+//    }
 //    }
 //    @Bean
 //    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 //        return config.getAuthenticationManager();
 //    }
+
 
 }
