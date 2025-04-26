@@ -15,12 +15,13 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '11'
-
           distribution: 'zulu'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
+      - name: Clean Build
+        run: ./gradlew clean build
       - name: Docker build
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
@@ -49,6 +50,9 @@ jobs:
           CLOVA_CLIENT_ID: ${{ secrets.CLOVA_CLIENT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         run: |
           aws ssm send-command \
             --instance-ids i-0b18f5134cc5231ad \
@@ -68,6 +72,11 @@ jobs:
                   -e CLOVA_CLIENT_ID=${{ secrets.CLOVA_CLIENT_ID }} \\
                   -e GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} \\
                   -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \\
+                  -e REDIRECT_URI=${{ secrets.REDIRECT_URI }} \\
+                  -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \\
+                  -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \\
+                  -e NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }} \\
+                  -e NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }} \\
                   logbei'
             ]" \
             --output text

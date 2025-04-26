@@ -1,6 +1,5 @@
 package com.springboot.report.controller;
 
-
 import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.member.service.MemberService;
@@ -61,7 +60,7 @@ public class ReportController {
         List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
 
         return new ResponseEntity<>(new ListResponseDto<>(
-                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+                mapper.reportsToReportsResponseDtos(response)), HttpStatus.CREATED);
     }
 
 

@@ -5,6 +5,7 @@ import com.springboot.record.entity.Record;
 import com.springboot.record.service.RecordService;
 import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.report.entity.Report;
+
 import com.springboot.report.service.ReportService;
 import com.springboot.utils.ReportUtil;
 import lombok.RequiredArgsConstructor;
@@ -41,11 +42,12 @@ public class ReportScheduler {
         //분석 조건 : 기록이 10개 이상일 때만 실행
         if (weeklyRecords.size() >= 10) {
             //Map<String, List<Record>> weeklyTitleRecords = ReportUtil.groupRecordsByWeek(weeklyRecords);
+
             List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
+
             //ai에 해당 데이터 전달
             openAiService.createReportsFromAiInBatch(weeklies);
         }
-
     }
 
     @Scheduled(cron = "0 0 6 1 * *")
@@ -64,14 +66,12 @@ public class ReportScheduler {
             //월간 데이터 준비 및 AI에 전달
             List<Record> monthlyRecords = recordService.getMonthlyRecords(monthStart, monthEnd);
             // Map<String, List<Record>> monthlyTitleRecords = ReportUtil.groupRecordsByYearMonthWeek(monthlyRecords);
+
             List<ReportAnalysisRequest> monthlies = ReportUtil.toReportRequests(monthlyRecords, Report.ReportType.REPORT_MONTHLY);
+
             //ai에 해당 데이터 전달
             openAiService.createReportsFromAiInBatch(monthlies);
         }
-
-
     }
-
-
 
 }

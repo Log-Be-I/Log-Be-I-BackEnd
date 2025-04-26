@@ -1,11 +1,14 @@
 package com.springboot.auth.service;
 
 // Google OAuth 관련 로직을 처리하는 서비스 클래스
+
+import com.springboot.auth.dto.GoogleTokenResponse;
 import com.springboot.auth.jwt.JwtTokenizer;
 import com.springboot.member.entity.Member;
 import com.springboot.member.repository.MemberRepository;
 import com.springboot.oauth.GoogleInfoDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
@@ -20,9 +23,13 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class GoogleOAuthService {
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final MemberRepository memberRepository;
+    private final JwtTokenizer jwtTokenizer;
 
 
     // application.yml에서 Google OAuth client ID를 주입받음
@@ -33,23 +40,71 @@ public class GoogleOAuthService {
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String clientSecret;
 
-    // DB에서 회원 정보를 조회하기 위한 리포지토리
-    private final MemberRepository memberRepository;
-    // JWT 토큰을 생성하기 위한 유틸리티 클래스
-    private final JwtTokenizer jwtTokenizer;
+    // redirect uri
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+    private String redirectUri;
 
-    // 생성자를 통해 의존성 주입
-    public GoogleOAuthService(RedisTemplate redisTemplate, MemberRepository memberRepository, JwtTokenizer jwtTokenizer) {
-        this.redisTemplate = redisTemplate;
-        this.memberRepository = memberRepository;
-        this.jwtTokenizer = jwtTokenizer;
+    // 프론트에서 전달받은 code로 Google에 토큰 요청
+    public Map<String, String> getTokensFromCode(String code) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("code", code);
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("redirect_uri", redirectUri);
+        params.add("grant_type", "authorization_code");
+        System.out.println(params);
+        System.out.println(headers);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(
+                "https://oauth2.googleapis.com/token", request, GoogleTokenResponse.class
+        );
+
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            GoogleTokenResponse body = response.getBody();
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("access_token", body.getAccessToken());
+//            tokens.put("refresh_token", body.getRefreshToken());
+            tokens.put("id_token", body.getIdToken());
+
+            // refreshToken이 null 일 수도 있음
+            if (body.getRefreshToken() != null) {
+                tokens.put("refresh_token", body.getRefreshToken());
+            } else {
+                log.warn("💢💢💢💢💢 Google did not return a refresh_token.");
+            }
+            return tokens;
+        }
+        throw new RuntimeException("Google 토큰 발급 실패");
+    }
+
+    public void saveTempRefreshToken(String email, String refreshToken) {
+        if (refreshToken != null) {
+            redisTemplate.opsForValue().set("temp:refreshToken:" + email, refreshToken, 10, TimeUnit.MINUTES);
+        } else {
+            log.warn("⛔⛔⛔⛔ Tried to store null refresh_token for email : {}", email);
+        }
+
     }
 
     // 구글 사용자 정보로 로그인 처리: DB에서 사용자 찾고 토큰 발급
-    public Map<String, String> processUserLogin(GoogleInfoDto googleInfoDto) {
+    public Map<String, String> processUserLogin(GoogleInfoDto googleInfoDto, String refreshToken) {
         // 이메일 기준으로 DB에서 사용자 조회 (없으면 예외 발생)
         Member member = memberRepository.findByEmail(googleInfoDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
+
+        String existingRefreshToken = member.getRefreshToken();
+        if (!refreshToken.equals(existingRefreshToken)) {
+            member.setRefreshToken(refreshToken);
+            memberRepository.save(member);
+        }
+
+        redisTemplate.opsForValue().set("google:" + member.getEmail(), refreshToken,
+                jwtTokenizer.getRefreshTokenExpirationMinutes(), TimeUnit.MINUTES);
 
         return generateAuthTokens(member);
     }
@@ -80,67 +135,5 @@ public class GoogleOAuthService {
         tokens.put("accessToken", accessToken);
         tokens.put("refreshToken", refreshToken);
         return tokens;
-    }
-
-    // 프론트에서 전달된 인가 코드로 구글에 액세스 토큰 요청
-    public String getAccessTokenFromCode(String code) {
-        // RestTemplate 인스턴스 생성
-        RestTemplate restTemplate = new RestTemplate();
-
-        // HTTP 헤더 설정 (Content-Type: application/x-www-form-urlencoded)
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        // 요청 바디에 필요한 파라미터 설정
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("code", code);
-        params.add("client_id", clientId);
-        params.add("client_secret", clientSecret);
-        params.add("redirect_uri", "http://localhost:3000/"); // 프론트의 redirect URI
-        params.add("grant_type", "authorization_code");
-
-        // 헤더와 바디를 함께 담은 HttpEntity 생성
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-
-        // 구글 토큰 엔드포인트에 POST 요청 보내기
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "https://oauth2.googleapis.com/token", request, Map.class
-        );
-
-        // 응답에서 액세스 토큰 추출
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            String accessToken = response.getBody().get("access_token").toString();
-            String refreshToken = response.getBody().get("refresh_token").toString();
-
-            // 사용자 정보 조회 요청
-            HttpHeaders userInfoHeaders = new HttpHeaders();
-            userInfoHeaders.setBearerAuth(accessToken);
-            HttpEntity<Void> userInfoRequest = new HttpEntity<>(userInfoHeaders);
-
-            ResponseEntity<Map> userInfoResponse = restTemplate.exchange(
-                    "https://www.googleapis.com/oauth2/v3/userinfo",
-                    HttpMethod.GET,
-                    userInfoRequest,
-                    Map.class
-            );
-            if (userInfoResponse.getStatusCode() == HttpStatus.OK && userInfoResponse.getBody() != null) {
-                String email = userInfoResponse.getBody().get("email").toString();
-
-                // 회원 조회
-                Member member = memberRepository.findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
-
-                // refreshToken 저장
-                member.setRefreshToken(refreshToken);
-                memberRepository.save(member);
-
-                // Redis 저장 예시 (실제 RedisTemplate 주입 필요)
-                redisTemplate.opsForValue().set("google:"+ member.getEmail(), accessToken,
-                    jwtTokenizer.getAccessTokenExpirationMinutes(), TimeUnit.MINUTES);
-            }
-        }
-
-        // 예외 발생: 토큰 요청 실패
-        throw new RuntimeException("Failed to get access token from Google");
     }
 }
