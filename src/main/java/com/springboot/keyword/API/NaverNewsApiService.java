@@ -26,7 +26,7 @@ public class NaverNewsApiService {
         return StringEscapeUtils.unescapeHtml4(noHtml);
     }
 
-    public String searchNews(String keyword) throws IOException {
+    public String searchNews(String keyword, Long memberId) throws IOException {
         OkHttpClient client = new OkHttpClient();
 
         // 쿼리 파라미터 구성 (3개만 조회)
@@ -64,7 +64,8 @@ public class NaverNewsApiService {
             newsItem.put("pubDate", obj.get("pubDate").getAsString());
             result.add(newsItem);
 
-            log.info("link: {}" ,obj.get("link"));
+            // memberId 를 포함한 Log 찍기
+            log.info("memberId: {} link: {}" , memberId, obj.get("link"));
         }
 
         return new Gson().toJson(result);

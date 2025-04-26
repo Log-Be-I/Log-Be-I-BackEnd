@@ -25,13 +25,14 @@ public class LogStorageService {
             // key 는 곧 특정 리스트의 이름, message 는 단지 해당 리스트에 쌓일 뿐
             redisTemplate.opsForList().rightPush(key, message);
         } catch (Exception e) {
+            //
             logAndStoreWithError("Redis log save failed: {}", e.getMessage());
         }
 
     }
     // ✔️ 콘솔 + Redis 저장 한 번에
     public void logAndStoreWithError(String message, String eMessage) {
-        log.info(message);
+        log.info(message, eMessage); // "Redis log save failed: Not found"
         storeInfoLog(message);
     }
 

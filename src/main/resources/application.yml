@@ -1,7 +1,7 @@
 spring:
   data:
     redis:
-      host: 127.0.0.1
+      host: 172.31.41.9
       port: 6379
   application:
     name:  log-be-i
@@ -20,7 +20,7 @@ spring:
     show-sql: true      # (2) SQL 쿼리 출력
   sql:
     init:
-      data-locations: classpath*:db/h2/data.sql
+      data-locations: classpath*:db/mysql/data.sql
   security:
     oauth2:
       client:
