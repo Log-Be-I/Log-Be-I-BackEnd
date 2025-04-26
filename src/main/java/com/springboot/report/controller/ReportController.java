@@ -60,7 +60,7 @@ public class ReportController {
         List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
 
         return new ResponseEntity<>(new ListResponseDto<>(
-                mapper.reportsToReportsResponseDtos(response)), HttpStatus.CREATED);
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
     }
 
 
