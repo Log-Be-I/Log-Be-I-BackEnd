@@ -54,9 +54,10 @@ public class ReportController {
 //        Member findMember = memberService.validateExistingMember(customPrincipal.getMemberId());
         List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
 
-        List<ReportAnalysisRequest> weeklies = ReportUtil.createWeeklyReportRequests(weeklyRecords);
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
         // GPT 분석 → Report 생성 -> DB 저장
-        List<Report> response= openAiService.createReportsFromAi(weeklies);
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
 
         return new ResponseEntity<>(new ListResponseDto<>(
                 mapper.reportsToReportsResponseDtos(response)), HttpStatus.CREATED);
