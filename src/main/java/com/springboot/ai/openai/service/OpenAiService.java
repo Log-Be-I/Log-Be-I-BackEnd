@@ -24,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.nio.charset.StandardCharsets;
 
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -47,45 +49,22 @@ import java.util.stream.Collectors;
 public class OpenAiService {
     //api 키, baseUrl 등 설정 정보
     private final OpenAiProperties properties;
-    //JSON 직렬화/역직렬화 도구
+    //JSON 직렬화-역직렬화 도구
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ReportService reportService;
+    private static final int TIMEOUT_MILLIS = 60 * 1000;    //60초
+    private static final int MAX_RETRY_COUNT = 3;
 
-
-    //Report 최종 : List<Report> -> ReportService
-//    public List<Report> createReportsFromAi(List<ReportAnalysisRequest> requests) {
-//// createReportsFromAi 내부 재귀함수 여부 테스트
-//        List<ReportAnalysisResponse> response = requests.stream().map(
-//                request -> {
-//                    log.info("🌀 요청 처리 중 - request title: {}, memberId: {}", request.getReportTitle(), request.getMemberId());
-//                    return generateReportFromAi(request);
-//                }
-//        ).collect(Collectors.toList());
-//
-//
-//
-//        //List<ReportAnalysisRequest> -> List<ReportAnalysisResponse> 변경
-////        List<ReportAnalysisResponse> response = requests.stream().map(
-////                request -> generateReportFromAi(request)).collect(Collectors.toList());
-////
-////        //List<ReportAnalysisResponse> -> List<Report>
-//        List<Report> reports = reportService.analysisResponseToReportList(response);
-//
-//        return reports;
-////          return reportService.analysisResponseToReportList(requests.stream()
-////                  .map(request -> generateReportFromAi(request))
-////                  .collect(Collectors.toList()));
-//
-//    }
-
-    //GPT 분석 요청은 10명씩 끊어서 전달 : 토큰 절약 + 응답 지연 방지
+    //Report
+    //GPT한테 분석 정보(사용자의 기록)를 보내고 분석 받은 데이터를 List<Report>로 받음
     public List<Report> createReportsFromAiInBatch(List<ReportAnalysisRequest> requests) {
-        // 요청을 10명 단위로 분할
+        //GPT 분석 요청은 10명씩 끊어서 전달 : 토큰 절약 + 응답 지연 방지
         List<List<ReportAnalysisRequest>> batches = ReportUtil.partitionList(requests, 10);
+        //분석 정보를 반환 받을 빈객체 생성
         List<Report> allReports = new ArrayList<>();
 
-
-        //배치별로 GPT에 요청
+        //배치별(사용자 10명 단위)로 GPT에 요청
+        //List<ReportAnalysusRequest> -> List<ReportAnalysisResponse> -> List<Report>
         for (List<ReportAnalysisRequest> batch : batches) {
             List<Report> batchReports = processBatchWithGpt(batch);
             allReports.addAll(batchReports);
@@ -96,11 +75,15 @@ public class OpenAiService {
     }
 
     // GPT 호출 처리 (단일 배치)
-    private List<Report> processBatchWithGpt(List<ReportAnalysisRequest> batch) {
-        return batch.stream()
-                .map(this::generateReportFromAi)
+    private List<Report> processBatchWithGpt(List<ReportAnalysisRequest> requests) {
+
+        return requests.stream()
+                //List<ReportAnalysisRequest> -> List<ReportAnalysisResponse>
+                .map(request -> generateReportFromAi(request))
+                //List<ReportAnalysisResponse> -> List<Report>
                 .map(reportService::analysisResponseToReport)
                 .collect(Collectors.toList());
+
     }
     //Report
     //ReportAnalysisRequest -> JSON 문자열 -> aiRequest -> aiResponse. content -> Report
@@ -113,11 +96,10 @@ public class OpenAiService {
             String prompt = reportTypeWeeklyOrMonthly(request, recordJson);
             //OpenAI 요청
             OpenAiRequest aiRequest = buildChatRequest(prompt);
+            //GPT한테 요청 보내고 응답 받음
             OpenAiResponse aiResponse = sendToGpt(aiRequest);
             //content 추출 & JSON 파싱 전 줄바꿈 이스케이프 처리
             String content = extractContent(aiResponse);
-//            String fixedJson = escapeWithObjectMapper(content); //컨트롤 문자 -> 이스케이프 처리
-//            String aiContent =  extractContent(content);
             // JSON -> Map
             Map<String, String> contentMap = jsonToMap(content); //aiResponse = {OpenAiResponse@16415}
 
@@ -176,11 +158,6 @@ public class OpenAiService {
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {});
     }
-    //Jackson 라이브러리
-//    private String escapeWithObjectMapper(String raw) throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        return objectMapper.writeValueAsString(objectMapper.readValue(raw, Map.class));
-//    }
 
 
     //ReportAnalysisRequest 의 ReportType = Weekly or Monthly 인 경우 타입에 맞는 prompt 반환
@@ -195,47 +172,8 @@ public class OpenAiService {
         }
 
     }
-    // 단일 기록 JSON 문자열로 반환
-//    public String serializeClovaText(String clovaText) throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        return objectMapper.writeValueAsString(clovaText);
-//    }
 
-//    public String chatWithWeeklyPrompt(String recordJson) {
-//        return
-//                "다음은 사용자의 한 주간 기록 데이터야. 이를 기반으로 아래 4가지 항목을 분석해줘. " +
-//                        "분석 결과는 반드시 JSON 형식의 문자열로, 한 줄로 출력해. 줄바꿈이나 들여쓰기, 코드블럭 없이 출력해야 해. " +
-//                        "value 값은 사람이 읽기 좋은 문장으로, 줄바꿈이 필요할 경우 반드시 \\n 이스케이프 문자로 표현해. 실제 줄바꿈은 절대 하지 마.\n" +
-//
-//                        "[summary]\n" +
-//                        "- 6개의 기록 분류(일상, 소비, 할 일, 건강, 메모, 일정) 중 가장 많이 기록된 분류와 총 횟수, 주요 활동 1개.\n" +
-//                        "- 형식: 가장 많이 기록된 Category [건강], 총 횟수 [25], 주요 활동 [스트레칭]\n\n" +
-//
-//                        "[emotionRatio]\n" +
-//                        "- 감정 표현: 기쁨, 행복, 쾌활, 편안, 슬픔, 불만, 버럭, 불안 중 최소 3개~최대 5개\n" +
-//                        "- 각 감정은 0~10 점수로 표현하며, 마지막 줄에 긍정/중립/부정 비율을 백분율로 표시 (합 100%)\n" +
-//                        "- 예시: 기쁨: 6, 불안: 4, 편안: 7\\n[긍정: 60%, 중립: 30%, 부정: 10%]\n\n" +
-//
-//                        "[insight]\n" +
-//                        "- 자주 사용한 단어(1~3개) + 반복된 키워드(1~3개)\n" +
-//                        "- 시간, 날짜 단어(오늘, 내일, 아침 등)는 제외하고, 행동 또는 감정 중심으로 추출\n" +
-//                        "- 예시: 자주 사용한 단어: 진짜, 너무, 음\\n반복된 키워드: 저녁 산책, 친구 통화\n\n" +
-//
-//                        "[suggestion]\n" +
-//                        "- 한 주간 리듬이 깨졌던 요일 또는 활동에 대한 분석과 개선 제안 문장 (1~2줄)\n" +
-//                        "- 예시: 수요일 저녁에 집중력이 자주 낮아졌습니다.\\n루틴 조정이나 산책을 권장합니다.\n\n" +
-//
-//                        "JSON의 key는 summary, emotionRatio, insight, suggestion 네 가지이며 반드시 다음과 같은 구조로 반환해:\n" +
-//                        "분석 결과는 반드시 아래와 같은 JSON(key-value) 구조로, 코드블럭(```json) 없이 출력하세요.\n" +
-//                        "JSON 이외의 설명, 예시, 코드블럭, 주석, Map 선언 등은 절대 포함하지 마세요.\n" +
-//                        "반드시 한 줄짜리 JSON 문자열로 출력해줘. 줄바꿈(\\n), 들여쓰기, 공백 없이 출력해줘.\n" +
-//                        "{\"summary\":\"...\",\"emotionRatio\":\"...\",\"insight\":\"...\",\"suggestion\":\"...\"}\n" +
-//                        "※ 실제 줄바꿈 없이 한 줄로 출력해야 하며, \\n으로 표현된 줄바꿈만 허용해.\n\n" +
-//                        "<사용자 기록>\n" +
-//                        "----\n" + recordJson + "\n----";
-//    }
-
-    //주간 프롬프트 - Json 문자열을 param으로 받음
+    //Weekly Report Prompt
     public String chatWithWeeklyPrompt(String recordJson) {
 
         return  "다음은 사용자의 한 주간 기록 데이터야. 이를 기반으로 다음 6가지 항목을 분석해야해.\n" +
@@ -282,7 +220,8 @@ public class OpenAiService {
                 " - suggestion : \n" +
                 "입니다. \n\n" +
 
-                "JSON 이외의 설명, 예시, 코드블럭, 주석, Map 선언 등은 절대 포함하지 마세요.\n" +
+                "JSON 이외의 설명, 예시, 코드블럭, 주석, Map 선언 등은 절대 포함하지 말아줘.\n" +
+                "각 항목은 구체적이고 자연스러운 문장으로 2~4문장 정도로 표현하되, 생성되는 JSON 결과는 총 길이가 최소 200자 이상, 최대 1000자 미만이 되도록 작성해줘.\n" +
                 "반드시 한 줄짜리 JSON 문자열로 출력해줘. 줄바꿈(\n), 들여쓰기, 공백 없이 출력해줘.\n" +
                 "출력 형식 아래와 같습니다:\n\n" +
                 "예시 : \n" +
@@ -299,87 +238,87 @@ public class OpenAiService {
                 "----";
     }
 
-    //월간 프롬프트
+    //Monthly Report Prompt
     public String chatWithMonthlyPrompt(String recordJson) {
         return
                 "다음은 사용자의 한 달간 기록 데이터야. 이를 기반으로 다음 6가지 항목을 분석해야해.\n" +
-                        "출력은 사용자가 읽기 편하게 작성하며, 각 문장은 1~2줄마다 줄바꿈을 해야해.\n" +
+                "출력은 사용자가 읽기 편하게 작성하며, 각 문장은 1~2줄마다 줄바꿈을 해야해.\n" +
 
-                        "[summary]\n" +
-                        "6개의 기록 분류(일상, 소비, 할 일, 건강, 메모, 일정) 중에서\n" +
-                        "가장 많이 기록된 분류와 총 횟수, 그 안에서 가장 많이 수행된 활동 하나를 알려줘.\n" +
-                        "형식: 가장 많이 기록된 Category [건강], 총 횟수 [25], 주요 활동 [스트레칭]\n\n" +
+                "[summary]\n" +
+                "6개의 기록 분류(일상, 소비, 할 일, 건강, 메모, 일정) 중에서\n" +
+                "가장 많이 기록된 분류와 총 횟수, 그 안에서 가장 많이 수행된 활동 하나를 알려줘.\n" +
+                "형식: 가장 많이 기록된 Category [건강], 총 횟수 [25], 주요 활동 [스트레칭]\n\n" +
 
-                        "[emotionRatio]\n" +
-                        "- 감정 표현은 기쁨, 행복, 쾌활, 편안, 슬픔, 불만, 버럭, 불안 중 최소 3개~최대 5개 선택\n" +
-                        "- 각 감정은 0~10 점수로 표현\n" +
-                        "- 마지막에 긍정/중립/부정 비율을 백분율로 표시 (합계 100%)\n" +
-                        "형식 예시:\n" +
-                        "기쁨 : 6, 불만 : 4, 편안 : 7\n" +
-                        "[긍정 : 60%, 중립 : 30%, 부정 : 10%]\n\n" +
+                "[emotionRatio]\n" +
+                "- 감정 표현은 기쁨, 행복, 쾌활, 편안, 슬픔, 불만, 버럭, 불안 중 최소 3개~최대 5개 선택\n" +
+                "- 각 감정은 0~10 점수로 표현\n" +
+                "- 마지막에 긍정/중립/부정 비율을 백분율로 표시 (합계 100%)\n" +
+                "형식 예시:\n" +
+                "기쁨 : 6, 불만 : 4, 편안 : 7\n" +
+                "[긍정 : 60%, 중립 : 30%, 부정 : 10%]\n\n" +
 
-                        "[insight]\n" +
-                        "- 자주 사용한 단어(1~3개), 반복된 키워드(1~3개) 각각 알려줘\n" +
-                        "- 자주 사용한 단어는 일상어 위주로 하되, 오늘, 어제, 내일, 아침, 점심, 저녁 등\n" +
-                        "날짜나 시간대를 단순히 지칭하는 단어는 제외해줘.\n" +
-                        "- 반복된 키워드는 사용자의 행동 습관 또는 관심 주제 중심으로 분석해줘\n" +
-                        "형식:\n" +
-                        "자주 사용한 단어 : 진짜, 너무, 음\n" +
-                        "반복된 키워드 : 저녁 산책, 친구 통화, 출근길 커피\n\n" +
+                "[insight]\n" +
+                "- 자주 사용한 단어(1~3개), 반복된 키워드(1~3개) 각각 알려줘\n" +
+                "- 자주 사용한 단어는 일상어 위주로 하되, 오늘, 어제, 내일, 아침, 점심, 저녁 등\n" +
+                "날짜나 시간대를 단순히 지칭하는 단어는 제외해줘.\n" +
+                "- 반복된 키워드는 사용자의 행동 습관 또는 관심 주제 중심으로 분석해줘\n" +
+                "형식:\n" +
+                "자주 사용한 단어 : 진짜, 너무, 음\n" +
+                "반복된 키워드 : 저녁 산책, 친구 통화, 출근길 커피\n\n" +
 
-                        "[suggestion]\n" +
-                        "- 한 달간 리듬이 깨졌던 요일이나 이상 패턴을 분석\n" +
-                        "- 다음 달에 도움이 될 제안을 1~2문장 작성\n" +
-                        "형식:\n" +
-                        "수요일 저녁에 집중력이 자주 낮아졌습니다.\n" +
-                        "루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때?\"\n\n" +
+                "[suggestion]\n" +
+                "- 한 달간 리듬이 깨졌던 요일이나 이상 패턴을 분석\n" +
+                "- 다음 달에 도움이 될 제안을 1~2문장 작성\n" +
+                "형식:\n" +
+                "수요일 저녁에 집중력이 자주 낮아졌습니다.\n" +
+                "루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때?\"\n\n" +
 
-                        "[categoryStat]\n" +
-                        "- 5개 카테고리(일상, 소비, 할 일, 건강, 메모)별 활동 비율을 백분율로 표현\n" +
-                        "- 총합 100%, 해석도 함께 제공\n" +
-                        "형식:\n" +
-                        "일정 30%, 소비 25%, 건강 20%, 할일 25%로 나타났습니다.\n" +
-                        "일정과 소비 항목이 상대적으로 많았습니다.\n\n" +
+                "[categoryStat]\n" +
+                "- 5개 카테고리(일상, 소비, 할 일, 건강, 메모)별 활동 비율을 백분율로 표현\n" +
+                "- 총합 100%, 해석도 함께 제공\n" +
+                "형식:\n" +
+                "일정 30%, 소비 25%, 건강 20%, 할일 25%로 나타났습니다.\n" +
+                "일정과 소비 항목이 상대적으로 많았습니다.\n\n" +
 
-                        "[pattern]\n" +
-                        "- 활동이 집중된 시간대(예: 오전/오후), 요일별 기록량 패턴을 분석\n" +
-                        "- 제안도 함께 작성\n" +
-                        "형식:\n" +
-                        "기록 시간대는 오전(9~11시)에 집중되었고,\n" +
-                        "요일별로는 화요일과 금요일에 활동이 많았습니다.\n" +
-                        "다음 달에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\n\n" +
+                "[pattern]\n" +
+                "- 활동이 집중된 시간대(예: 오전/오후), 요일별 기록량 패턴을 분석\n" +
+                "- 제안도 함께 작성\n" +
+                "형식:\n" +
+                "기록 시간대는 오전(9~11시)에 집중되었고,\n" +
+                "요일별로는 화요일과 금요일에 활동이 많았습니다.\n" +
+                "다음 달에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\n\n" +
 
-                        "JSON 이외의 설명, 예시, 코드블럭, 주석, Map 선언 등은 절대 포함하지 마세요.\n" +
-                        "value는 사람이 읽기 좋은 문장입니다.\n" +
-                        "value에 여러 문장이 필요하면 \n(이스케이프 문자)로 줄바꿈하세요.\n" +
-                        "각 항목의 key는 \n " +
-                        " - summary : \n" +
-                        " - emotionRatio : \n" +
-                        " - insight : \n" +
-                        " - suggestion : \n" +
-                        " - categoryStat : \n" +
-                        " - pattern : \n" +
-                        "입니다. \n\n" +
-                        "분석 결과는 반드시 아래와 같은 JSON(key-value) 구조로만 출력하세요.\n" +
-                        "출력 형식 아래와 같습니다:\n\n" +
-                        "예시 : \n" +
-                        "{\n" +
-                        "  \"summary\": \"가장 많이 기록된 Category는 [건강]이고, 총 25회 기록되었습니다.\n주요 활동은 스트레칭 입니다.\n" +
-                        "  \"emotionRatio\": \"기쁨: 6, 불안: 4, 편안: 7 \n"+"[긍정: 60%, 중립: 30%, 부정: 10%]\n" +
-                        "  \"insight\": \"자주 사용한 단어: 진짜, 너무, 음\n반복된 키워드: 저녁 산책, 친구 통화, 출근길 커피\n" +
-                        "  \"suggestion\": \"수요일 저녁에 집중력이 자주 낮아졌습니다.\n루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때요?\n" +
-                        "  \"categoryStat\": \"일정 30%, 소비 25%, 건강 20%, 할일 25%로 나타났습니다.\n일정과 소비 항목이 상대적으로 많았습니다.\n" +
-                        "  \"pattern\": \"기록 시간대는 오전(9~11시)에 집중되었고, 요일별로는 화요일과 금요일에 활동이 많았습니다.\n다음 주에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\n" +
-                        "}\n\n" +
+                "JSON 이외의 설명, 예시, 코드블럭, 주석, Map 선언 등은 절대 포함하지 마세요.\n" +
+                "value는 사람이 읽기 좋은 문장입니다.\n" +
+                "value에 여러 문장이 필요하면 \n(이스케이프 문자)로 줄바꿈하세요.\n" +
+                "각 항목의 key는 \n " +
+                " - summary : \n" +
+                " - emotionRatio : \n" +
+                " - insight : \n" +
+                " - suggestion : \n" +
+                " - categoryStat : \n" +
+                " - pattern : \n" +
+                "입니다. \n\n" +
+                "분석 결과는 반드시 아래와 같은 JSON(key-value) 구조로만 출력하세요.\n" +
+                "출력 형식 아래와 같습니다:\n\n" +
+                "예시 : \n" +
+                "{\n" +
+                "  \"summary\": \"가장 많이 기록된 Category는 [건강]이고, 총 25회 기록되었습니다.\n주요 활동은 스트레칭 입니다.\n" +
+                "  \"emotionRatio\": \"기쁨: 6, 불안: 4, 편안: 7 \n"+"[긍정: 60%, 중립: 30%, 부정: 10%]\n" +
+                "  \"insight\": \"자주 사용한 단어: 진짜, 너무, 음\n반복된 키워드: 저녁 산책, 친구 통화, 출근길 커피\n" +
+                "  \"suggestion\": \"수요일 저녁에 집중력이 자주 낮아졌습니다.\n루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때요?\n" +
+                "  \"categoryStat\": \"일정 30%, 소비 25%, 건강 20%, 할일 25%로 나타났습니다.\n일정과 소비 항목이 상대적으로 많았습니다.\n" +
+                "  \"pattern\": \"기록 시간대는 오전(9~11시)에 집중되었고, 요일별로는 화요일과 금요일에 활동이 많았습니다.\n다음 주에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\n" +
+                "}\n\n" +
 
-                        "<사용자 기록>\n" +
-                        "----\n" +
-                        recordJson + "\n" +
-                        "----";
+                "<사용자 기록>\n" +
+                "----\n" +
+                recordJson + "\n" +
+                "----";
 
     }
 
-    // schedule 과 record 구분
+    // schedule or record 생성 Prompt
     public String chatWithScheduleAndRecord(String clovaJson, String time) {
         return "- 너는 다양한 사람들의 일기, 생활 기록, 메모 등을 분석하여 그 내용을 정확히 분류하는 **빅데이터 전문가야**\n" +
                 "- “input text”를 읽고 분석하여 1차 분류 이후, 분류된 항목에 맞는 2차 분류 기준에 따라 최종 분류하여 값을  3차 반환 기준이 안내하는 형태에 맞춰 최종 데이터를 반환한다.\n" +
@@ -519,7 +458,7 @@ public class OpenAiService {
                 "- \"startDateTime\" 과 \"endDateTime\"의 형태는 ISO 8601 Local Date-Time 형식으로 작성되어야 한다.";
     }
 
-    //    GPT 서버에 요청보내기 (ChatRequest 생성)
+    // GPT 서버에 요청보내기 (aiRequest 생성)
     public OpenAiRequest buildChatRequest(String prompt) {
         //메세지 구성 : system + user prompt
         List<OpenAiMessage> messages = List.of(
@@ -535,49 +474,82 @@ public class OpenAiService {
 
     }
 
-    // GPT 서버에 요청을 보내고 응답 content를 반환하는 메서드
+    // GPT 서버에 요청을 보내고 응답 content를 반환하는 메서드 (aiRequest -> aiResponse)
+//    public OpenAiResponse sendToGpt(OpenAiRequest request) throws IOException {
+//        //GPT API에 보낼 POST 요청 생성
+//        HttpPost post = new HttpPost(properties.getBaseUrl());
+//        //요청 헤더 설정 : 인증토큰과 JSON 타입 명시
+//        post.setHeader("Authorization", "Bearer " + properties.getApiKey());
+//        post.setHeader("Content-Type", "application/json");
+//        //ChatRequest 객체를 JSON 문자열로 직렬화 -> 요청 본문에 담기
+//        post.setEntity(new StringEntity(objectMapper.writeValueAsString(request), StandardCharsets.UTF_8));
+//
+//        //HTTP  클라이언트로 요청 전송 및 응답 수신
+//        try (CloseableHttpClient client = HttpClients.createDefault();
+//             CloseableHttpResponse response = client.execute(post)) {
+//
+//            //응답 JSON 문자열 꺼냄
+//            String json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+//            //JSON 문자열을 ChatResponse 객체로 역직렬화
+//            return objectMapper.readValue(json, OpenAiResponse.class);
+//        }
+//    }
+
+    // GPT 서버에 요청을 보내고 응답 content를 반환하는 메서드 (aiRequest -> aiResponse)
+    //타임아웃 : 연결, 요청, 응답 각 60초로 제한 + 리트라이 : 최대 3번까지 재시도, 실패 시 예외 처리
     public OpenAiResponse sendToGpt(OpenAiRequest request) throws IOException {
-        //GPT API에 보낼 POST 요청 생성
-        HttpPost post = new HttpPost(properties.getBaseUrl());
-        //요청 헤더 설정 : 인증토큰과 JSON 타입 명시
-        post.setHeader("Authorization", "Bearer " + properties.getApiKey());
-        post.setHeader("Content-Type", "application/json");
-        //ChatRequest 객체를 JSON 문자열로 직렬화 -> 요청 본문에 담기
-        post.setEntity(new StringEntity(objectMapper.writeValueAsString(request), StandardCharsets.UTF_8));
 
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(TIMEOUT_MILLIS)      // 연결 60초 제한
+                .setConnectionRequestTimeout(TIMEOUT_MILLIS)     // 요청 정보 가져오는데 걸리는 시간 : 60초 제한
+                .setSocketTimeout(TIMEOUT_MILLIS)       // 서버로부터 응답 기다리는 최대 시간 : 60초 제한
+                .build();
         //HTTP  클라이언트로 요청 전송 및 응답 수신
-        try (CloseableHttpClient client = HttpClients.createDefault();
-             CloseableHttpResponse response = client.execute(post)) {
+        try (CloseableHttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(config)    //모든 Http 요청에 대해 timeout 같은 설정을 자동으로 적용 해줌
+                .build()) {                             //일관된 방식으로 안전하게 관리됨 : 무한정 버벅거림x, 재시도 or 실패 처리 가능
 
-            //응답 JSON 문자열 꺼냄
-            String json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-            //JSON 문자열을 ChatResponse 객체로 역직렬화
-            return objectMapper.readValue(json, OpenAiResponse.class);
+            int retryCount = 0;
+                //리트라이 최대 3번까지 재시도, 실패 시 예외발생
+            while (retryCount < MAX_RETRY_COUNT) {
+                //GPT API에 보낼 POST 요청 생성
+                HttpPost post = new HttpPost("https://api.openai.com/v1/chat/completions");
+                //요청 헤더 설정 : 인증토큰과 JSON 타입 명시
+                post.setHeader("Authorization", "Bearer " + properties.getApiKey());
+                post.setHeader("Content-Type", "application/json");
+                //ChatRequest 객체를 JSON 문자열로 직렬화 -> 요청 본문에 담기
+                post.setEntity(new StringEntity(objectMapper.writeValueAsString(request), StandardCharsets.UTF_8));
+
+
+                try (CloseableHttpResponse response = client.execute(post)) {
+                    //응답 JSON 문자열 꺼냄
+                    String json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                    //JSON 문자열을 ChatResponse 객체로 역직렬화
+                    return objectMapper.readValue(json, OpenAiResponse.class);
+                } catch (IOException e) {
+                    retryCount++;
+                    log.warn("GPT 요청 실패 - 재시도 {}회 (최대 {}회)", retryCount, MAX_RETRY_COUNT);
+                    if (retryCount >= MAX_RETRY_COUNT) {
+                        log.error("GPT 요청 최종 실패");
+                        throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED);
+                    }
+                    try {
+                        Thread.sleep(2000); // 재시도 전 2초 대기: 네트워크 일시장애도 커버 가능
+                    } catch (InterruptedException interruptedException) {
+                        Thread.currentThread().interrupt();
+                        throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED);
+                    }
+                }
+            }
         }
+        //3번 실패하면 예외발생
+        throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED); // 이론상 도달하지 않음
     }
 
-    //content만 꺼내서 파싱
+
+//aiResponse - content 파싱 (-> Map<K,V>)
     public String extractContent(OpenAiResponse response) {
         return response.getChoices().get(0).getMessage().getContent();
     }
 
-//    // GPT 응답에서 실제 줄바꿈(\n)을 JSON 파싱 가능한 이스케이프(\\n)로 변경
-//    private String fixMultilineJson(String raw) {
-//        return raw
-//                .replaceAll("\\\\n", "\n")  // 이중 이스케이프된 줄바꿈 처리
-//                .replaceAll("\\\\\"", "\"") // 이중 이스케이프된 큰따옴표 처리
-//                .replaceAll("\\\\t", "\t")  // 탭도 혹시 있으니
-//                .trim();
-//    }
-
-    // 컨트롤 문자 제거 및 JSON 파싱 가능한 문자열로 escape 처리
-    private String escapeControlChars(String input) {
-        if (input == null) return null;
-        return input
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
-    }
 }

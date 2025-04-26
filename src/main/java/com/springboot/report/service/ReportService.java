@@ -10,13 +10,9 @@ import com.springboot.exception.ExceptionCode;
 
 import com.springboot.report.dto.ReportAnalysisResponse;
 import com.springboot.report.entity.Report;
-import com.springboot.report.mapper.ReportMapper;
 import com.springboot.report.repository.ReportRepository;
-import com.springboot.utils.ReportUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
@@ -29,22 +25,22 @@ import java.util.stream.Collectors;
 public class ReportService {
     private final MemberService memberService;
     private final ReportRepository repository;
-    private final ReportMapper mapper;
     private final GoogleTextToSpeechService googleTextToSpeechService;
 
     //ai가 분석한 content 타입변환 ReportAnalysisRequest -> ReportAnalysisResponse 변환
     public ReportAnalysisResponse aiRequestToResponse(ReportAnalysisRequest request, Map<String, String> contentMap) {
-
         //ReportAnalysisRequest -> ReportAnalysisResponse 매핑
         ReportAnalysisResponse response = new ReportAnalysisResponse();
         response.setMemberId(request.getMemberId());
         response.setReportTitle(request.getReportTitle());
         response.setMonthlyReportTitle(request.getMonthlyReportTitle());
+        //Map<K,V> -> chatGPT 한테 받은 JSON 형태의 분석 데이터 매핑
         response.setContent(contentMap);
 
         return response;
     }
 
+    //ReportAnalysisResponse -> Report 변환
     public Report analysisResponseToReport(ReportAnalysisResponse response) {
        //NPE 방지
         Member member = new Member();
@@ -63,55 +59,28 @@ public class ReportService {
         return report;
     }
 
-    //ai 응답 -> Report
+    // DB에 저장
     public List<Report> analysisResponseToReportList(List<Report> reports) {
-//
-//        List<Report> reports = responses.stream().map(
-//                response -> analysisResponseToReport(response)).collect(Collectors.toList());
-//
-//        //생성된 List<Report> DB 저장
-//        return repository.saveAll(reports);
-        try {
-//            List<Report> reports = responses.stream()
-//                    .map(response -> analysisResponseToReport(response))
-//                    .collect(Collectors.toList());
+        //생성된 List<Report> DB 저장
             log.info("📦 DB 저장 직전 - reports size: {}, titles: {}", reports.size(), reports.stream().map(Report::getTitle).collect(Collectors.toList()));
             return repository.saveAll(reports);
-        } catch (Exception e) {
-            log.error("💥 Report 변환 중 에러 발생", e);
-            throw e;
-        }
     }
 
 
-
-
-
-
-//    public List<Report> createReport(List<ReportAnalysisResponse> responses) {
-//
-//
-//        //mapper 로 매핑 List<ReportAnalysisResponse> -> List<Report> 변환
-//        List<Report> reports = mapper.analysisResponseToReportList(responses);
-//        reports.stream().map(report -> report.setPeriodNumber(extractPeriodNumber(response.getReportTitle()));)
-//
-//        return repository.saveAll(reports);
-//    }
-
-    //연도별 전체조회
-    public List<Report> findMonthlyReports(long memberId,int year) {
+    // GET : 연도별 전체조회
+    public List<Report> findMonthlyReports(long memberId, int year) {
         String yearStr = year + "년";
         return repository.findByMember_MemberIdAndMonthlyTitleStartingWith(memberId, yearStr);
     }
 
-    //Report
+    // GET : Report 상세조회
     public List<Report> findMonthlyTitleWithReports(String monthlyTitle, long memberId) {
         return repository.findByMember_MemberIdAndMonthlyTitle(memberId, monthlyTitle);
 
     }
 
-
-    public List<String> reportToClovaAudio(List<Long> reportsId, long memberId){
+    //등록된 Report -> TTS : 음성 출력
+    public List<String> reportToGoogleAudio(List<Long> reportsId, long memberId){
         // 유효한 회원인지 검증
         Member member = memberService.validateExistingMember(memberId);
         //활동중인 회원인지 확인
@@ -125,13 +94,13 @@ public class ReportService {
             // 생성된 파일 이름을 담을 리스트
             List<String> filePathList = new ArrayList<>();
             // 리포트 리스트를 돌면서 하나하나 TTS 변환기에 넣기
-            reportList.stream().forEach(record ->
+            reportList.stream().forEach(report ->
             {
                 try {
                     // UUID 로 겹치지 않는 파일명 생성
                     String fileName = UUID.randomUUID().toString() + ".mp3";
                     // 제목과 내용을 같이 전달해서 시작하는 글의 날짜를 말하게 함
-                    googleTextToSpeechService.synthesizeText(record.getTitle() + record.getContent(), fileName);
+                    googleTextToSpeechService.synthesizeText(report.getTitle() + report.getContent(), fileName);
                     // 생성된 파일 경로 복사
                     filePathList.add(fileName);
                 } catch (Exception e) {
@@ -168,7 +137,7 @@ public class ReportService {
         }
     }
 
-    //periodNumber가 0(월간) 이면 reportType Monthly로 변겸
+    //ReportType 설정
     public void setReportType(Report report){
         if(report.getPeriodNumber() == 0){
             //reportType -> month로 변경
@@ -179,7 +148,7 @@ public class ReportService {
         }
     }
 
-    //주간 분석 개수 반환
+    //주간 분석 개수 반환 : 월간 분석 조건 - 주간분석 2개 이상 시 실행
     public int getWeeklyReportCount(YearMonth lastMonth) {
         String yearMonthPrefix = String.format("%d년 %02d월", lastMonth.getYear(), lastMonth.getMonthValue());
         // 1. 해당 월의 주간 Report 개수 조회 (예: JPA 쿼리)

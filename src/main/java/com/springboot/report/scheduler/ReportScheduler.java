@@ -9,17 +9,22 @@ import com.springboot.report.entity.Report;
 import com.springboot.report.service.ReportService;
 import com.springboot.utils.ReportUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 
-
+@Slf4j
 @Component
+@EnableScheduling
 @RequiredArgsConstructor
 public class ReportScheduler {
     private final ReportService reportService;
@@ -29,6 +34,8 @@ public class ReportScheduler {
 
     //매주 월요일 07:00에 실행
     @Scheduled(cron = "0 0 7 * * MON")
+    @Transactional
+    @Async //비동기처리
     public void sendWeeklyRecordsToAi() throws IOException { //OpenAiService 내부에서 HTTP 요청 시 IOException 발생할 수 있음
         //오늘이 4/14(월) 라면, 전 주 월요일은 4/7
         LocalDateTime today = LocalDateTime.now();
@@ -41,16 +48,16 @@ public class ReportScheduler {
 
         //분석 조건 : 기록이 10개 이상일 때만 실행
         if (weeklyRecords.size() >= 10) {
-            //Map<String, List<Record>> weeklyTitleRecords = ReportUtil.groupRecordsByWeek(weeklyRecords);
-
             List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
-
+            log.info("✅ 주간 리포트 생성 시작");
             //ai에 해당 데이터 전달
             openAiService.createReportsFromAiInBatch(weeklies);
         }
     }
 
     @Scheduled(cron = "0 0 6 1 * *")
+    @Transactional
+    @Async //비동기처리
     public void sendMonthlyRecordsToAi() throws IOException {
 
         YearMonth lastMonth = YearMonth.now().minusMonths(1);
@@ -65,10 +72,8 @@ public class ReportScheduler {
         if (weeklyReportCount >= 2) {
             //월간 데이터 준비 및 AI에 전달
             List<Record> monthlyRecords = recordService.getMonthlyRecords(monthStart, monthEnd);
-            // Map<String, List<Record>> monthlyTitleRecords = ReportUtil.groupRecordsByYearMonthWeek(monthlyRecords);
-
             List<ReportAnalysisRequest> monthlies = ReportUtil.toReportRequests(monthlyRecords, Report.ReportType.REPORT_MONTHLY);
-
+            log.info("✅ 월간 리포트 생성 시작");
             //ai에 해당 데이터 전달
             openAiService.createReportsFromAiInBatch(monthlies);
         }

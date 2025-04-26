@@ -16,7 +16,7 @@ public interface ReportMapper {
 
 
     //Report 전체 목록 조회
-    default List<ReportDto.summaryResponse> reportTosummaryResponse (List<Report> reports){
+    default List<ReportDto.summaryResponse> reportToSummaryResponse (List<Report> reports){
         //monthlyTitle 기준으로 Map<String, String>> 형태로 그룹핑
         return  reports.stream().collect(Collectors.groupingBy(
                 report -> report.getMonthlyTitle(), //각 report에서 monthlyTitle -> key로 추출

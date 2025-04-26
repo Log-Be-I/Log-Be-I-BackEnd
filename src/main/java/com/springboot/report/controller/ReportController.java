@@ -27,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 @Slf4j
 @RestController
 @RequestMapping("/reports")
@@ -50,8 +49,7 @@ public class ReportController {
         LocalDateTime weekStart = today.minusWeeks(1).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
         //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
-
-//        Member findMember = memberService.validateExistingMember(customPrincipal.getMemberId());
+        //
         List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
 
         List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
@@ -63,14 +61,12 @@ public class ReportController {
                 mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
     }
 
-
-
     // 구글 TTS (유저가 선택한 reportId 리스트를 받는다)
     @PostMapping("/audio")
     public ResponseEntity<List<String>> generateTts(@RequestBody List<Long> reportsId,
                                               @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-        List<String> audioReports =  reportService.reportToClovaAudio(reportsId, customPrincipal.getMemberId());
+        List<String> audioReports =  reportService.reportToGoogleAudio(reportsId, customPrincipal.getMemberId());
 
      return new ResponseEntity<>(audioReports, HttpStatus.OK);
     }
@@ -84,7 +80,7 @@ public class ReportController {
 
         List<Report> reports = reportService.findMonthlyReports(customPrincipal.getMemberId(), searchYear);
 
-        return new ResponseEntity<>(new ListResponseDto<>(mapper.reportTosummaryResponse(reports)), HttpStatus.OK);
+        return new ResponseEntity<>(new ListResponseDto<>(mapper.reportToSummaryResponse(reports)), HttpStatus.OK);
     }
 
     //Report - MonthlyTitle 상세 그룹 조회
