@@ -78,12 +78,12 @@ public class OpenAiService {
 //
 //    }
 
-
     //GPT 분석 요청은 10명씩 끊어서 전달 : 토큰 절약 + 응답 지연 방지
     public List<Report> createReportsFromAiInBatch(List<ReportAnalysisRequest> requests) {
         // 요청을 10명 단위로 분할
         List<List<ReportAnalysisRequest>> batches = ReportUtil.partitionList(requests, 10);
         List<Report> allReports = new ArrayList<>();
+
 
         //배치별로 GPT에 요청
         for (List<ReportAnalysisRequest> batch : batches) {
@@ -120,10 +120,12 @@ public class OpenAiService {
 //            String aiContent =  extractContent(content);
             // JSON -> Map
             Map<String, String> contentMap = jsonToMap(content); //aiResponse = {OpenAiResponse@16415}
+
             // generateReportFromAi 내부
             log.info("✅ contentMap 파싱 성공 - memberId: {}, contentMap keys: {}", request.getMemberId(), contentMap.keySet());
             //결과 매핑
             return reportService.aiRequestToResponse(request, contentMap);
+
 
         } catch (IOException e) {
             log.error("GPT 분석 실패 - memberId: " + request.getMemberId(), e);
@@ -236,72 +238,9 @@ public class OpenAiService {
     //주간 프롬프트 - Json 문자열을 param으로 받음
     public String chatWithWeeklyPrompt(String recordJson) {
 
-       return  "다음은 사용자의 한 주간 기록 데이터야. 이를 기반으로 다음 6가지 항목을 분석해야해.\n" +
-               "출력은 사용자가 읽기 편하게 작성하며, 각 문장은 1~2줄마다 줄바꿈을 해야해.\n" +
-               "분석 결과는 Map<String, String> 형태로 저장해줘.\n\n" +
-
-               "[summary]\n" +
-               "6개의 기록 분류(일상, 소비, 할 일, 건강, 메모, 일정) 중에서\n" +
-               "가장 많이 기록된 분류와 총 횟수, 그 안에서 가장 많이 수행된 활동 하나를 알려줘.\n" +
-               "형식: 가장 많이 기록된 Category [건강], 총 횟수 [25], 주요 활동 [스트레칭]\n\n" +
-
-               "[emotionRatio]\n" +
-               "- 감정 표현은 기쁨, 행복, 쾌활, 편안, 슬픔, 불만, 버럭, 불안 중 최소 3개~최대 5개 선택\n" +
-               "- 각 감정은 0~10 점수로 표현\n" +
-               "- 마지막에 긍정/중립/부정 비율을 백분율로 표시 (합계 100%)\n" +
-               "형식 예시:\n" +
-               "기쁨 : 6, 불만 : 4, 편안 : 7\n" +
-               "[긍정 : 60%, 중립 : 30%, 부정 : 10%]\n\n" +
-
-               "[insight]\n" +
-               "- 자주 사용한 단어(1~3개), 반복된 키워드(1~3개) 각각 알려줘\n" +
-               "- 자주 사용한 단어는 일상어 위주로 하되, 오늘, 어제, 내일, 아침, 점심, 저녁 등\n" +
-               "날짜나 시간대를 단순히 지칭하는 단어는 제외해줘.\n" +
-               "- 반복된 키워드는 사용자의 행동 습관 또는 관심 주제 중심으로 분석해줘\n" +
-               "형식:\n" +
-               "자주 사용한 단어 : 진짜, 너무, 음\n" +
-               "반복된 키워드 : 저녁 산책, 친구 통화, 출근길 커피\n\n" +
-
-               "[suggestion]\n" +
-               "- 한 달간 리듬이 깨졌던 요일이나 이상 패턴을 분석\n" +
-               "- 다음 달에 도움이 될 제안을 1~2문장 작성\n" +
-               "형식:\n" +
-               "수요일 저녁에 집중력이 자주 낮아졌습니다.\n" +
-               "루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때?\"\n\n" +
-
-               "분석 결과는 반드시 아래와 같은 JSON(key-value) 구조로, 코드블럭(```json) 없이 출력하세요.\n" +
-               "value는 사람이 읽기 좋은 문장입니다.\n" +
-               "value에 여러 문장이 필요하면 반드시 \n(이스케이프 문자)로 줄바꿈하세요.\n" +
-               "절대 실제 줄바꿈은 하지 마세요.\n" +
-               "각 항목의 key는 \n " +
-               " - summary : \n" +
-               " - emotionRatio : \n" +
-               " - insight : \n" +
-               " - suggestion : \n" +
-               "입니다. \n\n" +
-
-               "JSON 이외의 설명, 예시, 코드블럭, 주석, Map 선언 등은 절대 포함하지 마세요.\n" +
-               "반드시 한 줄짜리 JSON 문자열로 출력해줘. 줄바꿈(\n), 들여쓰기, 공백 없이 출력해줘.\n" +
-               "출력 형식 아래와 같습니다:\n\n" +
-               "예시 : \n" +
-               "{\n"
-               + "\"summary\": \"가장 많이 기록된 Category는 [건강]이고, 총 25회 기록되었습니다. 주요 활동은 스트레칭 입니다.\n"
-               + "\"emotionRatio\": \"기쁨: 6, 불안: 4, 편안: 7 [긍정: 60%, 중립: 30%, 부정: 10%]\n"
-               + "\"insight\": \"자주 사용한 단어: 진짜, 너무, 음, 반복된 키워드: 저녁 산책, 친구 통화, 출근길 커피\n"
-               + "\"suggestion\": \"수요일 저녁에 집중력이 자주 낮아졌습니다. 루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때요?\n"
-               + "}\n" +
-
-               "<사용자 기록>\n" +
-               "----\n" +
-               recordJson + "\n" +
-               "----";
-    }
-
-    //월간 프롬프트
-     public String chatWithMonthlyPrompt(String recordJson) {
-        return
-                "다음은 사용자의 한 달간 기록 데이터야. 이를 기반으로 다음 6가지 항목을 분석해야해.\n" +
+        return  "다음은 사용자의 한 주간 기록 데이터야. 이를 기반으로 다음 6가지 항목을 분석해야해.\n" +
                 "출력은 사용자가 읽기 편하게 작성하며, 각 문장은 1~2줄마다 줄바꿈을 해야해.\n" +
+                "분석 결과는 Map<String, String> 형태로 저장해줘.\n\n" +
 
                 "[summary]\n" +
                 "6개의 기록 분류(일상, 소비, 할 일, 건강, 메모, 일정) 중에서\n" +
@@ -332,48 +271,111 @@ public class OpenAiService {
                 "수요일 저녁에 집중력이 자주 낮아졌습니다.\n" +
                 "루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때?\"\n\n" +
 
-                "[categoryStat]\n" +
-                "- 5개 카테고리(일상, 소비, 할 일, 건강, 메모)별 활동 비율을 백분율로 표현\n" +
-                "- 총합 100%, 해석도 함께 제공\n" +
-                "형식:\n" +
-                "일정 30%, 소비 25%, 건강 20%, 할일 25%로 나타났습니다.\n" +
-                "일정과 소비 항목이 상대적으로 많았습니다.\n\n" +
-
-                "[pattern]\n" +
-                "- 활동이 집중된 시간대(예: 오전/오후), 요일별 기록량 패턴을 분석\n" +
-                "- 제안도 함께 작성\n" +
-                "형식:\n" +
-                "기록 시간대는 오전(9~11시)에 집중되었고,\n" +
-                "요일별로는 화요일과 금요일에 활동이 많았습니다.\n" +
-                "다음 달에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\n\n" +
-
-                "JSON 이외의 설명, 예시, 코드블럭, 주석, Map 선언 등은 절대 포함하지 마세요.\n" +
+                "분석 결과는 반드시 아래와 같은 JSON(key-value) 구조로, 코드블럭(```json) 없이 출력하세요.\n" +
                 "value는 사람이 읽기 좋은 문장입니다.\n" +
-                "value에 여러 문장이 필요하면 \n(이스케이프 문자)로 줄바꿈하세요.\n" +
+                "value에 여러 문장이 필요하면 반드시 \n(이스케이프 문자)로 줄바꿈하세요.\n" +
+                "절대 실제 줄바꿈은 하지 마세요.\n" +
                 "각 항목의 key는 \n " +
                 " - summary : \n" +
                 " - emotionRatio : \n" +
                 " - insight : \n" +
                 " - suggestion : \n" +
-                " - categoryStat : \n" +
-                " - pattern : \n" +
                 "입니다. \n\n" +
-                "분석 결과는 반드시 아래와 같은 JSON(key-value) 구조로만 출력하세요.\n" +
+
+                "JSON 이외의 설명, 예시, 코드블럭, 주석, Map 선언 등은 절대 포함하지 마세요.\n" +
+                "반드시 한 줄짜리 JSON 문자열로 출력해줘. 줄바꿈(\n), 들여쓰기, 공백 없이 출력해줘.\n" +
                 "출력 형식 아래와 같습니다:\n\n" +
                 "예시 : \n" +
-                "{\n" +
-                "  \"summary\": \"가장 많이 기록된 Category는 [건강]이고, 총 25회 기록되었습니다.\n주요 활동은 스트레칭 입니다.\n" +
-                "  \"emotionRatio\": \"기쁨: 6, 불안: 4, 편안: 7 \n"+"[긍정: 60%, 중립: 30%, 부정: 10%]\n" +
-                "  \"insight\": \"자주 사용한 단어: 진짜, 너무, 음\n반복된 키워드: 저녁 산책, 친구 통화, 출근길 커피\n" +
-                "  \"suggestion\": \"수요일 저녁에 집중력이 자주 낮아졌습니다.\n루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때요?\n" +
-                "  \"categoryStat\": \"일정 30%, 소비 25%, 건강 20%, 할일 25%로 나타났습니다.\n일정과 소비 항목이 상대적으로 많았습니다.\n" +
-                "  \"pattern\": \"기록 시간대는 오전(9~11시)에 집중되었고, 요일별로는 화요일과 금요일에 활동이 많았습니다.\n다음 주에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\n" +
-                "}\n\n" +
+                "{\n"
+                + "\"summary\": \"가장 많이 기록된 Category는 [건강]이고, 총 25회 기록되었습니다. 주요 활동은 스트레칭 입니다.\n"
+                + "\"emotionRatio\": \"기쁨: 6, 불안: 4, 편안: 7 [긍정: 60%, 중립: 30%, 부정: 10%]\n"
+                + "\"insight\": \"자주 사용한 단어: 진짜, 너무, 음, 반복된 키워드: 저녁 산책, 친구 통화, 출근길 커피\n"
+                + "\"suggestion\": \"수요일 저녁에 집중력이 자주 낮아졌습니다. 루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때요?\n"
+                + "}\n" +
 
                 "<사용자 기록>\n" +
                 "----\n" +
                 recordJson + "\n" +
                 "----";
+    }
+
+    //월간 프롬프트
+    public String chatWithMonthlyPrompt(String recordJson) {
+        return
+                "다음은 사용자의 한 달간 기록 데이터야. 이를 기반으로 다음 6가지 항목을 분석해야해.\n" +
+                        "출력은 사용자가 읽기 편하게 작성하며, 각 문장은 1~2줄마다 줄바꿈을 해야해.\n" +
+
+                        "[summary]\n" +
+                        "6개의 기록 분류(일상, 소비, 할 일, 건강, 메모, 일정) 중에서\n" +
+                        "가장 많이 기록된 분류와 총 횟수, 그 안에서 가장 많이 수행된 활동 하나를 알려줘.\n" +
+                        "형식: 가장 많이 기록된 Category [건강], 총 횟수 [25], 주요 활동 [스트레칭]\n\n" +
+
+                        "[emotionRatio]\n" +
+                        "- 감정 표현은 기쁨, 행복, 쾌활, 편안, 슬픔, 불만, 버럭, 불안 중 최소 3개~최대 5개 선택\n" +
+                        "- 각 감정은 0~10 점수로 표현\n" +
+                        "- 마지막에 긍정/중립/부정 비율을 백분율로 표시 (합계 100%)\n" +
+                        "형식 예시:\n" +
+                        "기쁨 : 6, 불만 : 4, 편안 : 7\n" +
+                        "[긍정 : 60%, 중립 : 30%, 부정 : 10%]\n\n" +
+
+                        "[insight]\n" +
+                        "- 자주 사용한 단어(1~3개), 반복된 키워드(1~3개) 각각 알려줘\n" +
+                        "- 자주 사용한 단어는 일상어 위주로 하되, 오늘, 어제, 내일, 아침, 점심, 저녁 등\n" +
+                        "날짜나 시간대를 단순히 지칭하는 단어는 제외해줘.\n" +
+                        "- 반복된 키워드는 사용자의 행동 습관 또는 관심 주제 중심으로 분석해줘\n" +
+                        "형식:\n" +
+                        "자주 사용한 단어 : 진짜, 너무, 음\n" +
+                        "반복된 키워드 : 저녁 산책, 친구 통화, 출근길 커피\n\n" +
+
+                        "[suggestion]\n" +
+                        "- 한 달간 리듬이 깨졌던 요일이나 이상 패턴을 분석\n" +
+                        "- 다음 달에 도움이 될 제안을 1~2문장 작성\n" +
+                        "형식:\n" +
+                        "수요일 저녁에 집중력이 자주 낮아졌습니다.\n" +
+                        "루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때?\"\n\n" +
+
+                        "[categoryStat]\n" +
+                        "- 5개 카테고리(일상, 소비, 할 일, 건강, 메모)별 활동 비율을 백분율로 표현\n" +
+                        "- 총합 100%, 해석도 함께 제공\n" +
+                        "형식:\n" +
+                        "일정 30%, 소비 25%, 건강 20%, 할일 25%로 나타났습니다.\n" +
+                        "일정과 소비 항목이 상대적으로 많았습니다.\n\n" +
+
+                        "[pattern]\n" +
+                        "- 활동이 집중된 시간대(예: 오전/오후), 요일별 기록량 패턴을 분석\n" +
+                        "- 제안도 함께 작성\n" +
+                        "형식:\n" +
+                        "기록 시간대는 오전(9~11시)에 집중되었고,\n" +
+                        "요일별로는 화요일과 금요일에 활동이 많았습니다.\n" +
+                        "다음 달에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\n\n" +
+
+                        "JSON 이외의 설명, 예시, 코드블럭, 주석, Map 선언 등은 절대 포함하지 마세요.\n" +
+                        "value는 사람이 읽기 좋은 문장입니다.\n" +
+                        "value에 여러 문장이 필요하면 \n(이스케이프 문자)로 줄바꿈하세요.\n" +
+                        "각 항목의 key는 \n " +
+                        " - summary : \n" +
+                        " - emotionRatio : \n" +
+                        " - insight : \n" +
+                        " - suggestion : \n" +
+                        " - categoryStat : \n" +
+                        " - pattern : \n" +
+                        "입니다. \n\n" +
+                        "분석 결과는 반드시 아래와 같은 JSON(key-value) 구조로만 출력하세요.\n" +
+                        "출력 형식 아래와 같습니다:\n\n" +
+                        "예시 : \n" +
+                        "{\n" +
+                        "  \"summary\": \"가장 많이 기록된 Category는 [건강]이고, 총 25회 기록되었습니다.\n주요 활동은 스트레칭 입니다.\n" +
+                        "  \"emotionRatio\": \"기쁨: 6, 불안: 4, 편안: 7 \n"+"[긍정: 60%, 중립: 30%, 부정: 10%]\n" +
+                        "  \"insight\": \"자주 사용한 단어: 진짜, 너무, 음\n반복된 키워드: 저녁 산책, 친구 통화, 출근길 커피\n" +
+                        "  \"suggestion\": \"수요일 저녁에 집중력이 자주 낮아졌습니다.\n루틴을 조정해보거나 짧은 산책을 넣어보는 건 어때요?\n" +
+                        "  \"categoryStat\": \"일정 30%, 소비 25%, 건강 20%, 할일 25%로 나타났습니다.\n일정과 소비 항목이 상대적으로 많았습니다.\n" +
+                        "  \"pattern\": \"기록 시간대는 오전(9~11시)에 집중되었고, 요일별로는 화요일과 금요일에 활동이 많았습니다.\n다음 주에는 저녁 시간대에도 짧은 루틴을 만들어보세요.\n" +
+                        "}\n\n" +
+
+                        "<사용자 기록>\n" +
+                        "----\n" +
+                        recordJson + "\n" +
+                        "----";
 
     }
 
@@ -517,7 +519,7 @@ public class OpenAiService {
                 "- \"startDateTime\" 과 \"endDateTime\"의 형태는 ISO 8601 Local Date-Time 형식으로 작성되어야 한다.";
     }
 
-//    GPT 서버에 요청보내기 (ChatRequest 생성)
+    //    GPT 서버에 요청보내기 (ChatRequest 생성)
     public OpenAiRequest buildChatRequest(String prompt) {
         //메세지 구성 : system + user prompt
         List<OpenAiMessage> messages = List.of(
@@ -548,7 +550,7 @@ public class OpenAiService {
              CloseableHttpResponse response = client.execute(post)) {
 
             //응답 JSON 문자열 꺼냄
-             String json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            String json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
             //JSON 문자열을 ChatResponse 객체로 역직렬화
             return objectMapper.readValue(json, OpenAiResponse.class);
         }
