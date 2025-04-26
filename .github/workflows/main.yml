@@ -51,6 +51,8 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+          RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         run: |
@@ -73,6 +75,10 @@ jobs:
                   -e GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} \\
                   -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \\
                   -e REDIRECT_URI=${{ secrets.REDIRECT_URI }} \\
+                  -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \\
+                  -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \\
+                  -e RDS_USERNAME=${{ secrets.RDS_USERNAME }} \\
+                  -e RDS_PASSWORD=${{ secrets.RDS_PASSWORD }} \\
                   -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \\
                   -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \\
                   -e NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }} \\
