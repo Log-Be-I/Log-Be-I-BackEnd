@@ -46,7 +46,6 @@ public class QuestionService {
         return questionRepository.save(findQuestion);
     }
 
-
     //관리자의 질문글 전체 조회
     public Page<Question> findQuestions(int page, int size, String sortType, Member currentMember){
         // 페이지 번호 검증

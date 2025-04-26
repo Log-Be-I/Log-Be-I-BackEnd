@@ -1,6 +1,5 @@
 package com.springboot.utils;
 
-import com.springboot.member.entity.Member;
 import com.springboot.record.entity.Record;
 import com.springboot.report.dto.RecordForAnalysisDto;
 import com.springboot.report.dto.ReportAnalysisRequest;
@@ -15,55 +14,18 @@ import java.util.stream.Collectors;
 public class ReportUtil {
     /**
      * 주어진 날짜가 해당 월의 몇 번째 주인지 반환
+     *
      * @param dateTime LocalDate 객체
      * @return 1~5 (1주차~5주차)
      */
     public static int getWeekOfMonth(LocalDateTime dateTime) {
-      //항상 월요일 시작으로 고정
+        //항상 월요일 시작으로 고정
         return dateTime.toLocalDate().get(WeekFields.of(DayOfWeek.MONDAY, 1).weekOfMonth());
     }
 
     /**
-     * Record 리스트를 주차별로 그룹핑
-     * @param records Record 리스트
-     * @return 주차(1~5)를 key로, 해당 주차의 Record 리스트를 value로 하는 Map
-     */
-//    public static Map<String, List<Record>> groupRecordsByWeek(List<Record> records) {
-//       //주차별 <1주차, 기록>
-//        Map<String, List<Record>> weekMap = new HashMap<>();
-//        for (Record record : records) {
-//            LocalDateTime dateTime = record.getRecordDateTime();
-//            int year = dateTime.getYear();
-//            int month = dateTime.getMonthValue();
-//            int week = getWeekOfMonth(dateTime); // 주차 계산 (예 : 1 ) -> 1주차
-//            String key = String.format("%d년 %02d월 %d주차", year, month, week); // 예) 2025-04-1
-//            // 해당 주차의 리스트가 없으면 새로 생성 후 추가
-//            weekMap.computeIfAbsent(key, k -> new ArrayList<>()).add(record);
-//        }
-//        return weekMap;
-//    }
-//
-//    /**
-//     * Record 리스트를 월별로 그룹핑
-//     * @param records Record 리스트
-//     * @return 월별 key로, 해당 월의 Record 리스트를 value로 하는 Map
-//     */
-//    public static Map<String, List<Record>> groupRecordsByYearMonthWeek(List<Record> records) {
-//        //주차별 <1주차, 기록>
-//        Map<String, List<Record>> weekMap = new HashMap<>();
-//        for (Record record : records) {
-//            LocalDateTime dateTime = record.getRecordDateTime();
-//            int year = dateTime.getYear();
-//            int month = dateTime.getMonthValue();
-//            String key = String.format("%d년 %02d월", year, month); // 예) 2025년 04월
-//            // 해당 주차의 리스트가 없으면 새로 생성 후 추가
-//            weekMap.computeIfAbsent(key, k -> new ArrayList<>()).add(record);
-//        }
-//        return weekMap;
-//    }
-
-    /**
      * 주간 Report의 title 생성
+     *
      * @param dateTime 주간 대표 날짜(예: 월요일)
      * @return "YYYY년 MM월 N주차" 형태의 문자열
      */
@@ -76,6 +38,7 @@ public class ReportUtil {
 
     /**
      * 월간 Report의 title 생성
+     *
      * @param dateTime 주간 대표 날짜(예: 월요일)
      * @return "YYYY년 MM월" 형태의 문자열
      */
@@ -84,6 +47,7 @@ public class ReportUtil {
         int month = dateTime.getMonthValue();
         return String.format("%d년 %02d월", year, month);
     }
+
 
     // ... 기존 코드 유지
 
@@ -102,7 +66,7 @@ public class ReportUtil {
 //        //records순회하면서
 //        for (Record record : records) {
 //            if(record.getMember().getMemberId() != null) {
-////                Long memberId = record.getMember().getMemberId();
+    ////                Long memberId = record.getMember().getMemberId();
 //                String reportTitle = getWeeklyReportTitle(record.getRecordDateTime());
 //                String monthlyReportTitle = getMonthlyReportTitle(record.getRecordDateTime());
 //
@@ -133,45 +97,65 @@ public class ReportUtil {
 //        return result;
 //    }
     //주간 Report 생성 준비
-    public static List<ReportAnalysisRequest> createWeeklyReportRequests(List<Record> records) {
+//    public static List<ReportAnalysisRequest> createWeeklyReportRequests(List<Record> records) {
+//
+//        List<RecordForAnalysisDto> analysisDtoList = recordsToRecordsForAnalysisDto(records);
+//        return records.stream().map(record -> recordToWeeklyAnalysisRequest(record,analysisDtoList)).collect(Collectors.toList());
+//
+//    }
+//
+//    //월간 Report 생성 준비
+//    public static List<ReportAnalysisRequest> createMonthlyReportRequests(List<Record> records) {
+//
+//        List<RecordForAnalysisDto> analysisDtoList = recordsToRecordsForAnalysisDto(records);
+//        return records.stream().map(record -> recordToMonthlyAnalysisRequest(record, analysisDtoList)).collect(Collectors.toList());
+//    }
 
-        List<RecordForAnalysisDto> analysisDtoList = recordsToRecordsForAnalysisDto(records);
-        return records.stream().map(record -> recordToWeeklyAnalysisRequest(record,analysisDtoList)).collect(Collectors.toList());
+    //List<Rcord> -> List<ReportAnalysisRequest>
+    public static List<ReportAnalysisRequest> toReportRequests(List<Record> records, Report.ReportType type) {
+        //Map : 필요한 정보만 뽑아오기 위한 중간다리 역할
+        Map<Long, List<Record>> grouped = records.stream()
+                .collect(Collectors.groupingBy(record -> record.getMember().getMemberId()));  // Map<K,V> 반환
 
+        //Key : memberId , value : List<Record>
+        return grouped.entrySet().stream().map(entry -> {
+            Long memberId = entry.getKey();
+            List<Record> memberRecords = entry.getValue();
+
+            //Record 의 content, recordDateTime, categoryName 옮겨서 List
+            List<RecordForAnalysisDto> dtos = memberRecords.stream()
+                    .map(record -> new RecordForAnalysisDto(record.getContent(), record.getRecordDateTime(), record.getCategory().getName()))
+                    .collect(Collectors.toList());
+
+            LocalDateTime baseTime = memberRecords.get(0).getRecordDateTime();
+
+            //List<ReportAnalysisRequest>  생성 및 반환
+            return new ReportAnalysisRequest(
+                    getWeeklyReportTitle(baseTime), // 또는 getMonthlyTitle
+                    getMonthlyReportTitle(baseTime),
+                    memberId,
+                    type,
+                    dtos
+            );
+        }).collect(Collectors.toList());
     }
 
-    //월간 Report 생성 준비
-    public static List<ReportAnalysisRequest> createMonthlyReportRequests(List<Record> records) {
 
-        List<RecordForAnalysisDto> analysisDtoList = recordsToRecordsForAnalysisDto(records);
-        return records.stream().map(record -> recordToMonthlyAnalysisRequest(record,analysisDtoList)).collect(Collectors.toList());
+    // 요청 분할 유틸
+    public static <T> List<List<T>> partitionList(List<T> list, int size) {
+        List<List<T>> result = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += size) {
+            result.add(list.subList(i, Math.min(i + size, list.size())));
+        }
+        return result;
+    }
 
-    }
-    //weekly Record info
-    public static ReportAnalysisRequest recordToWeeklyAnalysisRequest(Record record, List<RecordForAnalysisDto> analysisDtoList){
-        return new ReportAnalysisRequest(
-                getWeeklyReportTitle(record.getRecordDateTime()),
-                getMonthlyReportTitle(record.getRecordDateTime()),
-                record.getMember().getMemberId(),
-                Report.ReportType.REPORT_WEEKLY,
-                analysisDtoList
-        );
-    }
-    //Monthly Record info
-    public static ReportAnalysisRequest recordToMonthlyAnalysisRequest(Record record, List<RecordForAnalysisDto> analysisDtoList){
-        return new ReportAnalysisRequest(
-                getMonthlyReportTitle(record.getRecordDateTime()),
-                getMonthlyReportTitle(record.getRecordDateTime()),
-                record.getMember().getMemberId(),
-                Report.ReportType.REPORT_MONTHLY,
-                analysisDtoList
-        );
-    }
+
 
     //List<Record> -> List<RecordForAnalysisDto>
     public static List<RecordForAnalysisDto> recordsToRecordsForAnalysisDto (List<Record> records) {
-       return records.stream().map(
-               record -> recordToRecordForAnalysisDto(record)).collect(Collectors.toList());
+        return records.stream().map(
+                record -> recordToRecordForAnalysisDto(record)).collect(Collectors.toList());
     }
 
     public static RecordForAnalysisDto recordToRecordForAnalysisDto(Record record) {
