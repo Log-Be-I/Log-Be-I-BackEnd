@@ -1,6 +1,5 @@
 package com.springboot.utils;
 
-import com.springboot.member.entity.Member;
 import com.springboot.record.entity.Record;
 import com.springboot.report.dto.RecordForAnalysisDto;
 import com.springboot.report.dto.ReportAnalysisRequest;
@@ -98,19 +97,19 @@ public class ReportUtil {
 //        return result;
 //    }
     //주간 Report 생성 준비
-    public static List<ReportAnalysisRequest> createWeeklyReportRequests(List<Record> records) {
-
-        List<RecordForAnalysisDto> analysisDtoList = recordsToRecordsForAnalysisDto(records);
-        return records.stream().map(record -> recordToWeeklyAnalysisRequest(record,analysisDtoList)).collect(Collectors.toList());
-
-    }
-
-    //월간 Report 생성 준비
-    public static List<ReportAnalysisRequest> createMonthlyReportRequests(List<Record> records) {
-
-        List<RecordForAnalysisDto> analysisDtoList = recordsToRecordsForAnalysisDto(records);
-        return records.stream().map(record -> recordToMonthlyAnalysisRequest(record,analysisDtoList)).collect(Collectors.toList());
-
+//    public static List<ReportAnalysisRequest> createWeeklyReportRequests(List<Record> records) {
+//
+//        List<RecordForAnalysisDto> analysisDtoList = recordsToRecordsForAnalysisDto(records);
+//        return records.stream().map(record -> recordToWeeklyAnalysisRequest(record,analysisDtoList)).collect(Collectors.toList());
+//
+//    }
+//
+//    //월간 Report 생성 준비
+//    public static List<ReportAnalysisRequest> createMonthlyReportRequests(List<Record> records) {
+//
+//        List<RecordForAnalysisDto> analysisDtoList = recordsToRecordsForAnalysisDto(records);
+//        return records.stream().map(record -> recordToMonthlyAnalysisRequest(record, analysisDtoList)).collect(Collectors.toList());
+//    }
 
     //List<Rcord> -> List<ReportAnalysisRequest>
     public static List<ReportAnalysisRequest> toReportRequests(List<Record> records, Report.ReportType type) {
@@ -150,7 +149,7 @@ public class ReportUtil {
         }
         return result;
     }
-}
+
 
 
     //List<Record> -> List<RecordForAnalysisDto>
