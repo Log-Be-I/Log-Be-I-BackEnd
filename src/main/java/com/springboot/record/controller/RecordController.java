@@ -124,7 +124,7 @@ public class RecordController {
                                      @Positive @RequestParam("size") int size,
                                      @RequestParam("categoryName") String categoryName,
                                      @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-                                     @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+                                     @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
         Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(), categoryName, startDate, endDate);
 
