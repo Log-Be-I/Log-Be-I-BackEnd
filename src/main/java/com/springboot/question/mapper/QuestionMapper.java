@@ -42,6 +42,7 @@ public interface QuestionMapper {
                         question.getQuestionStatus(),
                         question.getImage(),
                         question.getMember().getMemberId(),
+                        question.getMember().getEmail(),
                         answerResponse,
                         question.getCreatedAt(),
                         question.getModifiedAt(),
