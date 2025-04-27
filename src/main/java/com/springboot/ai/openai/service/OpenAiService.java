@@ -12,6 +12,7 @@ import com.springboot.ai.openai.dto.OpenAiRequest;
 import com.springboot.ai.openai.dto.OpenAiResponse;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.log.LogStorageService;
 import com.springboot.member.entity.Member;
 import com.springboot.record.entity.Record;
 import com.springboot.report.dto.RecordForAnalysisDto;
@@ -52,8 +53,10 @@ public class OpenAiService {
     //JSON 직렬화-역직렬화 도구
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ReportService reportService;
+    private final LogStorageService logStorageService;
     private static final int TIMEOUT_MILLIS = 60 * 1000;    //60초
     private static final int MAX_RETRY_COUNT = 3;
+
 
     //Report
     //GPT한테 분석 정보(사용자의 기록)를 보내고 분석 받은 데이터를 List<Report>로 받음
@@ -104,7 +107,7 @@ public class OpenAiService {
             Map<String, String> contentMap = jsonToMap(content); //aiResponse = {OpenAiResponse@16415}
 
             // generateReportFromAi 내부
-            log.info("✅ contentMap 파싱 성공 - memberId: {}, contentMap keys: {}", request.getMemberId(), contentMap.keySet());
+            log.info("contentMap parse success - memberId: {}, contentMap keys: {}", request.getMemberId(), contentMap.keySet());
             //결과 매핑
             return reportService.aiRequestToResponse(request, contentMap);
 
@@ -123,19 +126,28 @@ public class OpenAiService {
         ZoneId seoulZone = ZoneId.of("Asia/Seoul");
         LocalDateTime nowKST = LocalDateTime.now(seoulZone);  // ← 이렇게 해야 정확히 KST
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> map = mapper.readValue(text, new TypeReference<>() {});
-        String value = map.get("text");
-        // 사용자 입력 text -> JSON 으로 변경
-        String prompt = chatWithScheduleAndRecord(value, nowKST.toString());
-        // GPT 요청 객체 생성
-        OpenAiRequest chatRequest = buildChatRequest(prompt);
-        // 실제 GPT 서버에 요청 보내고 응답 받기
-        OpenAiResponse chatResponse = sendToGpt(chatRequest);
-        // 응답 중 필요한 텍스트만 추출
-        String content = extractContent(chatResponse);
+        Map<String, String> map = mapper.readValue(text, new TypeReference<>() {
+        });
+        try {
+            String value = map.get("text");
+            // 사용자 입력 text -> JSON 으로 변경
+            String prompt = chatWithScheduleAndRecord(value, nowKST.toString());
+            // GPT 요청 객체 생성
+            OpenAiRequest chatRequest = buildChatRequest(prompt);
+            // 실제 GPT 서버에 요청 보내고 응답 받기
+            OpenAiResponse chatResponse = sendToGpt(chatRequest);
+            // 응답 중 필요한 텍스트만 추출
+            String content = extractContent(chatResponse);
+            logStorageService.logAndStoreWithError("GPT_audio_record process: {}", "GPT", "content");
+            // json 역직렬화 (JSON -> Map)
+            return jsonToMap(content);
+        }
+        catch (IOException e) {
+            log.error("createRecordOrSchedule Failed - reason: {}", e.getMessage(), e);
+            logStorageService.logAndStoreWithError("GPT_audio_record Failed", "GPT", e.getMessage());
+            throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED); // 너가 따로 정의한 예외 던짐
+        }
 
-        // json 역직렬화 (JSON -> Map)
-        return jsonToMap(content);
     }
 
     //기록 리스트 JSON 문자열로 직렬화 (객체 -> JSON)
@@ -528,7 +540,8 @@ public class OpenAiService {
                     return objectMapper.readValue(json, OpenAiResponse.class);
                 } catch (IOException e) {
                     retryCount++;
-                    log.warn("GPT 요청 실패 - 재시도 {}회 (최대 {}회)", retryCount, MAX_RETRY_COUNT);
+//                    log.warn("GPT 요청 실패 - 재시도 {}회 (최대 {}회)", retryCount, MAX_RETRY_COUNT);
+                    logStorageService.logAndStoreWithError("GPT 요청 실패 - 재시도 {}회 (최대 {}회)", "GPT", retryCount, "3");
                     if (retryCount >= MAX_RETRY_COUNT) {
                         log.error("GPT 요청 최종 실패");
                         throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED);
@@ -536,12 +549,14 @@ public class OpenAiService {
                     try {
                         Thread.sleep(2000); // 재시도 전 2초 대기: 네트워크 일시장애도 커버 가능
                     } catch (InterruptedException interruptedException) {
+
                         Thread.currentThread().interrupt();
                         throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED);
                     }
                 }
             }
         }
+        logStorageService.logAndStoreWithError("GPT 요청 실패: {}", "GPT", ExceptionCode.REPORT_GENERATION_FAILED.getMessage());
         //3번 실패하면 예외발생
         throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED); // 이론상 도달하지 않음
     }
