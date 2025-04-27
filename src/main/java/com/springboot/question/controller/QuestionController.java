@@ -66,7 +66,7 @@ public class QuestionController {
     public ResponseEntity postQuestion(@RequestBody QuestionDto.Post dto,
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         // dto에 memberId set
-        dto.setMemberId(customPrincipal.getMemberId());
+//        dto.setMemberId(customPrincipal.getMemberId());
         // mapper로 dto -> entity
         Question question = questionMapper.questionPostToQuestion(dto);
         // question만들고

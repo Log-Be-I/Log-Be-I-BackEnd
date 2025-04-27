@@ -1,6 +1,7 @@
 package com.springboot.question.dto;
 
 import com.springboot.answer.dto.AnswerDto;
+import com.springboot.member.dto.MemberResponseDto;
 import com.springboot.question.entity.Question;
 import com.springboot.validator.NotSpace;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -66,6 +67,7 @@ public class QuestionDto {
         private Question.QuestionStatus questionStatus;
         private String questionImage;
         private Long memberId;
+        private String writerEmail;
         private AnswerDto.Response answer;
         private LocalDateTime createdAt;
         private LocalDateTime modifiedAt;

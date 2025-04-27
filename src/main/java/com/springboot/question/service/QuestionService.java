@@ -24,8 +24,8 @@ public class QuestionService {
 
     public Question createQuestion(Question question, Long memberId){
         //회원이 존재하는지 확인
-        memberService.validateExistingMember(memberId);
-
+        Member member = memberService.validateExistingMember(memberId);
+        question.setMember(member);
         return questionRepository.save(question);
     }
 
