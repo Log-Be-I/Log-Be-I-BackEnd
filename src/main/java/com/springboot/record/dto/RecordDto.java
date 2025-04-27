@@ -70,7 +70,7 @@ public class RecordDto {
         private String content;
         private Record.RecordStatus recordStatus;
         private Long memberId;
-        private CategoryDto.Response category;
+        private Long categoryId;
     }
 
 }

@@ -1,7 +1,5 @@
 package com.springboot.record.mapper;
 
-import com.springboot.category.dto.CategoryDto;
-import com.springboot.category.entity.Category;
 import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.Record;
 import org.mapstruct.Mapper;
@@ -24,8 +22,6 @@ public interface RecordMapper {
     @Mapping(target = "category.categoryId", source = "categoryId")
     @Mapping(target = "recordDateTime", expression = "java(updateStringToLocalDateTime(patch.getRecordDateTime()))")
     Record recordPatchDtoToRecord(RecordDto.Patch patch);
-//    @Mapping(target = "categoryId", source = "category.categoryId")
-//    RecordDto.Response recordToRecordResponse(Record record);
 
     default RecordDto.Response recordToRecordResponse(Record record) {
         RecordDto.Response response = new RecordDto.Response(
@@ -33,16 +29,10 @@ public interface RecordMapper {
                 record.getContent(),
                 record.getRecordStatus(),
                 record.getMember().getMemberId(),
-                categoryToCategoryResponse(record.getCategory())
+                record.getCategory().getCategoryId()
 
         );
         return response;
-    }
-    default CategoryDto.Response categoryToCategoryResponse(Category category) {
-        CategoryDto.Response categoryResponseDto = new CategoryDto.Response();
-        categoryResponseDto.setCategoryId(category.getCategoryId());
-        categoryResponseDto.setName(category.getName());
-       return categoryResponseDto;
     }
 
     default List<RecordDto.Response> recordsToRecordResponses(List<Record> records) {

@@ -5,7 +5,6 @@ import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
-import com.springboot.member.service.MemberService;
 import com.springboot.record.dto.RecordDto;
 import com.springboot.record.entity.Record;
 import com.springboot.record.mapper.RecordMapper;
@@ -28,11 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.io.IOException;
-
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
+
 
 import java.util.List;
 import java.util.Map;
@@ -122,11 +118,11 @@ public class RecordController {
     @GetMapping("/records")
     public ResponseEntity getRecords(@Positive @RequestParam("page") int page,
                                      @Positive @RequestParam("size") int size,
-                                     @RequestParam("categoryName") String categoryName,
+                                     @RequestParam("categoryId") Long categoryId,
                                      @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
                                      @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
-        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(), categoryName, startDate, endDate);
+        Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(), categoryId, startDate, endDate);
 
         List<Record> records = recordPage.getContent();
         return new ResponseEntity<>( new MultiResponseDto<>(

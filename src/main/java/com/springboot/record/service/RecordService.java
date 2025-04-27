@@ -167,10 +167,9 @@ public class RecordService {
     }
 
     //기록 전체 조회
-
-    public Page<Record> findRecords(int page, int size, long memberId, String categoryName, LocalDateTime startDate, LocalDateTime endDate) {
+    public Page<Record> findRecords(int page, int size, long memberId, Long categoryId, LocalDateTime startDate, LocalDateTime endDate) {
         Member foundmember = memberService.validateExistingMember(memberId);
-        categoryService.verifyExistsCategory(foundmember, categoryName);
+        categoryService.findVerifiedCategory(categoryId);
 
 
         if(page < 1) {
@@ -180,10 +179,10 @@ public class RecordService {
 
         Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.ASC, "recordDateTime"));
 
-        if(categoryName.equals("전체")){
+        if(categoryId == 0){
             return repository.findAllByMember_MemberIdAndRecordDateTimeBetween(memberId, startDate, endDate, pageable);
         } else {
-            return repository.findAllByMember_MemberIdAndCategory_NameAndRecordDateTimeBetween(memberId, categoryName, startDate, endDate, pageable);
+            return repository.findAllByMember_MemberIdAndCategory_CategoryIdAndRecordDateTimeBetween(memberId, categoryId, startDate, endDate, pageable);
 
         }
     }
