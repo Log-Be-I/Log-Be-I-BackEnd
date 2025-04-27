@@ -137,7 +137,7 @@ public class MemberService {
     }
 
     // 조건에 맞춘 회원 검색 결과
-    public List<Member> findFilterMembers (List<Member> members, Map<String, String> filters, String email, String name ) {
+    public List<Member> findFilterMembers (List<Member> members, Map<String, String> filters, String email, String name, String region ) {
         List<Member> filteredMember = new ArrayList<>(members);
         // 검색 조건
         // email 과 name 전부 들어왔다면
@@ -170,6 +170,12 @@ public class MemberService {
         if(filters.get("memberStatus") != null) {
             filteredMember = filteredMember.stream().filter(member ->
                             member.getMemberStatus().equals(filters.get("memberStatus")))
+                    .collect(Collectors.toList());
+        }
+        // region 으로 필터링
+        if (region != null) {
+            filteredMember = filteredMember.stream().filter(member ->
+                    member.getRegion() == region)
                     .collect(Collectors.toList());
         }
         return filteredMember;

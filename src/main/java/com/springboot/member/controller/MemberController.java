@@ -200,7 +200,8 @@ public class MemberController {
                                      @RequestParam(value = "member_Status", required = false) String memberStatus,
                                      @RequestParam(value = "birth", required = false) String birth,
                                      @RequestParam(value = "email", required = false) String email,
-                                     @RequestParam(value =  "name", required = false) String name) {
+                                     @RequestParam(value =  "name", required = false) String name,
+                                     @RequestParam(value = "region", required = false) String region) {
 
         Map<String, String> filters = new HashMap<>();
         // 출생년도 조건이 들어왔을때
@@ -215,7 +216,7 @@ public class MemberController {
 
         Page<Member> pageMember = memberService.findMembers(page-1, size, sortBy, order);
 
-        List<Member> members = memberService.findFilterMembers(pageMember.getContent(), filters, email, name);
+        List<Member> members = memberService.findFilterMembers(pageMember.getContent(), filters, email, name, region);
 
         return new ResponseEntity<>(
                 new MultiResponseDto<>(memberMapper.membersToMemberResponseDtos(members), pageMember), HttpStatus.OK
