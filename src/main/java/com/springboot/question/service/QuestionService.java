@@ -47,7 +47,7 @@ public class QuestionService {
     }
 
     //관리자의 질문글 전체 조회
-    public Page<Question> findQuestions(int page, int size, String sortType, Member currentMember){
+    public Page<Question> findQuestions(int page, int size, String sortType, String answerFilter, Member currentMember){
         // 페이지 번호 검증
         if(page < 1){
             throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
@@ -58,8 +58,14 @@ public class QuestionService {
         }
         Sort sort = getSortType(sortType);
         Pageable pageable = PageRequest.of(page -1, size, sort);
+
+        if("answered".equalsIgnoreCase(answerFilter)) {
+
+        }
         // 비활성화 글 제외하고 조회
         Page<Question> questionPage = questionRepository.findAllQuestionsWithoutDeactivated(pageable);
+
+
         return questionPage;
     }
 
