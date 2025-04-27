@@ -36,7 +36,7 @@ public class DataInitializer implements CommandLineRunner {
             member01.setName("관리자02");
             member01.setProfile("url");
             member01.setEmail("admin2@gmail.com");
-            member01.setRoles(List.of("ROLE_ADMIN", "ROLE_USER"));
+            member01.setRoles(List.of("ADMIN", "USER"));
             member01.setRefreshToken(passwordEncoder.encode("5678"));
 
             Member member03 = new Member();
@@ -46,7 +46,7 @@ public class DataInitializer implements CommandLineRunner {
             member03.setName("관리자03");
             member03.setProfile("url");
             member03.setEmail("admin3@gmail.com");
-            member03.setRoles(List.of("ROLE_ADMIN", "ROLE_USER"));
+            member03.setRoles(List.of("ADMIN", "USER"));
             member03.setRefreshToken(passwordEncoder.encode("9012"));
 
             userRepository.saveAll(List.of(
