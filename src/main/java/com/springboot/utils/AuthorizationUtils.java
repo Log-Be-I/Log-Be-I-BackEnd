@@ -39,10 +39,12 @@ public class AuthorizationUtils {
 
     // 로그인한 사용자와 작성자가 동일한지 확인하는 메서드
     public static boolean isOwner(long ownerId, long authenticatedId) {
-        if (ownerId != authenticatedId) {
-            throw new BusinessLogicException(ExceptionCode.UNAUTHORIZED_OPERATION);
-        }
-        return true;
+        // 다르면 바로 예외 발생 관리자 여부를 체크할 기회조차 X.
+//        if (ownerId != authenticatedId) {
+//            throw new BusinessLogicException(ExceptionCode.UNAUTHORIZED_OPERATION);
+//        }
+//        return true;
+        return ownerId == authenticatedId;
     }
 
     //작성자가 관리자인지 확인하고 아니라면 예외 던지는 메서드

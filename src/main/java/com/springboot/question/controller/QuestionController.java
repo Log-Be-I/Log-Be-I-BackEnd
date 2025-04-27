@@ -131,7 +131,7 @@ public class QuestionController {
 
     // 관리자용 전체조회
     //Spring Security에서 제공, 관리자만 접근하도록 설정
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/office")
     public ResponseEntity getQuestions(@Positive @RequestParam int page, @Positive @RequestParam int size,
                                        @RequestParam(defaultValue = "newest") String sortType,

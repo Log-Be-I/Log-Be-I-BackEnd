@@ -24,6 +24,7 @@ public interface QuestionMapper {
     default QuestionDto.Response questionToQuestionResponse(Question question) {
         AnswerDto.Response answerResponse = new AnswerDto.Response();
         if(question.getAnswer() != null) {
+            answerResponse.setAnswerId(question.getAnswer().getAnswerId());  // ✅ 추가!
             answerResponse.setQuestionId(question.getQuestionId());
             answerResponse.setMemberId(question.getAnswer().getMember().getMemberId());
             answerResponse.setContent(question.getAnswer().getContent());

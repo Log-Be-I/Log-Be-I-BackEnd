@@ -38,7 +38,8 @@ public class CustomAuthorityUtils {
         // 권한 리스트를 스트림으로 변환
         return roles.stream()
                 // map 으로 순회하며 스프링 시큐리티가 사용가능한 형태로 "ROLE_" 붙여줌
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                //.map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 }
