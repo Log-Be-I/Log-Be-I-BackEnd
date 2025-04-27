@@ -24,6 +24,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -134,12 +136,19 @@ public class QuestionController {
     //@PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/office")
     public ResponseEntity getQuestions(@Positive @RequestParam int page, @Positive @RequestParam int size,
-                                       @RequestParam(defaultValue = "newest") String sortType,
-                                       @RequestParam("answerFilter") String answerFilter,   //
+                                       @RequestParam(value = "sortType", defaultValue = "newest") String sortType,
+                                       @RequestParam(value = "onlyNotAnswer", defaultValue = "false") boolean onlyNotAnswer,
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         Member currentMember = memberService.validateExistingMember(customPrincipal.getMemberId());
-        Page<Question> questionPage = questionService.findQuestions(page, size, sortType, answerFilter, currentMember);
+
+        PageRequest pageRequest = PageRequest.of(page -1,
+                size,
+                sortType.equalsIgnoreCase("newest")
+                    ? Sort.by(Sort.Direction.DESC, "questionId")
+                    : Sort.by(Sort.Direction.ASC,"questionId"));
+
+        Page<Question> questionPage = questionService.findQuestions(pageRequest, onlyNotAnswer, currentMember);
         List<Question> questions = questionPage.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>
                 (questionMapper.questionsToQuestionResponses(questions), questionPage), HttpStatus.OK);

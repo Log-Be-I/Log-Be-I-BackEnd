@@ -71,6 +71,8 @@ public class RecordDto {
         private Record.RecordStatus recordStatus;
         private Long memberId;
         private Long categoryId;
+        private LocalDateTime createdAt;
+        private LocalDateTime modifiedAt;
     }
 
 }

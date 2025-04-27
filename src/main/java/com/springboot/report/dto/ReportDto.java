@@ -5,6 +5,7 @@ import com.springboot.report.entity.Report;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -28,5 +29,6 @@ public class ReportDto {
         private Map<String, String> content;
         private Report.ReportType reportType;
         private int periodNumber;
+        private LocalDateTime createdAt;
     }
 }
