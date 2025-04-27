@@ -142,7 +142,7 @@ public class MemberService {
         // 검색 조건
         // email 과 name 전부 들어왔다면
         if(email != null && name != null) {
-            filteredMember = filteredMember.stream().filter(member -> {
+            filteredMember = members.stream().filter(member -> {
                 Objects.equals(member.getEmail(), email);
                 Objects.equals(member.getName(), name);
                 return true;
@@ -150,13 +150,13 @@ public class MemberService {
 
             // email 만 들어왔을 때
         } else if (email != null){
-            filteredMember = filteredMember.stream().filter(member ->
+            filteredMember = members.stream().filter(member ->
                             Objects.equals(member.getEmail(), email))
                     .collect(Collectors.toList());
 
             // name 만 들어왔을 때
         } else if (name != null) {
-            filteredMember = filteredMember.stream().filter(member ->
+            filteredMember = members.stream().filter(member ->
                             Objects.equals(member.getName(), name))
                     .collect(Collectors.toList());
         }

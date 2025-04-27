@@ -1,9 +1,11 @@
 package com.springboot.utils;
 
+import com.springboot.log.LogStorageService;
 import com.springboot.record.entity.Record;
 import com.springboot.report.dto.RecordForAnalysisDto;
 import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.report.entity.Report;
+import lombok.RequiredArgsConstructor;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -11,6 +13,7 @@ import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
 
+//@RequiredArgsConstructor
 public class ReportUtil {
     /**
      * 주어진 날짜가 해당 월의 몇 번째 주인지 반환
@@ -18,6 +21,8 @@ public class ReportUtil {
      * @param dateTime LocalDate 객체
      * @return 1~5 (1주차~5주차)
      */
+//    private final LogStorageService  logStorageService;
+
     public static int getWeekOfMonth(LocalDateTime dateTime) {
         //항상 월요일 시작으로 고정
         return dateTime.toLocalDate().get(WeekFields.of(DayOfWeek.MONDAY, 1).weekOfMonth());
@@ -147,6 +152,7 @@ public class ReportUtil {
         for (int i = 0; i < list.size(); i += size) {
             result.add(list.subList(i, Math.min(i + size, list.size())));
         }
+
         return result;
     }
 
