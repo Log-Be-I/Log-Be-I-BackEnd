@@ -87,7 +87,7 @@ public class KeywordController {
         List<Map<String, Object>> response = new ArrayList<>();
 
         for (Keyword keyword : keywordList) {
-            String newsJson = naverNewsApiService.searchNews(keyword.getName());
+            String newsJson = naverNewsApiService.searchNews(keyword.getName(), customPrincipal.getMemberId());
             log.info("Request{}:{}", customPrincipal.getEmail(), keyword.getName());
             // JSON 문자열을 리스트로 파싱
             List<Map<String, String>> newsList = new Gson().fromJson(newsJson, List.class);
