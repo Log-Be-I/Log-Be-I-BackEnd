@@ -171,7 +171,6 @@ public class RecordService {
         Member foundmember = memberService.validateExistingMember(memberId);
         categoryService.findVerifiedCategory(categoryId);
 
-
         if(page < 1) {
             throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
         }

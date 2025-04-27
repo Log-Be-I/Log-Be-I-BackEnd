@@ -86,6 +86,11 @@ public class CategoryService {
 
     //이미 등록되어 있는지 검증
     public Category findVerifiedCategory(long categoryId){
+        if(categoryId == 0){
+            Category allCat = new Category();
+            allCat.setCategoryId(0L);
+            return allCat;
+        }
         return categoryRepository.findById(categoryId).orElseThrow(
                 () -> new BusinessLogicException(ExceptionCode.CATEGORY_NOT_FOUND));
     }
