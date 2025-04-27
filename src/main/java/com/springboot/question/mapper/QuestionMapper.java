@@ -55,7 +55,6 @@ public interface QuestionMapper {
 
             return questions.stream().filter(question -> question.getQuestionStatus() == Question.QuestionStatus.QUESTION_REGISTERED)
                     .map(question -> questionToQuestionResponse(question))
-                    .sorted(Comparator.comparing(QuestionDto.Response::getCreatedAt))
                     .collect(Collectors.toList());
 
     }

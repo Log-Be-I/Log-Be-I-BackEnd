@@ -29,8 +29,9 @@ public interface RecordMapper {
                 record.getContent(),
                 record.getRecordStatus(),
                 record.getMember().getMemberId(),
-                record.getCategory().getCategoryId()
-
+                record.getCategory().getCategoryId(),
+                record.getCreatedAt(),
+                record.getModifiedAt()
         );
         return response;
     }

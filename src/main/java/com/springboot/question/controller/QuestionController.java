@@ -24,6 +24,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -76,7 +78,7 @@ public class QuestionController {
         return ResponseEntity.created(location).body(new SingleResponseDto<>(questionMapper.questionToQuestionResponse(createdQuestion)));
     }
 
-//    //swagger API - 수정
+    //swagger API - 수정
     @Operation(summary = "문의 글 수정", description = "해당 회원이 기존에 등록된 문의 글을 수정합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "기존에 등록된 문의 글 수정 성공",
@@ -129,16 +131,24 @@ public class QuestionController {
             @ApiResponse(responseCode = "403", description = "관리자 권한 없음")
     })
 
-    // 관리자용 전체조회
+    //관리자용 전체조회
     //Spring Security에서 제공, 관리자만 접근하도록 설정
     //@PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/office")
     public ResponseEntity getQuestions(@Positive @RequestParam int page, @Positive @RequestParam int size,
-                                       @RequestParam(defaultValue = "newest") String sortType,
+                                       @RequestParam(value = "sortType", defaultValue = "newest") String sortType,
+                                       @RequestParam(value = "onlyNotAnswer", defaultValue = "false") boolean onlyNotAnswer,
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         Member currentMember = memberService.validateExistingMember(customPrincipal.getMemberId());
-        Page<Question> questionPage = questionService.findQuestions(page, size, sortType, currentMember);
+
+        PageRequest pageRequest = PageRequest.of(page -1,
+                size,
+                sortType.equalsIgnoreCase("newest")
+                    ? Sort.by(Sort.Direction.DESC, "questionId")
+                    : Sort.by(Sort.Direction.ASC,"questionId"));
+
+        Page<Question> questionPage = questionService.findQuestions(pageRequest, onlyNotAnswer, currentMember);
         List<Question> questions = questionPage.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>
                 (questionMapper.questionsToQuestionResponses(questions), questionPage), HttpStatus.OK);
@@ -158,7 +168,7 @@ public class QuestionController {
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}")))
     })
 
-    // 회원용 질문 목록 조회
+    //회원용 질문 목록 조회
     @GetMapping("/my")
     public ResponseEntity getMyQuestions(@Positive @RequestParam int page, @Positive @RequestParam int size,
                                          @RequestParam String orderBy,
@@ -208,7 +218,7 @@ public class QuestionController {
                             examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
     })
 
-    // 문의글 삭제
+    //문의글 삭제
     @DeleteMapping("/{question-id}")
     public ResponseEntity deleteQuestion(@PathVariable("question-id") long questionId,
                                          @AuthenticationPrincipal CustomPrincipal customPrincipal) {

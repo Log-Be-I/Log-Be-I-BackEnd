@@ -47,20 +47,16 @@ public class QuestionService {
     }
 
     //관리자의 질문글 전체 조회
-    public Page<Question> findQuestions(int page, int size, String sortType, Member currentMember){
-        // 페이지 번호 검증
-        if(page < 1){
-            throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
+    public Page<Question> findQuestions(PageRequest pageRequest, boolean onlyNotAnswer, Member currentMember){
+
+        if(onlyNotAnswer) {
+            //true 면 답변 없는 것만 조회
+            return questionRepository.findAllByQuestionStatusAndQuestionAnswerStatus(
+                    Question.QuestionStatus.QUESTION_REGISTERED, Question.QuestionAnswerStatus.NONE_ANSWER, pageRequest);
+        } else {
+            //false 면 전체 조회
+            return questionRepository.findAllByQuestionStatus(Question.QuestionStatus.QUESTION_REGISTERED, pageRequest);
         }
-        // 정렬 조건 설정
-        if(sortType == null || sortType.isBlank()){
-            sortType = "newest";
-        }
-        Sort sort = getSortType(sortType);
-        Pageable pageable = PageRequest.of(page -1, size, sort);
-        // 비활성화 글 제외하고 조회
-        Page<Question> questionPage = questionRepository.findAllQuestionsWithoutDeactivated(pageable);
-        return questionPage;
     }
 
     //회원의 질문 글 전체 조회
