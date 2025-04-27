@@ -1,7 +1,7 @@
 spring:
   data:
     redis:
-      host: 127.0.0.1
+      host: 13.124.182.96
       port: 6379
   application:
     name:  log-be-i
@@ -25,6 +25,7 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${REDIRECT_URI}
             scope:
               - profile
               - email
@@ -71,7 +72,7 @@ springdoc:
     path: /swagger-ui.html #swagger ui 의 api 문서 확인 경로 defalut 는 /swagger-ui.html 이다.
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: INFO
 clova:
   api:
     key: ${CLOVA_API_SECRET}
@@ -86,3 +87,22 @@ openai:
 naver:
   client-id: ${NAVER_CLIENT_ID}
   secret-key: ${NAVER_CLIENT_SECRET}
+cloud:
+  aws:
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: logbe-i-log
+management:
+  endpoints:
+    web:
+      exposure:
+        include: loggers
+  endpoint:
+    loggers:
+      enabled: true

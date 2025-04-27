@@ -1,10 +1,7 @@
 package com.springboot.report.controller;
 
-import com.springboot.ai.googleTTS.GoogleTextToSpeechService;
 import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.member.entity.Member;
-import com.springboot.member.repository.MemberRepository;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.Record;
 import com.springboot.record.service.RecordService;
@@ -29,10 +26,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -61,12 +54,13 @@ public class ReportController {
 //        Member findMember = memberService.validateExistingMember(customPrincipal.getMemberId());
         List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
 
-        List<ReportAnalysisRequest> weeklies = ReportUtil.createWeeklyReportRequests(weeklyRecords);
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
         // GPT 분석 → Report 생성 -> DB 저장
-        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
 
         return new ResponseEntity<>(new ListResponseDto<>(
-                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+                mapper.reportsToReportsResponseDtos(response)), HttpStatus.CREATED);
     }
 
 

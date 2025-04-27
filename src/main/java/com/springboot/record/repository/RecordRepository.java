@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,8 +19,26 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 //    List<Record> findWithMemberByRecordDateTimeBetween(LocalDateTime start, LocalDateTime end);
     @Query("SELECT r FROM Record r JOIN FETCH r.member WHERE r.recordDateTime BETWEEN :start AND :end AND r.recordStatus = :status")
     List<Record> findRegisteredRecordsWithMemberBetween(LocalDateTime start, LocalDateTime end, Record.RecordStatus status);
+   
 
 
     Page<Record> findAllByMember_MemberIdAndCategory_CategoryId(Long memberId, Long categoryId, Pageable pageable);
+
+    // memberId, 날짜 범위, categoryId 받아서 데이터 탐색
+    Page<Record> findAllByMember_MemberIdAndCategory_NameAndRecordDateTimeBetween(
+            Long memberId,
+            String categoryName,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
+    );
+
+    // Category 전체 선택일 경우 memberId, 날짜 범위로만 탐색
+    Page<Record> findAllByMember_MemberIdAndRecordDateTimeBetween(
+            Long memberId,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
+    );
 
 }

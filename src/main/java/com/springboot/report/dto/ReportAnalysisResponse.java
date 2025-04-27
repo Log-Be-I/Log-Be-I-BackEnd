@@ -8,6 +8,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+
 @Setter
 public class ReportAnalysisResponse {
     //content 안에 있는 내용물(JSON)을 담는 그릇
