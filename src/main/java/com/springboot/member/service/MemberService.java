@@ -16,6 +16,7 @@ import com.springboot.question.entity.Question;
 import com.springboot.record.entity.Record;
 import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -122,39 +123,55 @@ public class MemberService {
     }
 
     // 전체 조회는 관리자만 가능하다.
-    public Page<Member> findMembers(int page, int size, String sortBy, String order, Map<String, String> filters) {
+    public Page<Member> findMembers(int page, int size, String sortBy, String order) {
         // 정렬 조건 (삼항연산자로 내림, 오름차순 선택)
-        Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort.Direction direction = order != null ? Sort.Direction.fromString(order) : Sort.Direction.DESC;
 
         // 페이지네이션 양식 생성
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy == null ? "createdAt" : sortBy));
 
-        // 값이 존재하는 값의 키로 벨류를 조회하여 설정
-        Page<Member> members;
-        if (!filters.isEmpty()) {
-            String key = filters.keySet().iterator().next();
-            String value = filters.get(key);
+        Page<Member> members = memberRepository.findAll(pageable);
 
-            switch (key) {
-                case "birth":
-                    members = memberRepository.findByBirth(value, pageable);
-                    break;
-                case "email":
-                    members = memberRepository.findByEmail(value, pageable);
-                    break;
-                case "name":
-                    members = memberRepository.findByName(value, pageable);
-                    break;
-                case "memberStatus":
-                    members = memberRepository.findByMemberStatus(Member.MemberStatus.valueOf(value), pageable);
-                    break;
-                default:
-                    members = memberRepository.findAll(pageable);
-            }
-        } else {
-            members = memberRepository.findAll(pageable);
-        }
         return members;
+    }
+
+    // 조건에 맞춘 회원 검색 결과
+    public List<Member> findFilterMembers (List<Member> members, Map<String, String> filters, String email, String name ) {
+        List<Member> filteredMember = new ArrayList<>(members);
+        // 검색 조건
+        // email 과 name 전부 들어왔다면
+        if(email != null && name != null) {
+            filteredMember = filteredMember.stream().filter(member -> {
+                Objects.equals(member.getEmail(), email);
+                Objects.equals(member.getName(), name);
+                return true;
+            }).collect(Collectors.toList());
+
+            // email 만 들어왔을 때
+        } else if (email != null){
+            filteredMember = filteredMember.stream().filter(member ->
+                            Objects.equals(member.getEmail(), email))
+                    .collect(Collectors.toList());
+
+            // name 만 들어왔을 때
+        } else if (name != null) {
+            filteredMember = filteredMember.stream().filter(member ->
+                            Objects.equals(member.getName(), name))
+                    .collect(Collectors.toList());
+        }
+        // "birth" 조건이 있을때만 필터링 ex) 1970 ~ 1979
+        if(filters.get("birth") != null){
+            filteredMember = filteredMember.stream().filter(member ->
+                            member.getBirth().substring(0, 3).equals(filters.get("birth")))
+                    .collect(Collectors.toList());
+        }
+        // memberStatus 로 필터링
+        if(filters.get("memberStatus") != null) {
+            filteredMember = filteredMember.stream().filter(member ->
+                            member.getMemberStatus().equals(filters.get("memberStatus")))
+                    .collect(Collectors.toList());
+        }
+        return filteredMember;
     }
 
     // 회원 삭제는 관리자와 유저 본인만 가능

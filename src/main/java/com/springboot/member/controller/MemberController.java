@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -193,23 +194,28 @@ public class MemberController {
                                      @Parameter(description = "size", example = "5")
                                      @Positive @RequestParam(value = "size") int size,
                                      @Parameter(description = "정렬 조건", example = "ASC")
-                                     @RequestParam(value = "sortBy") String sortBy,
+                                     @RequestParam(value = "sortBy", required = false) String sortBy,
                                      @Parameter(description = "필터 조건", example = "birth")
-                                     @RequestParam(value = "order") String order,
+                                     @RequestParam(value = "order", required = false) String order,
                                      @RequestParam(value = "member_Status", required = false) String memberStatus,
                                      @RequestParam(value = "birth", required = false) String birth,
                                      @RequestParam(value = "email", required = false) String email,
                                      @RequestParam(value =  "name", required = false) String name) {
 
         Map<String, String> filters = new HashMap<>();
-        if (birth != null) filters.put("birth", birth);
-        if (email != null) filters.put("email", email);
-        if (name != null) filters.put("name", name);
-        if (memberStatus != null) filters.put("memberStatus", memberStatus);
+        // 출생년도 조건이 들어왔을때
+        if (birth != null) {
+            String year = birth.substring(0, 3);
+            filters.put("birth", year);
+        }
+        // 상태 조건이 들어왔을때
+        if (memberStatus != null) {
+            filters.put("memberStatus", memberStatus);
+        }
 
-        Page<Member> pageMember = memberService.findMembers(page-1, size, sortBy, order, filters);
+        Page<Member> pageMember = memberService.findMembers(page-1, size, sortBy, order);
 
-        List<Member> members = pageMember.getContent();
+        List<Member> members = memberService.findFilterMembers(pageMember.getContent(), filters, email, name);
 
         return new ResponseEntity<>(
                 new MultiResponseDto<>(memberMapper.membersToMemberResponseDtos(members), pageMember), HttpStatus.OK
