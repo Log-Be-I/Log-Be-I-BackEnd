@@ -1,12 +1,15 @@
 package com.springboot.log;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/log")
 @RequiredArgsConstructor
@@ -17,12 +20,14 @@ public class TestLogForceController {
     private final LogReset logReset;
 
     @PostMapping
-    public String addDummyLogs() {
+    public String addDummyLogs(HttpServletRequest request) {
         logStorageService.storeInfoLog("더미 로그 - Google", "Google_Calendar");
         logStorageService.storeInfoLog("더미 로그 - GPT Record", "GPT_Record");
         logStorageService.storeInfoLog("더미 로그 - GPT Report", "GPT_Report");
         logStorageService.storeInfoLog("더미 로그 - Clova", "Clova");
-        return "더미 데이터 삽입 완료!";
+        log.info("요청 URI: {}", request.getRequestURI());
+        return "OK";
+//        return "더미 데이터 삽입 완료!";
     }
 
     // 강제 업로드 실행 API
