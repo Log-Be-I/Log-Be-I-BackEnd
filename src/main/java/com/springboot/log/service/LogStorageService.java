@@ -36,14 +36,12 @@ public class LogStorageService {
                 log.error("Redis log save failed during error handling: {}", e.getMessage());
             }
         }
-
     }
     // 콘솔 + Redis 저장 한 번에
     public void logAndStoreWithError(String message, String partName, Object... args) {
         log.info(message, args); // "Redis log save failed: Not found"
         storeInfoLog(String.format(message.replace("{}", "%s"), args), partName);
     }
-
     public void logAndStore(String message, String partName) {
         log.info(message);
         storeInfoLog(message, partName);

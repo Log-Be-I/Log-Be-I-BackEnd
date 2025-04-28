@@ -13,18 +13,18 @@ public class LogGoogle {
     private final LogPost logPost;
 
     // 6개월마다 S3 초기화
-    @Scheduled(cron = "0 0 0 1 1,7 *")
-    public void googleCalendarMonthlyLogReset() {
-        List<String> logNames = List.of( "Google_Calendar"); // 삭제할 이름 리스트
-        logReset.logResetForS3(logNames, 6,0); // 여기서 호출!
-    }
+//    @Scheduled(cron = "0 0 0 1 1,7 *")
+//    public void googleCalendarMonthlyLogReset() {
+//        List<String> logNames = List.of( "Google_Calendar"); // 삭제할 이름 리스트
+//        logReset.logResetForS3(logNames, 6,0); // 여기서 호출!
+//    }
 
     // 1달마다 S3 갱신
-    @Scheduled(cron = "0 0 0 1 * * ")
-    public void googleCalendarMonthlyLogPost() {
-        List<String> logNames = List.of("Google_Calendar");
-        logPost.logPostForS3(logNames, 1, 0);
-    }
+//    @Scheduled(cron = "0 0 0 1 * * ")
+//    public void googleCalendarMonthlyLogPost() {
+//        List<String> logNames = List.of("Google_Calendar");
+//        logPost.logPostForS3(logNames, 1, 0);
+//    }
 
     // 1달마다 S3 갱신
     @Scheduled(cron = "0 0 0 1 * * ")
