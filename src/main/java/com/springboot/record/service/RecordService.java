@@ -75,7 +75,7 @@ public class RecordService {
                 member.setMemberId(customPrincipal.getMemberId());
                 schedule.setMember(member);
                 return scheduleRepository.save(schedule);
-            } catch (exception e) {
+            } catch (Exception e) {
                 throw new BusinessLogicException(ExceptionCode.RECORD_FAILED);
 
             }
