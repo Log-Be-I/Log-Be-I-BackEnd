@@ -35,8 +35,10 @@ public enum ExceptionCode {
     NOT_FOUND(404, "Not Found"),
     REPORT_GENERATION_FAILED(500, "GPT analysis error"),
     INVALID_REPORT_TYPE(500, "Invalid Report type"),
-    INVALID_SERVER_ERROR(500, "Invalid server error");
-
+    INVALID_SERVER_ERROR(500, "Invalid server error"),
+    S3_DELETE_FAILED(500, "S3 delete failed"),
+    S3_POST_FAILED(500, "S3 post failed"),
+    GOOGLE_CALENDAR_FAILED(500, "Google calender Failed");
     @Getter
     private int status;
 

@@ -1,6 +1,7 @@
 package com.springboot.ai.clova;
 
 import com.springboot.ai.openai.service.OpenAiService;
+import com.springboot.log.LogStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,9 @@ public class ClovaSpeechService {
     @Value("${clova.api.id}")
     private String CLIENT_ID;
 
+    private final LogStorageService logStorageService;
+
+    String logName = "Clova";
     // 클로바 STT API 에 오디오 파일을 전송하고, 텍스트로 변환된 결과를 받아오는 메서드
     public String recognizeSpeech(File voiceFile) throws IOException {
         // 언어 설정
@@ -92,6 +96,7 @@ public class ClovaSpeechService {
 
         } catch (Exception e) {
             e.printStackTrace();
+            logStorageService.logAndStoreWithError("Clova STT request failed: {}", logName, e.getMessage(), e);
             throw new RuntimeException("Clova STT 요청 중 오류 발생", e);
         }
         // 최종 문자열을 반환

@@ -22,7 +22,7 @@ public class GoogleTextToSpeechService {
     private String apiKey;
 
     private LogStorageService logStorageService;
-    String logName = "TTS";
+    String logName = "Google_TTS";
     // toggle
     // text -> voice 로 변환할 글, outputFilePath -> 파일 저장할 경로 ( 저장될 파일 이름만 작성하면 경로는 자동으로 현 파일 위치로 잡는다)
     public void synthesizeText(String text, String outputFilePath) throws Exception {
