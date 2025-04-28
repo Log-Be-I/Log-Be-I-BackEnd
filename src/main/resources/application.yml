@@ -56,8 +56,8 @@ server:
       file-size-threshold: 2KB    #임계값 설정
 jwt:
   key: ${JWT_SECRET_KEY}
-  access-token-expiration-minutes: 240
-  refresh-token-expiration-minutes: 420
+  access-token-expiration-minutes: 480
+  refresh-token-expiration-minutes: 1440
 springdoc:
   api-docs:
     enabled: true
