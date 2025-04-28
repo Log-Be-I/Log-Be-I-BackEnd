@@ -2,7 +2,6 @@ package com.springboot.report.controller;
 
 import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.Record;
 import com.springboot.record.service.RecordService;
 import com.springboot.report.dto.ReportAnalysisRequest;
@@ -12,9 +11,7 @@ import com.springboot.report.service.ReportService;
 import com.springboot.responsedto.ListResponseDto;
 import com.springboot.utils.ReportUtil;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.checkerframework.checker.index.qual.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,40 +19,35 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/reports")
-@RequiredArgsConstructor
 @Validated
+@RequiredArgsConstructor
 public class ReportController {
-
     private final ReportService reportService;
     private final ReportMapper mapper;
-    private final MemberService memberService;
     //postman Test 진행
     private final OpenAiService openAiService;
     private final RecordService recordService;
+
     //test
 //    (@RequestParam("weekStart") LocalDateTime weekStart,
 //    @RequestParam("weekEnd") LocalDateTime weekEnd
     @PostMapping("/test")
-    public ResponseEntity testGenerateReports(@RequestParam("weekStart") LocalDateTime weekStart,
-                                              @RequestParam("weekEnd") LocalDateTime weekEnd) {
+    public ResponseEntity testGenerateReports() {
 
         ZoneId koreaZone = ZoneId.of("Asia/Seoul");
-//        LocalDateTime today = LocalDateTime.now(koreaZone);
+        LocalDateTime today = LocalDateTime.now(koreaZone);
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-//        LocalDateTime weekStart = today.minusWeeks(7).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(8).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
-//        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
         List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
 
@@ -68,24 +60,180 @@ public class ReportController {
                 mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
     }
 
-    // 구글 TTS (유저가 선택한 reportId 리스트를 받는다)
-    @PostMapping("/audio")
-    public ResponseEntity<List<String>> generateTts(@RequestBody List<Long> reportsId,
-                                              @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+    @PostMapping("/test1")
+    public ResponseEntity testGenerateReportss() {
 
-        List<String> audioReports =  reportService.reportToGoogleAudio(reportsId, customPrincipal.getMemberId());
+        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime today = LocalDateTime.now(koreaZone);
 
-     return new ResponseEntity<>(audioReports, HttpStatus.OK);
+//        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks(7).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
+        // GPT 분석 → Report 생성 -> DB 저장
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
+
+        return new ResponseEntity<>(new ListResponseDto<>(
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
     }
 
-    //연도별 그룹 조회
+    @PostMapping("/test2")
+    public ResponseEntity testGenerateReportsss() {
+
+        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime today = LocalDateTime.now(koreaZone);
+
+//        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks(6).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
+        // GPT 분석 → Report 생성 -> DB 저장
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
+
+        return new ResponseEntity<>(new ListResponseDto<>(
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/test3")
+    public ResponseEntity testGenerateReportssss() {
+
+        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime today = LocalDateTime.now(koreaZone);
+
+//        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks(5).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
+        // GPT 분석 → Report 생성 -> DB 저장
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
+
+        return new ResponseEntity<>(new ListResponseDto<>(
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+    }
+    @PostMapping("/test4")
+    public ResponseEntity testGenerateReportssssw() {
+
+        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime today = LocalDateTime.now(koreaZone);
+
+//        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks(4).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
+        // GPT 분석 → Report 생성 -> DB 저장
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
+
+        return new ResponseEntity<>(new ListResponseDto<>(
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+    }
+    @PostMapping("/test5")
+    public ResponseEntity testGenerateReportsssd() {
+
+        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime today = LocalDateTime.now(koreaZone);
+
+//        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks(3).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
+        // GPT 분석 → Report 생성 -> DB 저장
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
+
+        return new ResponseEntity<>(new ListResponseDto<>(
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+    }
+    @PostMapping("/test6")
+    public ResponseEntity testGenerateReportsssddd() {
+
+        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime today = LocalDateTime.now(koreaZone);
+
+//        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks(2).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
+        // GPT 분석 → Report 생성 -> DB 저장
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
+
+        return new ResponseEntity<>(new ListResponseDto<>(
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+    }
+    @PostMapping("/test7")
+    public ResponseEntity testMonthlyReport(){
+
+        YearMonth lastMonth = YearMonth.now().minusMonths(1);
+        //전 달 1일 00:00:00
+        LocalDateTime monthStart = lastMonth.atDay(1).atStartOfDay();
+        //전 달 말일 23:59:59
+        LocalDateTime monthEnd = lastMonth.atEndOfMonth().atTime(23, 59, 59);
+
+
+        List<Record> monthlyRecords = recordService.getMonthlyRecords(monthStart, monthEnd);
+        List<ReportAnalysisRequest> monthlies = ReportUtil.toReportRequests(monthlyRecords, Report.ReportType.REPORT_MONTHLY);
+        log.info("✅ 월간 리포트 생성 시작");
+        //ai에 해당 데이터 전달
+        List<Report> reports = openAiService.createReportsFromAiInBatch(monthlies);
+
+        return new ResponseEntity<>(new ListResponseDto<>(
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+    }
+
+
+// 구글 TTS (유저가 선택한 reportId 리스트를 받는다)
+//    @PostMapping("/audio")
+//    public ResponseEntity<List<String>> generateTts(@RequestBody List<Long> reportsId,
+//                                              @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+//
+//        List<String> audioReports =  report.reportToGoogleAudio(reportsId, customPrincipal.getMemberId());
+//
+//     return new ResponseEntity<>(audioReports, HttpStatus.OK);
+//    }
+
+//연도별 그룹 조회
     @GetMapping
     public ResponseEntity getReportList(@Positive @RequestParam(value = "year", required = false) Integer year,  // year를 안보내도 기본값 처리 하도록 설정
                                         @AuthenticationPrincipal CustomPrincipal customPrincipal){
         //year 값이 설정되지 않았다면 올해 기준으로 정렬
         int searchYear =(year != null) ? year : LocalDate.now().getYear();
 
-        List<Report> reports = reportService.findMonthlyReports(customPrincipal.getMemberId(), searchYear);
+        List<Report> reports =
+                reportService.findMonthlyReports(customPrincipal.getMemberId(), searchYear);
 
         return new ResponseEntity<>(new ListResponseDto<>(mapper.reportToSummaryResponse(reports)), HttpStatus.OK);
     }
