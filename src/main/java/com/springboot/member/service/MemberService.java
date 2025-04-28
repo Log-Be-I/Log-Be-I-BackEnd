@@ -25,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -300,5 +301,19 @@ public class MemberService {
         findMember.setNotification(notification);
         //저장
         memberRepository.save(findMember);
+    }
+
+    //관리자 Web -> 오늘 회원가입한 회원 정보
+    public List<String> findTodayRegisteredMembers(){
+
+        LocalDate today = LocalDate.now();
+        //오늘부터 +1일 까지 가입한 회원 조회
+        List<Member> members = memberRepository.findByCreatedAtBetween(
+                today.atStartOfDay(), today.plusDays(1).atStartOfDay());
+
+        //조회된 회원의 이름만 출력
+        return members.stream()
+                .map(member -> member.getName())
+                .collect(Collectors.toList());
     }
 }

@@ -1,5 +1,6 @@
 package com.springboot.question.service;
 
+import com.springboot.dashboard.dto.DashBoardResponseDto;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
@@ -8,13 +9,12 @@ import com.springboot.question.entity.Question;
 import com.springboot.question.repository.QuestionRepository;
 import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,17 +47,45 @@ public class QuestionService {
     }
 
     //관리자의 질문글 전체 조회
-    public Page<Question> findQuestions(PageRequest pageRequest, boolean onlyNotAnswer, Member currentMember){
+    public Page<Question> findQuestions(int page, int size, String sortType , boolean onlyNotAnswer, String email, String title){
+
+        // 페이지 번호 검증
+        if(page < 1){
+            throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
+        }
+        Sort sort = getSortType(sortType);
+        Pageable pageable = PageRequest.of(page -1, size, sort);
+
+        Page<Question> questions;
 
         if(onlyNotAnswer) {
             //true 면 답변 없는 것만 조회
-            return questionRepository.findAllByQuestionStatusAndQuestionAnswerStatus(
-                    Question.QuestionStatus.QUESTION_REGISTERED, Question.QuestionAnswerStatus.NONE_ANSWER, pageRequest);
+           questions = questionRepository.findAllByQuestionStatusAndQuestionAnswerStatus(
+                    Question.QuestionStatus.QUESTION_REGISTERED, Question.QuestionAnswerStatus.NONE_ANSWER, pageable);
         } else {
             //false 면 전체 조회
-            return questionRepository.findAllByQuestionStatus(Question.QuestionStatus.QUESTION_REGISTERED, pageRequest);
+            questions = questionRepository.findAllByQuestionStatus(Question.QuestionStatus.QUESTION_REGISTERED, pageable);
         }
+
+        //email, title 조건 추가 필터링
+        List<Question> filteredQuestions = questions.getContent().stream().filter(
+                question -> {
+                    //사용자가 email 검색어를 안넣거나, 넣었을 경우 포함하는지
+                    boolean emailMatch = (email == null || question.getMember().getEmail().contains(email));
+                    //사용자가 title 검색어를 안넣거나, 넣었을 경우 포함하는지
+                    boolean titleMatch = (title == null || question.getTitle().contains(title));
+                    //조회하고자하는 내용과 검색어가 유사한 글+이메일만 조회할 수 있도록 가능
+                    return emailMatch && titleMatch;
+                })
+                .collect(Collectors.toList());
+        return new PageImpl<>(filteredQuestions, pageable, filteredQuestions.size());
     }
+//
+//    //조건에 맞춘 회원 검색 결과 : 작성자(email)+제목(title)
+//    public List<Question> findFilterQuestions(List<Question> questions){
+//
+//
+//    }
 
     //회원의 질문 글 전체 조회
     public Page<Question> findMyQuestions(int page, int size, long memberId, String orderBy){
@@ -124,9 +152,9 @@ public class QuestionService {
     private Sort getSortType(String sortType){
         switch (sortType.toUpperCase()){
             case "NEWEST":
-                return Sort.by(Sort.Direction.DESC, "createdAt");
+                return Sort.by(Sort.Direction.DESC, "questionId");
             case "OLDEST":
-                return Sort.by(Sort.Direction.ASC, "createdAt");
+                return Sort.by(Sort.Direction.ASC, "questionId");
             default:
                 throw new IllegalArgumentException("올바른 정렬 조건을 입력해 주세요: " + sortType);
         }
@@ -138,5 +166,11 @@ public class QuestionService {
         findQuestion.setAnswer(null);
         findQuestion.setQuestionAnswerStatus(Question.QuestionAnswerStatus.NONE_ANSWER);
 
+    }
+
+    public List<DashBoardResponseDto.UnansweredQuestion> findUnansweredQuestions() {
+        List<Question> questions = questionRepository.findAllByQuestionAnswerStatus(Question.QuestionAnswerStatus.NONE_ANSWER);
+        return  questions.stream().map(question -> new DashBoardResponseDto.UnansweredQuestion(question.getTitle()))
+                        .collect(Collectors.toList());
     }
 }

@@ -133,22 +133,26 @@ public class QuestionController {
 
     //관리자용 전체조회
     //Spring Security에서 제공, 관리자만 접근하도록 설정
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/office")
-    public ResponseEntity getQuestions(@Positive @RequestParam int page, @Positive @RequestParam int size,
+    public ResponseEntity getQuestions(@Positive @RequestParam(value = "page") int page,
+                                       @Positive @RequestParam(value = "size") int size,
                                        @RequestParam(value = "sortType", defaultValue = "newest") String sortType,
                                        @RequestParam(value = "onlyNotAnswer", defaultValue = "false") boolean onlyNotAnswer,
+                                       @RequestParam(value = "email", required = false) String email,
+                                       @RequestParam(value = "title", required = false) String title,
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-        Member currentMember = memberService.validateExistingMember(customPrincipal.getMemberId());
+//        Member currentMember = memberService.validateExistingMember(customPrincipal.getMemberId());
 
-        PageRequest pageRequest = PageRequest.of(page -1,
-                size,
-                sortType.equalsIgnoreCase("newest")
-                    ? Sort.by(Sort.Direction.DESC, "questionId")
-                    : Sort.by(Sort.Direction.ASC,"questionId"));
+//        PageRequest pageRequest = PageRequest.of(page -1,
+//                size,
+//                sortType.equalsIgnoreCase("newest")
+//                    ? Sort.by(Sort.Direction.DESC, "questionId")
+//                    : Sort.by(Sort.Direction.ASC,"questionId"));
 
-        Page<Question> questionPage = questionService.findQuestions(pageRequest, onlyNotAnswer, currentMember);
+//        Page<Question> questionPage = questionService.findQuestions(pageRequest, onlyNotAnswer, currentMember);
+        Page<Question> questionPage = questionService.findQuestions(page, size, sortType, onlyNotAnswer, email, title);
         List<Question> questions = questionPage.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>
                 (questionMapper.questionsToQuestionResponses(questions), questionPage), HttpStatus.OK);
