@@ -74,7 +74,11 @@ public class RecordService {
                 Member member = new Member();
                 member.setMemberId(customPrincipal.getMemberId());
                 schedule.setMember(member);
+                return scheduleRepository.save(schedule);
+            } catch (exception e) {
+                throw new BusinessLogicException(ExceptionCode.RECORD_FAILED);
 
+            }
         } else if (data.get("type").equals("record")) {
             // record 레포 save 로직
             Record record = new Record();
