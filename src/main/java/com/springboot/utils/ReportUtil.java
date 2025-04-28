@@ -1,17 +1,18 @@
 package com.springboot.utils;
 
-import com.springboot.log.LogStorageService;
+import com.springboot.exception.BusinessLogicException;
+import com.springboot.exception.ExceptionCode;
 import com.springboot.record.entity.Record;
 import com.springboot.report.dto.RecordForAnalysisDto;
 import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.report.entity.Report;
-import lombok.RequiredArgsConstructor;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 //@RequiredArgsConstructor
 public class ReportUtil {
@@ -134,14 +135,27 @@ public class ReportUtil {
 
             LocalDateTime baseTime = memberRecords.get(0).getRecordDateTime();
 
-            //List<ReportAnalysisRequest>  생성 및 반환
-            return new ReportAnalysisRequest(
-                    getWeeklyReportTitle(baseTime), // 또는 getMonthlyTitle
-                    getMonthlyReportTitle(baseTime),
-                    memberId,
-                    type,
-                    dtos
-            );
+            if(type.equals(Report.ReportType.REPORT_WEEKLY)) {
+                //List<ReportAnalysisRequest>  생성 및 반환
+                return new ReportAnalysisRequest(
+                        getWeeklyReportTitle(baseTime), // 또는 getMonthlyTitle
+                        getMonthlyReportTitle(baseTime),
+                        memberId,
+                        Report.ReportType.REPORT_WEEKLY,
+                        dtos
+                );
+
+            } else if (type.equals(Report.ReportType.REPORT_MONTHLY)) {
+                return new ReportAnalysisRequest(
+                        getMonthlyReportTitle(baseTime), // 또는 getMonthlyTitle
+                        getMonthlyReportTitle(baseTime),
+                        memberId,
+                        Report.ReportType.REPORT_MONTHLY,
+                        dtos
+                );
+            } else {
+                throw new BusinessLogicException(ExceptionCode.REPORT_TYPE_NOT_FOUND);
+            }
         }).collect(Collectors.toList());
     }
 
@@ -164,7 +178,7 @@ public class ReportUtil {
 
             //List<ReportAnalysisRequest>  생성 및 반환
             return new ReportAnalysisRequest(
-                    getWeeklyReportTitle(baseTime), // 또는 getMonthlyTitle
+                    getMonthlyReportTitle(baseTime), // 또는 getMonthlyTitle
                     getMonthlyReportTitle(baseTime),
                     memberId,
                     type,

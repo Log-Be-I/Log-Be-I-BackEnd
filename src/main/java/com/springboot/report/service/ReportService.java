@@ -34,6 +34,7 @@ public class ReportService {
         response.setMemberId(request.getMemberId());
         response.setReportTitle(request.getReportTitle());
         response.setMonthlyReportTitle(request.getMonthlyReportTitle());
+        response.setType(request.getReportType());
         //Map<K,V> -> chatGPT 한테 받은 JSON 형태의 분석 데이터 매핑
         response.setContent(contentMap);
 
@@ -53,7 +54,8 @@ public class ReportService {
         report.setContent(response.getContent());
         //해당 report가 주간인지 월간인지 구분
         report.setPeriodNumber(extractPeriodNumber(response.getReportTitle()));
-        setReportType(report);
+        report.setReportType(response.getType());
+//        setReportType(report);
         log.info("📌 변환된 Report: {}", report);
 
         return report;

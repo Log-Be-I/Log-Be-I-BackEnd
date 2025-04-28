@@ -49,7 +49,7 @@ public class ReportController {
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
-        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+        List<Record> weeklyRecords = recordService.   getWeeklyRecords(weekStart, weekEnd);
 
         List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
         // GPT 분석 → Report 생성 -> DB 저장
@@ -204,7 +204,7 @@ public class ReportController {
 
 
         List<Record> monthlyRecords = recordService.getMonthlyRecords(monthStart, monthEnd);
-        List<ReportAnalysisRequest> monthlies = ReportUtil.toMonthlyReportRequests(monthlyRecords, Report.ReportType.REPORT_MONTHLY);
+        List<ReportAnalysisRequest> monthlies = ReportUtil.toReportRequests(monthlyRecords, Report.ReportType.REPORT_MONTHLY);
         log.info("✅ 월간 리포트 생성 시작");
         //ai에 해당 데이터 전달
         List<Report> reports = openAiService.createReportsFromAiInBatch(monthlies);
