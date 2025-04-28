@@ -34,6 +34,7 @@ public enum ExceptionCode {
     GPT_FAILED(500, "Gpt analysis error"),
     NOT_FOUND(404, "Not Found"),
     REPORT_GENERATION_FAILED(500, "GPT analysis error"),
+    TOKEN_NOT_EXIST(401, "Token not exist"),
     INVALID_REPORT_TYPE(500, "Invalid Report type"),
     INVALID_SERVER_ERROR(500, "Invalid server error"),
     S3_DELETE_FAILED(500, "S3 delete failed"),
