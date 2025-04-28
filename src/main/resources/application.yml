@@ -1,7 +1,7 @@
 spring:
   data:
     redis:
-      host: 127.0.0.1
+      host: 172.31.41.9
       port: 6379
   application:
     name:  log-be-i
@@ -45,7 +45,7 @@ mail:
       - admin3@gmail.com
   data:
     redis:
-      host: 127.0.0.1  #Redis 서버 주소 지정
+      host: 172.31.41.9  #Redis 서버 주소 지정
       port: 6379        # Redis 서버 포트 지정
 server:
   servlet:
