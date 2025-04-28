@@ -49,6 +49,7 @@ public class DataInitializer implements CommandLineRunner {
             member03.setRoles(List.of("ADMIN", "USER"));
             member03.setRefreshToken(passwordEncoder.encode("9012"));
 
+
             userRepository.saveAll(List.of(
                member03, member01, member
             ));
