@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,4 +27,11 @@ public class ScheduleResponseDto {
     @NotBlank
     private String endDateTime;
 
+    @Schema(description = "등록 날짜", example = "2025-04-12T14:30")
+    @NotBlank
+    private LocalDateTime createdAt;
+
+    @Schema(description = "마지막 수정 날짜", example = "2025-04-12T14:30")
+    @NotBlank
+    private LocalDateTime lastModifiedAt;
 }
