@@ -4,6 +4,8 @@ package com.springboot.auth.service;
 
 import com.springboot.auth.dto.GoogleTokenResponse;
 import com.springboot.auth.jwt.JwtTokenizer;
+import com.springboot.exception.BusinessLogicException;
+import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
 import com.springboot.member.repository.MemberRepository;
 import com.springboot.oauth.GoogleInfoDto;
@@ -135,5 +137,13 @@ public class GoogleOAuthService {
         tokens.put("accessToken", accessToken);
         tokens.put("refreshToken", refreshToken);
         return tokens;
+    }
+
+    // Google AccessToken을 Redis에 저장하는 메서드
+    public void saveAccessTokenToRedis(String email, String accessToken){
+        redisTemplate.opsForValue().set(("google:" + email), accessToken);
+        if(redisTemplate.opsForValue().get("google:" + email) == null){
+            throw new BusinessLogicException(ExceptionCode.TOKEN_NOT_EXIST);
+        }
     }
 }

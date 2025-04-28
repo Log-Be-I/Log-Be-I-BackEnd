@@ -50,6 +50,9 @@ public class GoogleAuthController {
             // 2. id_token 을 파싱해 유저 정보(email, name) 가져오기
             GoogleInfoDto userInfo = oAuthService.authenticate(idToken);
 
+            // Redis에 Google AccessToken 저장
+            googleOAuthService.saveAccessTokenToRedis(userInfo.getEmail(), accessToken);
+
             // 3. DB에 유저 존재 여부 확인
             boolean isExiting = memberService.googleOAuthValidateMember(userInfo.getEmail());
 
