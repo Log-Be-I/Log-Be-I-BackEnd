@@ -70,7 +70,7 @@ springdoc:
   groups:
     enabled: false #api 그룹 기능, default는 true 이나 당장 사용하지 않기에 false 로 지정
   swagger-ui:
-#    tryItOutEnabled: true
+    #    tryItOutEnabled: true
     operationsSorter: method #method 기준으로 정렬, 그외 alpha 로 정렬 가능
     path: /swagger-ui.html #swagger ui 의 api 문서 확인 경로 defalut 는 /swagger-ui.html 이다.
 logging:
