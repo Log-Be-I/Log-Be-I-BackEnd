@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Schedule {
+public class Schedule extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,22 +34,9 @@ public class Schedule {
     @Enumerated(value = EnumType.STRING)
     private ScheduleStatus scheduleStatus = ScheduleStatus.SCHEDULE_REGISTERED;
 
-    @Column
-    private String eventId;
-
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
-
-    @Column(name = "LAST_MODIFIED_AT")
-    private LocalDateTime modifiedAt;
-
-    @PrePersist
-    public void prePersist() {
-        if (this.modifiedAt == null) {
-            this.modifiedAt = LocalDateTime.now();
-        }
-    }
 
     public enum ScheduleStatus {
         SCHEDULE_REGISTERED("일정 등록"),

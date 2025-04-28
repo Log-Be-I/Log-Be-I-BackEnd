@@ -74,6 +74,7 @@ public class DataInitializer implements CommandLineRunner {
             categoryList.stream().map(category -> categoryRepository.save(category));
             member04.setCategories(categoryList);
 
+
             userRepository.saveAll(List.of(
                member04, member03, member01, member
             ));
