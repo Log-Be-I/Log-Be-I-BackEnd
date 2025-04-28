@@ -1,5 +1,6 @@
 package com.springboot.report.dto;
 
+import com.springboot.report.entity.Report;
 import lombok.*;
 
 import java.util.Map;
@@ -15,6 +16,7 @@ public class ReportAnalysisResponse {
     private Long memberId;
     private String reportTitle;
     private String monthlyReportTitle;
+    private Report.ReportType type;
     private Map<String, String> content;
 //    private String summary;          // ✅ 기록한 총 횟수, 많이 한 활동
 //    private String emotionRatio;     // 😊 긍정/중립/부정 비율

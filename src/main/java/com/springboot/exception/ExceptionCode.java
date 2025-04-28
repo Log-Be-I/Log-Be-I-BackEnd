@@ -40,7 +40,9 @@ public enum ExceptionCode {
     S3_DELETE_FAILED(500, "S3 delete failed"),
     S3_POST_FAILED(500, "S3 post failed"),
     GOOGLE_CALENDAR_FAILED(500, "Google calender Failed"),
-    RECORD_FAILED(500, "Record save failed");
+    RECORD_FAILED(500, "Record save failed"),
+    REPORT_TYPE_NOT_FOUND(404, "Report type not found");
+
     @Getter
     private int status;
 

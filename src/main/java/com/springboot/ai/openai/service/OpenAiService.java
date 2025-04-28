@@ -13,8 +13,6 @@ import com.springboot.ai.openai.dto.OpenAiResponse;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.log.LogStorageService;
-import com.springboot.member.entity.Member;
-import com.springboot.record.entity.Record;
 import com.springboot.report.dto.RecordForAnalysisDto;
 import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.report.dto.ReportAnalysisResponse;
@@ -25,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.nio.charset.StandardCharsets;
 
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
