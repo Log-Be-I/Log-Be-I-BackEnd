@@ -26,7 +26,7 @@ public class ScheduleResponseDto {
     @NotBlank
     private String endDateTime;
 
-    @NotBlank
-    private String calendarId;
+//    @NotBlank
+//    private String calendarId;
 
 }

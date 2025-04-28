@@ -8,8 +8,8 @@ import com.springboot.category.service.CategoryService;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 
-import com.springboot.googleCalendar.dto.GoogleEventDto;
-import com.springboot.googleCalendar.service.GoogleCalendarService;
+//import com.springboot.googleCalendar.dto.GoogleEventDto;
+//import com.springboot.googleCalendar.service.GoogleCalendarService;
 
 
 import com.springboot.log.LogStorageService;
@@ -47,7 +47,7 @@ public class RecordService {
     private final RecordRepository repository;
     private final HistoricalRecordRepository historicalRecordRepository;
     private final MemberService memberService;
-    private final GoogleCalendarService googleCalendarService;
+//    private final GoogleCalendarService googleCalendarService;
     private final OpenAiService openAiService;
     private final ScheduleRepository scheduleRepository;
     private final CategoryService categoryService;
@@ -58,7 +58,7 @@ public class RecordService {
     @Value("${clova.api.id}")
     private String CLIENT_ID;
 
-    String logName = "Google_Calendar";
+//    String logName = "Google_Calendar";
     @Transactional
     public Object saveByType (Map<String, String> data, CustomPrincipal customPrincipal) {
 
@@ -76,21 +76,21 @@ public class RecordService {
                 member.setMemberId(customPrincipal.getMemberId());
                 schedule.setMember(member);
 
-                GoogleEventDto googleEventDto = new GoogleEventDto();
-                googleEventDto.setStartDateTime(schedule.getStartDateTime() + "+09:00");
-                googleEventDto.setEndDateTime(schedule.getEndDateTime() + "+09:00");
-                googleEventDto.setSummary(schedule.getTitle());
-                googleEventDto.setCalendarId(customPrincipal.getEmail());
+//                GoogleEventDto googleEventDto = new GoogleEventDto();
+//                googleEventDto.setStartDateTime(schedule.getStartDateTime() + "+09:00");
+//                googleEventDto.setEndDateTime(schedule.getEndDateTime() + "+09:00");
+//                googleEventDto.setSummary(schedule.getTitle());
+//                googleEventDto.setCalendarId(customPrincipal.getEmail());
                 // db에 일단 저장
-                scheduleRepository.save(schedule);
+//                scheduleRepository.save(schedule);
                 // 구글 캘린더 등록 요청
-                Event googleEvent = googleCalendarService.sendEventToGoogleCalendar(googleEventDto);
+//                Event googleEvent = googleCalendarService.sendEventToGoogleCalendar(googleEventDto);
                 // 3. eventId 반영 후 다시 저장
-                schedule.setEventId(googleEvent.getId());
+//                schedule.setEventId(googleEvent.getId());
                 // 스케쥴 객체 리턴
                 return scheduleRepository.save(schedule);
             } catch (Exception e) {
-                logStorageService.logAndStoreWithError("Google Calendar post failed", logName, e.getMessage(), e);
+//                logStorageService.logAndStoreWithError("Google Calendar post failed", logName, e.getMessage(), e);
                 // 구글 요청 실패 → 강제 롤백
                 throw new BusinessLogicException(ExceptionCode.GOOGLE_CALENDAR_FAILED);
             }
