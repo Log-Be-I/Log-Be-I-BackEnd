@@ -39,7 +39,8 @@ public enum ExceptionCode {
     INVALID_SERVER_ERROR(500, "Invalid server error"),
     S3_DELETE_FAILED(500, "S3 delete failed"),
     S3_POST_FAILED(500, "S3 post failed"),
-    GOOGLE_CALENDAR_FAILED(500, "Google calender Failed");
+    GOOGLE_CALENDAR_FAILED(500, "Google calender Failed"),
+    RECORD_FAILED(500, "Record save failed");
     @Getter
     private int status;
 
