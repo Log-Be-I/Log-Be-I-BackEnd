@@ -8,14 +8,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/test/log")
+@RequestMapping("/log")
 @RequiredArgsConstructor
 public class TestLogForceController {
 
     private final LogStorageService logStorageService;
     private final TestLogForceUploader testLogForceUploader;
     private final LogReset logReset;
-    @PostMapping("/add-dummy")
+
+    @PostMapping
     public String addDummyLogs() {
         logStorageService.storeInfoLog("더미 로그 - Google", "Google_Calendar");
         logStorageService.storeInfoLog("더미 로그 - GPT Record", "GPT_Record");
