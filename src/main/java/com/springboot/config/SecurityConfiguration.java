@@ -100,6 +100,7 @@ public class SecurityConfiguration {
                         .antMatchers("/auth/login", "/oauth/login").permitAll()
                         .antMatchers("/logout").permitAll()
                         .antMatchers("/hello").permitAll()
+                        .antMatchers("/log").permitAll()
                         // 접근 권한과 상관없이 post 요청이라면 허용한다
                         .antMatchers(HttpMethod.POST, "/*/members").permitAll()
                         .antMatchers(HttpMethod.POST, "/*/questions").permitAll()

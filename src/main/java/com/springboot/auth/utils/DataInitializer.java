@@ -1,13 +1,20 @@
 package com.springboot.auth.utils;
 
+import com.springboot.category.entity.Category;
+import com.springboot.category.mapper.CategoryMapper;
+import com.springboot.category.repository.CategoryRepository;
 import com.springboot.member.entity.Member;
 import com.springboot.member.repository.MemberRepository;
+import com.springboot.member.service.MemberService;
+import com.springboot.record.entity.Record;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -15,6 +22,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private final MemberRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public void run(String... args) {
@@ -49,9 +57,26 @@ public class DataInitializer implements CommandLineRunner {
             member03.setRoles(List.of("ADMIN", "USER"));
             member03.setRefreshToken(passwordEncoder.encode("9012"));
 
+            Member member04 = new Member();
+            member04.setBirth("1995-10-24");
+            member04.setNickname("미나리");
+            member04.setRegion("서울시");
+            member04.setName("나리나리");
+            member04.setProfile("url");
+            member04.setEmail("menari@gmail.com");
+            member04.setRoles(List.of("USER"));
+            member04.setRefreshToken(passwordEncoder.encode("alalskflskfl"));
+            List<Record> records = new ArrayList<>();
+            List<String> categoryNames = List.of("일상", "소비", "건강", "할 일", "기타");
+            List<Category> categoryList = categoryNames.stream()
+                    .map(categoryName -> new Category(categoryName, "url", member, true))
+                    .collect(Collectors.toList());
+            categoryList.stream().map(category -> categoryRepository.save(category));
+            member04.setCategories(categoryList);
+
 
             userRepository.saveAll(List.of(
-               member03, member01, member
+               member04, member03, member01, member
             ));
         }
     }

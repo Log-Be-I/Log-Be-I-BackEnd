@@ -22,4 +22,15 @@ public abstract class BaseEntity {
     @LastModifiedDate
     @Column(name = "LAST_MODIFIED_AT")
     private LocalDateTime modifiedAt;
+
+    @javax.persistence.PrePersist
+    public void prePersist() {
+        this.createdAt = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
+        this.modifiedAt = this.createdAt;
+    }
+
+    @javax.persistence.PreUpdate
+    public void preUpdate() {
+        this.modifiedAt = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
+    }
 }
