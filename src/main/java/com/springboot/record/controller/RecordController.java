@@ -65,6 +65,7 @@ public class RecordController {
             Record record = (Record) response;
             return ResponseEntity.ok(mapper.recordToRecordResponse(record));
         } else {
+
             throw new BusinessLogicException(ExceptionCode.GPT_FAILED);
         }
     }

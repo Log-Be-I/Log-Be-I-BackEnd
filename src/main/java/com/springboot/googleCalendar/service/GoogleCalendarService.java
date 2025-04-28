@@ -9,6 +9,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 import com.springboot.auth.utils.CustomPrincipal;
+import com.springboot.log.LogStorageService;
 import com.springboot.member.service.MemberService;
 import com.springboot.redis.RedisService;
 import com.springboot.googleCalendar.dto.GoogleEventDto;
@@ -40,6 +41,8 @@ public class GoogleCalendarService {
     private final ScheduleMapper scheduleMapper;
     private final MemberService memberService;
     private final ScheduleRepository scheduleRepository;
+    private final LogStorageService logStorageService;
+    String logName = "Google_Calendar";
     // 구글 캘린더 등록 요청
     public Event sendEventToGoogleCalendar(GoogleEventDto dto) {
         try {
@@ -80,6 +83,7 @@ public class GoogleCalendarService {
             return calendar.events().insert(calendarId, event).execute();
 
         } catch (Exception e) {
+            logStorageService.logAndStoreWithError("Google Calendar schedule post failed: {}", logName, e.getMessage(), e);
             throw new RuntimeException("Google Calendar 이벤트 등록 실패: " + e.getMessage(), e);
         }
     }
@@ -116,6 +120,7 @@ public class GoogleCalendarService {
             return events.getItems();
 
         } catch (Exception e) {
+            logStorageService.logAndStoreWithError("Google Calendar schedule get failed: {}",logName , e.getMessage(), e);
             throw new RuntimeException("Google Calendar 일정 조회 실패: " + e.getMessage(), e);
         }
     }
@@ -177,6 +182,7 @@ public class GoogleCalendarService {
             return updatedEvent.getUpdated().toStringRfc3339();
 
         } catch (Exception e) {
+            logStorageService.logAndStoreWithError("Google Calendar schedule update failed: {}", logName, e.getMessage(), e);
             throw new RuntimeException("Google Calendar 이벤트 수정 실패: " + e.getMessage(), e);
         }
     }
@@ -324,6 +330,7 @@ public class GoogleCalendarService {
             calendar.events().delete(calendarId, event.getId()).execute();
 
         } catch (Exception e) {
+            logStorageService.logAndStoreWithError("Google Calendar schedule delete failed: {}", logName, e.getMessage(), e);
             throw new RuntimeException("Google Calendar 이벤트 삭제 실패: " + e.getMessage(), e);
         }
     }

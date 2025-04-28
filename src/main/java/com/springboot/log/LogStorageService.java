@@ -26,6 +26,7 @@ public class LogStorageService {
             // 해당 날짜 key (logs: yyyy-MM-dd)의 리스트 맨 끝에 메시지를 추가 저장함
             // key 는 곧 특정 리스트의 이름, message 는 단지 해당 리스트에 쌓일 뿐
             redisTemplate.opsForList().rightPush(key, message);
+
         } catch (Exception e) {
             if (!isHandlingError) {
                 isHandlingError = true;
@@ -37,7 +38,7 @@ public class LogStorageService {
         }
 
     }
-    // ✔️ 콘솔 + Redis 저장 한 번에
+    // 콘솔 + Redis 저장 한 번에
     public void logAndStoreWithError(String message, String partName, Object... args) {
         log.info(message, args); // "Redis log save failed: Not found"
         storeInfoLog(String.format(message.replace("{}", "%s"), args), partName);
@@ -46,5 +47,11 @@ public class LogStorageService {
     public void logAndStore(String message, String partName) {
         log.info(message);
         storeInfoLog(message, partName);
+    }
+
+    //  에러용 콘솔 + Redis 저장 한 번에
+    public void logErrorAndStore(String message, String partName, Exception e) {
+        log.error(message + " - reason: {}", e.getMessage(), e);
+        storeInfoLog(String.format(message + " - reason: %s", e.getMessage()), partName);
     }
 }

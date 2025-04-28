@@ -56,8 +56,8 @@ public class OpenAiService {
     private final LogStorageService logStorageService;
     private static final int TIMEOUT_MILLIS = 60 * 1000;    //60초
     private static final int MAX_RETRY_COUNT = 3;
-
-
+    String logNameReport = "GPT_Report";
+    String logNameRecord = "GPT_Record";
     //Report
     //GPT한테 분석 정보(사용자의 기록)를 보내고 분석 받은 데이터를 List<Report>로 받음
     public List<Report> createReportsFromAiInBatch(List<ReportAnalysisRequest> requests) {
@@ -86,8 +86,8 @@ public class OpenAiService {
                 //List<ReportAnalysisResponse> -> List<Report>
                 .map(reportService::analysisResponseToReport)
                 .collect(Collectors.toList());
-
     }
+
     //Report
     //ReportAnalysisRequest -> JSON 문자열 -> aiRequest -> aiResponse. content -> Report
     public ReportAnalysisResponse generateReportFromAi(ReportAnalysisRequest request){
@@ -105,19 +105,16 @@ public class OpenAiService {
             String content = extractContent(aiResponse);
             // JSON -> Map
             Map<String, String> contentMap = jsonToMap(content); //aiResponse = {OpenAiResponse@16415}
-
             // generateReportFromAi 내부
-            log.info("contentMap parse success - memberId: {}, contentMap keys: {}", request.getMemberId(), contentMap.keySet());
+            logStorageService.logAndStoreWithError("contentMap parse success - memberId: {}, contentMap keys: {}", logNameReport,request.getMemberId(), contentMap.keySet());
             //결과 매핑
             return reportService.aiRequestToResponse(request, contentMap);
 
-
         } catch (IOException e) {
-            log.error("GPT 분석 실패 - memberId: " + request.getMemberId(), e);
+            logStorageService.logAndStoreWithError("GPT 분석 실패 - memberId: {}", logNameReport, request.getMemberId(), e);
             throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED);
         }
     }
-
 
     //audio-Record 최종
     // 문장을 우리가 원하는 key value 형태로 변환
@@ -138,18 +135,17 @@ public class OpenAiService {
             OpenAiResponse chatResponse = sendToGpt(chatRequest);
             // 응답 중 필요한 텍스트만 추출
             String content = extractContent(chatResponse);
-            logStorageService.logAndStoreWithError("GPT_audio_record process: {}", "GPT", "content");
+            logStorageService.logAndStoreWithError("GPT_audio_record process: {}", logNameRecord, content);
             // json 역직렬화 (JSON -> Map)
             return jsonToMap(content);
         }
         catch (IOException e) {
-            log.error("createRecordOrSchedule Failed - reason: {}", e.getMessage(), e);
-            logStorageService.logAndStoreWithError("GPT_audio_record Failed", "GPT", e.getMessage());
+            logStorageService.logAndStoreWithError("createRecordOrSchedule Failed - reason: {}", logNameRecord, e.getMessage(), e);
+
+//            logStorageService.logAndStoreWithError("GPT_audio_record Failed", "GPT", e.getMessage());
             throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED); // 너가 따로 정의한 예외 던짐
         }
-
     }
-
     //기록 리스트 JSON 문자열로 직렬화 (객체 -> JSON)
     public String serializeRecords(List<RecordForAnalysisDto> dtos) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -171,7 +167,6 @@ public class OpenAiService {
         return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {});
     }
 
-
     //ReportAnalysisRequest 의 ReportType = Weekly or Monthly 인 경우 타입에 맞는 prompt 반환
     public String reportTypeWeeklyOrMonthly(ReportAnalysisRequest request, String recordJson) {
 
@@ -182,7 +177,6 @@ public class OpenAiService {
         } else {
             throw new BusinessLogicException(ExceptionCode.INVALID_REPORT_TYPE);
         }
-
     }
 
     //Weekly Report Prompt
@@ -541,9 +535,9 @@ public class OpenAiService {
                 } catch (IOException e) {
                     retryCount++;
 //                    log.warn("GPT 요청 실패 - 재시도 {}회 (최대 {}회)", retryCount, MAX_RETRY_COUNT);
-                    logStorageService.logAndStoreWithError("GPT 요청 실패 - 재시도 {}회 (최대 {}회)", "GPT", retryCount, "3");
+                    logStorageService.logAndStoreWithError("GPT 요청 실패 - 재시도 {}회 (최대 {}회)", logNameReport, retryCount, "3");
                     if (retryCount >= MAX_RETRY_COUNT) {
-                        log.error("GPT 요청 최종 실패");
+                        logStorageService.logAndStoreWithError("GPT 요청 최종 실패", logNameReport, e.getMessage(), e);
                         throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED);
                     }
                     try {
@@ -556,7 +550,7 @@ public class OpenAiService {
                 }
             }
         }
-        logStorageService.logAndStoreWithError("GPT 요청 실패: {}", "GPT", ExceptionCode.REPORT_GENERATION_FAILED.getMessage());
+        logStorageService.logAndStoreWithError("GPT 요청 실패: {}", logNameReport, ExceptionCode.REPORT_GENERATION_FAILED.getMessage());
         //3번 실패하면 예외발생
         throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED); // 이론상 도달하지 않음
     }
