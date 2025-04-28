@@ -1,5 +1,6 @@
 package com.springboot.notice.service;
 
+import com.springboot.dashboard.dto.DashBoardResponseDto;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.service.MemberService;
@@ -12,7 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -88,6 +91,16 @@ public class NoticeService {
         );
     }
 
+    public List<DashBoardResponseDto.RecentNotice> findTop5RecentNotices() {
+        //최근 등록되 공지글 5개 내림차순으로 조회
+        List<Notice> noticeList = noticeRepository.findTop5ByOrderByCreatedAtDesc();
+
+        return noticeList.stream().map(
+                notice -> new DashBoardResponseDto.RecentNotice(notice.getTitle(), notice.getCreatedAt()))
+                .collect(Collectors.toList());
+
+
+    }
 
 
 }

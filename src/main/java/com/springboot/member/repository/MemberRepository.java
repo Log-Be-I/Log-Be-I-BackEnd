@@ -6,6 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, JpaSpecificationExecutor<Member> {
@@ -16,4 +20,8 @@ public interface MemberRepository extends JpaRepository<Member, Long>, JpaSpecif
     Page<Member> findByEmail(String email, Pageable pageable);
     Page<Member> findByBirth(String birth, Pageable pageable);
     Page<Member> findByMemberStatus(Member.MemberStatus status, Pageable pageable);
+    //관리자 Web - 조회 로직
+    //금일 날짜로 조회
+    List<Member> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
 }
