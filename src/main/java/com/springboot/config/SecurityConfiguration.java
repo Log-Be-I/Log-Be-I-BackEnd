@@ -96,10 +96,10 @@ public class SecurityConfiguration {
                 // 모든 요청에 대해 인증 없이 접근 가능
                 // 여러개의 요청에 대한 권한 정의가 가능하다
                 .authorizeHttpRequests(authorize -> authorize
+                        .antMatchers("/log").permitAll()
                         .antMatchers("/auth/login", "/oauth/login").permitAll()
                         .antMatchers("/logout").permitAll()
                         .antMatchers("/hello").permitAll()
-                        .antMatchers("/log").permitAll()
                         // 접근 권한과 상관없이 post 요청이라면 허용한다
                         .antMatchers(HttpMethod.POST, "/*/members").permitAll()
                         .antMatchers(HttpMethod.POST, "/*/questions").permitAll()
