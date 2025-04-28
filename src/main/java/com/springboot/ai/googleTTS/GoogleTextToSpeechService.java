@@ -1,6 +1,7 @@
 package com.springboot.ai.googleTTS;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.springboot.log.LogStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ public class GoogleTextToSpeechService {
     @Value("${google.api.key}")
     private String apiKey;
 
+    private LogStorageService logStorageService;
+    String logName = "Google_TTS";
     // toggle
     // text -> voice 로 변환할 글, outputFilePath -> 파일 저장할 경로 ( 저장될 파일 이름만 작성하면 경로는 자동으로 현 파일 위치로 잡는다)
     public void synthesizeText(String text, String outputFilePath) throws Exception {
@@ -63,7 +66,9 @@ public class GoogleTextToSpeechService {
             //
             try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
                 String error = br.lines().reduce("", (acc, line) -> acc + line);
-                throw new RuntimeException("TTS API 요청 실패: " + error);
+                // TTS 요청 실패시 로그 남기기
+                logStorageService.logAndStoreWithError("TTS API Request Failed: {}", error, logName);
+                throw new RuntimeException("TTS API Request Failed: " + error);
             }
         }
 
@@ -87,6 +92,6 @@ public class GoogleTextToSpeechService {
             fos.write(audioBytes);
         }
 
-        log.info("Audio saved to: {}", outputFilePath);
+        logStorageService.logAndStoreWithError("Audio saved to: {}", outputFilePath, logName);
     }
 }

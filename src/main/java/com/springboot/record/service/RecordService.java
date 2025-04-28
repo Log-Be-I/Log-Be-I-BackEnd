@@ -12,6 +12,7 @@ import com.springboot.googleCalendar.dto.GoogleEventDto;
 import com.springboot.googleCalendar.service.GoogleCalendarService;
 
 
+import com.springboot.log.LogStorageService;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.HistoricalRecord;
@@ -23,6 +24,7 @@ import com.springboot.schedule.repository.ScheduleRepository;
 import com.springboot.utils.AuthorizationUtils;
 import com.springboot.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,7 +40,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecordService {
@@ -49,39 +51,50 @@ public class RecordService {
     private final OpenAiService openAiService;
     private final ScheduleRepository scheduleRepository;
     private final CategoryService categoryService;
+    private final LogStorageService logStorageService;
 
     @Value("${clova.api.key}")
     private String API_KEY;
     @Value("${clova.api.id}")
     private String CLIENT_ID;
 
-
+    String logName = "Google_Calendar";
+    @Transactional
     public Object saveByType (Map<String, String> data, CustomPrincipal customPrincipal) {
 
         // type 뽑기
         if(data.get("type").equals("schedule")) {
-            // 스케쥴 레포 save 로직
-            // 스케쥴 객체 생성
-            Schedule schedule = new Schedule();
-            schedule.setTitle(data.get("title"));
-            schedule.setStartDateTime(data.get("startDateTime"));
-            schedule.setEndDateTime(data.get("endDateTime"));
-            Member member = new Member();
-            member.setMemberId(customPrincipal.getMemberId());
-            schedule.setMember(member);
+            try{
+                // 스케쥴 레포 save 로직
+                // 스케쥴 객체 생성
+                Schedule schedule = new Schedule();
+                schedule.setTitle(data.get("title"));
+                schedule.setStartDateTime(data.get("startDateTime"));
+                schedule.setEndDateTime(data.get("endDateTime"));
 
-            GoogleEventDto googleEventDto = new GoogleEventDto();
-            googleEventDto.setStartDateTime(schedule.getStartDateTime() + "+09:00");
-            googleEventDto.setEndDateTime(schedule.getEndDateTime() + "+09:00");
-            googleEventDto.setSummary(schedule.getTitle());
-            googleEventDto.setCalendarId(customPrincipal.getEmail());
-            // 구글 캘린더 등록 요청
-            Event googleEvent = googleCalendarService.sendEventToGoogleCalendar(googleEventDto);
-            // 3. eventId 반영 후 다시 저장
-            schedule.setEventId(googleEvent.getId());
-            scheduleRepository.save(schedule);
-            // 스케쥴 객체 리턴
-            return scheduleRepository.save(schedule);
+                Member member = new Member();
+                member.setMemberId(customPrincipal.getMemberId());
+                schedule.setMember(member);
+
+                GoogleEventDto googleEventDto = new GoogleEventDto();
+                googleEventDto.setStartDateTime(schedule.getStartDateTime() + "+09:00");
+                googleEventDto.setEndDateTime(schedule.getEndDateTime() + "+09:00");
+                googleEventDto.setSummary(schedule.getTitle());
+                googleEventDto.setCalendarId(customPrincipal.getEmail());
+                // db에 일단 저장
+                scheduleRepository.save(schedule);
+                // 구글 캘린더 등록 요청
+                Event googleEvent = googleCalendarService.sendEventToGoogleCalendar(googleEventDto);
+                // 3. eventId 반영 후 다시 저장
+                schedule.setEventId(googleEvent.getId());
+                // 스케쥴 객체 리턴
+                return scheduleRepository.save(schedule);
+            } catch (Exception e) {
+                logStorageService.logAndStoreWithError("Google Calendar post failed", logName, e.getMessage(), e);
+                // 구글 요청 실패 → 강제 롤백
+                throw new BusinessLogicException(ExceptionCode.GOOGLE_CALENDAR_FAILED);
+            }
+
         } else if (data.get("type").equals("record")) {
             // record 레포 save 로직
             Record record = new Record();

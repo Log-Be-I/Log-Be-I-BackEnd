@@ -131,9 +131,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // accessToken 생성
         String accessToken = jwtTokenizer.generateAccessToken(claims, subject, expiration, base64EncodedSecretKey);
 
-        System.out.println("🔍 원본 Secret Key: " + jwtTokenizer.getSecretKey());
-        System.out.println("🔍 Base64 Secret Key: " + jwtTokenizer.encodeBase64SecretKey(jwtTokenizer.getSecretKey()));
-
         return accessToken;
     }
 

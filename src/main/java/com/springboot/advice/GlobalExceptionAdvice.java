@@ -94,7 +94,7 @@ public class GlobalExceptionAdvice {
                 e.getMessage());
 
         // Redis + 콘솔 저장
-        logStorageService.logAndStore(errorMessage);
+        logStorageService.logAndStore(errorMessage, "redis");
         final ErrorResponse response = ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR);
         return response;
     }
