@@ -46,7 +46,6 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MemberMapper memberMapper;
-//    private final RedisTemplate redisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
 
     //swagger API - 등록

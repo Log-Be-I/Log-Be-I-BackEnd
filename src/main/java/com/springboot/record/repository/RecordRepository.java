@@ -1,6 +1,7 @@
 package com.springboot.record.repository;
 
 import com.springboot.record.entity.Record;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,11 +18,15 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 //    List<Record> findByRecordDateTimeBetween(LocalDateTime start, LocalDateTime end);
 //    @Query("SELECT r FROM Record r JOIN FETCH r.member WHERE r.recordDateTime BETWEEN :start AND :end")
 //    List<Record> findWithMemberByRecordDateTimeBetween(LocalDateTime start, LocalDateTime end);
-    @Query("SELECT r FROM Record r JOIN FETCH r.member WHERE r.recordDateTime BETWEEN :start AND :end AND r.recordStatus = :status")
-    List<Record> findRegisteredRecordsWithMemberBetween(LocalDateTime start, LocalDateTime end, Record.RecordStatus status);
-   
+//    @Query("SELECT r FROM Record r JOIN FETCH r.member WHERE r.recordDateTime BETWEEN :start AND :end AND r.recordStatus = :status ORDER BY r.recordDateTime ASC")
+//    List<Record> findRegisteredRecordsWithMemberBetween(LocalDateTime start, LocalDateTime end, Record.RecordStatus status);
 
-
+// @Query("SELECT r FROM Record r WHERE r.recordDateTime BETWEEN :start AND :end AND r.recordStatus = :status")
+// List<Record> findRegisteredRecordsWithMemberBetween(LocalDateTime start, LocalDateTime end, Record.RecordStatus status);
+@Query("SELECT r FROM Record r JOIN FETCH r.member WHERE r.recordDateTime BETWEEN :start AND :end AND r.recordStatus = :status ORDER BY r.recordDateTime ASC")
+List<Record> findRegisteredRecordsWithMemberBetween(@Param("start") LocalDateTime start,
+                                                    @Param("end") LocalDateTime end,
+                                                    @Param("status") Record.RecordStatus status);
     Page<Record> findAllByMember_MemberIdAndCategory_CategoryId(Long memberId, Long categoryId, Pageable pageable);
 
     // memberId, 날짜 범위, categoryId 받아서 데이터 탐색
