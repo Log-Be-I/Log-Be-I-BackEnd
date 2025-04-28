@@ -20,12 +20,12 @@ public class TestLogForceController {
     private final LogReset logReset;
 
     @PostMapping
-    public String addDummyLogs(HttpServletRequest request) {
+    public String addDummyLogs() {
         logStorageService.storeInfoLog("더미 로그 - Google", "Google_Calendar");
         logStorageService.storeInfoLog("더미 로그 - GPT Record", "GPT_Record");
         logStorageService.storeInfoLog("더미 로그 - GPT Report", "GPT_Report");
         logStorageService.storeInfoLog("더미 로그 - Clova", "Clova");
-        log.info("요청 URI: {}", request.getRequestURI());
+//        log.info("요청 URI: {}", request.getRequestURI());
         return "OK";
 //        return "더미 데이터 삽입 완료!";
     }
