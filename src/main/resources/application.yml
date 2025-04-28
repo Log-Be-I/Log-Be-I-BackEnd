@@ -1,22 +1,22 @@
 spring:
   data:
     redis:
-      host: 127.0.0.1
+      host: 172.31.41.9
       port: 6379
   application:
     name:  log-be-i
   h2:
     console:
-      enabled: true
+      enabled: false
       path: /h2
   datasource:
-    url: jdbc:h2:mem:test
-#    username: ${RDS_USERNAME}
-#    password: ${RDS_PASSWORD}
-#    driver-class-name: com.h2.cj.jdbc.Driver
+    url: jdbc:mysql://database-1.c10a226u86g0.ap-northeast-2.rds.amazonaws.com:3306/logbe_i_DB?serverTimezone=Asia/Seoul
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create  # (1) 스키마 자동 생성
+      ddl-auto: update  # (1) 스키마 자동 생성
     show-sql: true      # (2) SQL 쿼리 출력
   sql:
     init:
@@ -45,7 +45,7 @@ mail:
       - admin3@gmail.com
   data:
     redis:
-      host: 127.0.0.1  #Redis 서버 주소 지정
+      host: 172.31.41.9  #Redis 서버 주소 지정
       port: 6379        # Redis 서버 포트 지정
 server:
   servlet:
@@ -56,8 +56,8 @@ server:
       file-size-threshold: 2KB    #임계값 설정
 jwt:
   key: ${JWT_SECRET_KEY}
-  access-token-expiration-minutes: 480
-  refresh-token-expiration-minutes: 1440
+  access-token-expiration-minutes: 40
+  refresh-token-expiration-minutes: 420
 springdoc:
   api-docs:
     enabled: true
@@ -70,7 +70,7 @@ springdoc:
   groups:
     enabled: false #api 그룹 기능, default는 true 이나 당장 사용하지 않기에 false 로 지정
   swagger-ui:
-#    tryItOutEnabled: true
+    #    tryItOutEnabled: true
     operationsSorter: method #method 기준으로 정렬, 그외 alpha 로 정렬 가능
     path: /swagger-ui.html #swagger ui 의 api 문서 확인 경로 defalut 는 /swagger-ui.html 이다.
 logging:

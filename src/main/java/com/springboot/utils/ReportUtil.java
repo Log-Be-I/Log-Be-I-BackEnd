@@ -145,6 +145,33 @@ public class ReportUtil {
         }).collect(Collectors.toList());
     }
 
+    public static List<ReportAnalysisRequest> toMonthlyReportRequests(List<Record> records, Report.ReportType type) {
+        //Map : 필요한 정보만 뽑아오기 위한 중간다리 역할
+        Map<Long, List<Record>> grouped = records.stream()
+                .collect(Collectors.groupingBy(record -> record.getMember().getMemberId()));  // Map<K,V> 반환
+
+        //Key : memberId , value : List<Record>
+        return grouped.entrySet().stream().map(entry -> {
+            Long memberId = entry.getKey();
+            List<Record> memberRecords = entry.getValue();
+
+            //Record 의 content, recordDateTime, categoryName 옮겨서 List
+            List<RecordForAnalysisDto> dtos = memberRecords.stream()
+                    .map(record -> new RecordForAnalysisDto(record.getContent(), record.getRecordDateTime(), record.getCategory().getName()))
+                    .collect(Collectors.toList());
+
+            LocalDateTime baseTime = memberRecords.get(0).getRecordDateTime();
+
+            //List<ReportAnalysisRequest>  생성 및 반환
+            return new ReportAnalysisRequest(
+                    getWeeklyReportTitle(baseTime), // 또는 getMonthlyTitle
+                    getMonthlyReportTitle(baseTime),
+                    memberId,
+                    type,
+                    dtos
+            );
+        }).collect(Collectors.toList());
+    }
 
     // 요청 분할 유틸
     public static <T> List<List<T>> partitionList(List<T> list, int size) {
