@@ -57,7 +57,7 @@ server:
 jwt:
   key: ${JWT_SECRET_KEY}
   access-token-expiration-minutes: 200
-  refresh-token-expiration-minutes: 820
+  refresh-token-expiration-minutes: 1440
 springdoc:
   api-docs:
     enabled: true
