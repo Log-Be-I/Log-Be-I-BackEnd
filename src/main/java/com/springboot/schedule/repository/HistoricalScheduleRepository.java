@@ -7,5 +7,4 @@ import com.springboot.schedule.entity.HistoricalSchedule;
 import java.util.Optional;
 
 public interface HistoricalScheduleRepository extends JpaRepository<HistoricalSchedule, Long> {
-    Optional<Schedule> findVByMemberId(long memberId);
 }

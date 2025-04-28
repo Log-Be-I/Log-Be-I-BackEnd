@@ -34,22 +34,9 @@ public class Schedule extends BaseEntity{
     @Enumerated(value = EnumType.STRING)
     private ScheduleStatus scheduleStatus = ScheduleStatus.SCHEDULE_REGISTERED;
 
-//    @Column
-//    private String eventId;
-
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
-
-//    @Column(name = "LAST_MODIFIED_AT")
-//    private LocalDateTime modifiedAt;
-
-//    @PrePersist
-//    public void prePersist() {
-//        if (this.modifiedAt == null) {
-//            this.modifiedAt = LocalDateTime.now();
-//        }
-//    }
 
     public enum ScheduleStatus {
         SCHEDULE_REGISTERED("일정 등록"),
