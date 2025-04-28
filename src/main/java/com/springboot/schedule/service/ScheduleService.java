@@ -38,27 +38,7 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final HistoricalScheduleRepository historicalScheduleRepository;
-    private final RedisService redisService;
     private final MemberService memberService;
-    private final ClovaSpeechService clovaSpeechService;
-    private final RecordRepository recordRepository;
-
-//    // 일정 등록 - 음성
-//    public void postVoiceSchedule (File voiceFile, CustomPrincipal customPrincipal) throws IOException {
-////        // 유효한 회원인지 검증
-//        memberService.validateExistingMember(customPrincipal.getMemberId());
-////
-////        // clova 로 speech to text 변환
-//        String speechToText = clovaSpeechService.recognizeSpeech(voiceFile);
-
-    /// /
-    /// /        // 변환된 text 를 Gpt로 전달
-    /// /        String text = speechToText;
-    /// /
-    /// /        // Gpt 로 부터 전달받은 데이터를 Schedule 과 Record 를 분류해주는 로직에 speechToText 넣기
-//        handleResponse(speechToText);
-//    }
-
 
     // 일정 등록 - text
     public void postTextSchedule(Schedule schedule, CustomPrincipal customPrincipal) {
@@ -168,7 +148,6 @@ public class ScheduleService {
             findSchedule.setStartDateTime(
                     Optional.ofNullable(schedule.getStartDateTime())
                             .orElse(findSchedule.getStartDateTime()));
-//            findSchedule.setEventId(schedule.getEventId());
 
             // 수정 끝난 일정 데이터 등록
             scheduleRepository.save(findSchedule);
@@ -204,39 +183,12 @@ public class ScheduleService {
     }
 
 
-//    // Day or Month 분기 처리 year 과 Month 가지고 분기 처리해야해서 0 Or 1로 작성했움
-//    public List<String> dayOrMonthTime (int year, int month){
-//        // year 과 month 를 강제로 0 으로 할당 (FE가 주는 정보는 하나도 없음)
-//        // 0 이 들어왔다는건 /main 조회한다는것
-//        if (year == 0 || month == 0) {
-//            // 새로운 year 객체 생성 현재 시간 기준 yyyy
-//            int newYear = LocalDateTime.now().getYear();
-//            // 새로운 month 객체 생성 현재 시간 기준 mm
-//            int newMonth = LocalDateTime.now().getMonth().getValue();
-//            // 새로운 day 객체 생성 현재 시간 기준 dd
-//            int day = LocalDateTime.now().getDayOfMonth();
-//            // timeMine = 해당 일의 시작 시간
-//            String timeMin = getStartOfDay(newYear, newMonth, day);
-//            // timeMax = 해당 일의 마지막 시간
-//            String timeMax = getEndOfDay(newYear, newMonth, day);
-//            // 하루의 시작 시간과 마지막 시간을 List 에 넣음
-//            List<String> timeList = List.of(timeMin, timeMax);
-//            return timeList;
-//        } else {
-//            // timeMin = 해당 월의 시작 시간
-//            String timeMin = getStartOfMonth(year, month);
-//            // 해당 월 마지막 시간
-//            String timeMax = getEndOfMonth(year, month);
-//            List<String> timeList = List.of(timeMin, timeMax);
-//            return timeList;
-//        }
-//    }
-
     // ISO 8601 기본형 포맷 으로 해당 월의 시작 시간 연/월/일 시/분/초 반환
     public String getStartOfMonth(int year, int month) {
         LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
         return startOfMonth.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
+
     // ISO 8601 기본형 포맷 으로 해당 월의 마지막 시간 연/월/일 시/분/초 반환
     public String getEndOfMonth(int year, int month) {
         LocalDateTime endOfMonth = YearMonth.of(year, month)
@@ -256,76 +208,4 @@ public class ScheduleService {
         LocalDateTime startOfDay = LocalDate.of(year, month, day).atTime(00, 00, 00);
         return startOfDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
-
-
-
-
-//    public void validateScheduleStatus(long scheduleId) {
-//        if (schedule.getScheduleStatus() != Schedule.ScheduleStatus.SCHEDULE_DELETED) {
-//            new BusinessLogicException(ExceptionCode.NOT_FOUND);
-//        }
-//    }
 }
-
-    // 일정 수정( 구글 )
-//    public void updateSchedule (long scheduleId, CustomPrincipal customPrincipal) throws GeneralSecurityException, IOException {
-//        // 일정 찾기
-//        Schedule findSchedule = validateExistingSchedule(scheduleId);
-//
-////        Event schedule = getEvent(findSchedule.getEventId(), customPrincipal.getEmail());
-//
-//        // 데이터 수정
-//        if(Objects.equals(customPrincipal.getEmail(), findSchedule.getMember().getEmail())){
-//            // 데이터 이관
-//            HistoricalSchedule historicalSchedule = new HistoricalSchedule();
-//            historicalSchedule.setScheduleStatus(HistoricalSchedule.ScheduleStatus.SCHEDULE_UPDATED);
-//            historicalSchedule.setMemberId(customPrincipal.getMemberId());
-//            historicalSchedule.setEndDateTime(findSchedule.getEndDateTime());
-//            historicalSchedule.setStartDateTime(findSchedule.getStartDateTime());
-//            historicalSchedule.setOriginalScheduleId(findSchedule.getScheduleId());
-//            historicalSchedule.setTitle(findSchedule.getTitle());
-
-//            findSchedule.setTitle(
-//                    Optional.ofNullable(schedule.getSummary())
-//                            .orElse(findSchedule.getTitle()));
-//            findSchedule.setEndDateTime(
-//                    Optional.ofNullable(schedule.getEnd().getDateTime().toString())
-//                            .orElse(findSchedule.getEndDateTime()));
-//            findSchedule.setStartDateTime(
-//                    Optional.ofNullable(schedule.getStart().getDateTime().toString())
-//                            .orElse(findSchedule.getStartDateTime()));
-
-//            // 수정 데이터 등록
-//            scheduleRepository.save(findSchedule);
-//            // 이관 완료
-//            historicalScheduleRepository.save(historicalSchedule);
-//        } else {
-//            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
-//        }
-
-//    }
-
-
-
-
-    // 단일 조회
-//    public Event getEvent (String eventId, String email) throws GeneralSecurityException, IOException {
-//
-//        // accessToken 가져오기
-//        String accessToken = redisService.getGoogleAccessToken(email);
-//        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-//
-//        Calendar calendar = new Calendar.Builder(
-//                GoogleNetHttpTransport.newTrustedTransport(),
-//                JacksonFactory.getDefaultInstance(),
-//                credential
-//        ).setApplicationName("LogBeI").build();
-//
-//        // 기존 이벤트 불러오기
-//        Event event = calendar.events().get(email, eventId).execute();
-//
-//        return event;
-//    }
-
-
-//}
