@@ -24,8 +24,16 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final CategoryRepository categoryRepository;
 
+    
+    
     @Override
     public void run(String... args) {
+         List<String> categoryNames = List.of("일상", "소비", "건강", "할 일", "기타");
+         List<Category> categoryList = categoryNames.stream()
+                    .map(categoryName -> new Category(categoryName, "url", member, true))
+                    .collect(Collectors.toList());
+            categoryList.stream().map(category -> categoryRepository.save(category));
+        
         if (userRepository.count() == 0) {
             Member member = new Member();
             member.setBirth("2006-11-11");
@@ -36,11 +44,6 @@ public class DataInitializer implements CommandLineRunner {
             member.setEmail("admin1@gmail.com");
             member.setRoles(List.of("ADMIN","USER"));
             member.setRefreshToken(passwordEncoder.encode("1234"));
-             List<String> categoryNames = List.of("일상", "소비", "건강", "할 일", "기타");
-            List<Category> categoryList = categoryNames.stream()
-                    .map(categoryName -> new Category(categoryName, "url", member, true))
-                    .collect(Collectors.toList());
-            categoryList.stream().map(category -> categoryRepository.save(category));
             member.setCategories(categoryList);
             
             Member member01 = new Member();
@@ -73,11 +76,6 @@ public class DataInitializer implements CommandLineRunner {
             member04.setRoles(List.of("USER"));
             member04.setRefreshToken(passwordEncoder.encode("alalskflskfl"));
             List<Record> records = new ArrayList<>();
-            List<String> categoryNames = List.of("일상", "소비", "건강", "할 일", "기타");
-            List<Category> categoryList = categoryNames.stream()
-                    .map(categoryName -> new Category(categoryName, "url", member, true))
-                    .collect(Collectors.toList());
-            categoryList.stream().map(category -> categoryRepository.save(category));
             member04.setCategories(categoryList);
 
 
