@@ -219,7 +219,7 @@ public class ReportController {
    public ResponseEntity<List<String>> generateTts(@RequestBody List<Long> reportsId,
                                              @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-       List<String> audioReports =  report.reportToGoogleAudio(reportsId, customPrincipal.getMemberId());
+       List<String> audioReports =  reportService.reportToGoogleAudio(reportsId, customPrincipal.getMemberId());
 
     return new ResponseEntity<>(audioReports, HttpStatus.OK);
    }
