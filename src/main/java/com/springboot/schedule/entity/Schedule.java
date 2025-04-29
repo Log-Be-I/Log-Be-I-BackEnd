@@ -26,10 +26,10 @@ public class Schedule extends BaseEntity{
     private String title;
 
     @Column(nullable = false)
-    private String startDateTime;
+    private LocalDateTime startDateTime;
 
     @Column(nullable = false)
-    private String endDateTime;
+    private LocalDateTime endDateTime;
 
     @Enumerated(value = EnumType.STRING)
     private ScheduleStatus scheduleStatus = ScheduleStatus.SCHEDULE_REGISTERED;
