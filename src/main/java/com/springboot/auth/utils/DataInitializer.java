@@ -66,7 +66,7 @@ public class DataInitializer implements CommandLineRunner {
             member04.setEmail("menari@gmail.com");
             member04.setRoles(List.of("USER"));
             member04.setRefreshToken(passwordEncoder.encode("alalskflskfl"));
-            List<Record> records = new ArrayList<>();
+//            List<Record> records = new ArrayList<>();
             List<String> categoryNames = List.of("일상", "소비", "건강", "할 일", "기타");
             List<Category> categoryList = categoryNames.stream()
                     .map(categoryName -> new Category(categoryName, "url", member, true))

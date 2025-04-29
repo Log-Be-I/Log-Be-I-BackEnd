@@ -50,11 +50,11 @@ public class DateUtil {
         }
     }
 
-//    public static LocalDateTime parseToLocalDateTime(String dateTimeStr, String pattern) {
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-//            return LocalDateTime.parse(dateTimeStr, formatter);
-//
-//    }
+    public static LocalDateTime parseToLocalDateTime(String dateTimeStr, String pattern) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+            return LocalDateTime.parse(dateTimeStr, formatter);
+
+    }
 
 
 }
