@@ -21,6 +21,7 @@ public abstract class BaseEntity {
 
     @LastModifiedDate
     @Column(name = "MODIFIED_AT", columnDefinition = "DATETIME(0)")
+
     private LocalDateTime modifiedAt;
 
 //    @javax.persistence.PrePersist
