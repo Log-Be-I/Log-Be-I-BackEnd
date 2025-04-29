@@ -215,14 +215,14 @@ public class ReportController {
 
 
 // 구글 TTS (유저가 선택한 reportId 리스트를 받는다)
-//    @PostMapping("/audio")
-//    public ResponseEntity<List<String>> generateTts(@RequestBody List<Long> reportsId,
-//                                              @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-//
-//        List<String> audioReports =  report.reportToGoogleAudio(reportsId, customPrincipal.getMemberId());
-//
-//     return new ResponseEntity<>(audioReports, HttpStatus.OK);
-//    }
+   @PostMapping("/audio")
+   public ResponseEntity<List<String>> generateTts(@RequestBody List<Long> reportsId,
+                                             @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+
+       List<String> audioReports =  report.reportToGoogleAudio(reportsId, customPrincipal.getMemberId());
+
+    return new ResponseEntity<>(audioReports, HttpStatus.OK);
+   }
 
 //연도별 그룹 조회
     @GetMapping
