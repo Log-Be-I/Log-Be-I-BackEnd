@@ -327,7 +327,7 @@ public class OpenAiService {
     // schedule or record 생성 Prompt
     public String chatWithScheduleAndRecord(String clovaJson, String time) {
         return "- 너는 다양한 사람들의 일기, 생활 기록, 메모 등을 분석하여 그 내용을 정확히 분류하는 **빅데이터 전문가야**\n" +
-                "- “input text”를 읽고 분석하여 1차 분류 이후, 분류된 항목에 맞는 2차 분류 기준에 따라 최종 분류하여 값을  3차 반환 기준이 안내하는 형태에 맞춰 최종 데이터를 반환한다.\n" +
+                "- " + clovaJson + "을 읽고 분석하여 1차 분류 이후, 분류된 항목에 맞는 2차 분류 기준에 따라 최종 분류하여 값을  3차 반환 기준이 안내하는 형태에 맞춰 최종 데이터를 반환한다.\n" +
                 "- base 기준은 모든 분류 기준 및 3차 반환에 적용되며 가장 우선적으로 적용되어야한다.\n" +
                 "- 모든 시간 관련 기록들은 KST 를 기준으로 작성하되 +09:00은 빼고 출력한다.이외에 모든 시간 관련된 데이터를 분석 및 출력하기전에 시간 데이터 분류 기준을 1순위로 참고하여 작성한다.\n" +
                 "- 입력 텍스트는 아래 순서에 따라 판단합니다:\n" +
@@ -336,10 +336,6 @@ public class OpenAiService {
                 "    3. **건강 (record, categoryId = 4)**\n" +
                 "    4. **일상 (record, categoryId = 1)**\n" +
                 "    5. **기타 (record, categoryId = 5)**\n" +
-                "---\n" +
-                "**input text :**\n" +
-                "---\n" +
-                clovaJson + "\n" +
                 "---\n" +
                 "**base 기준 :**\n" +
                 "- 최종 반환 데이터는 JSON 으로 작성하여 반환한다.\n" +

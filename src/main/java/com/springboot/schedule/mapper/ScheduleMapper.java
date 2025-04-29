@@ -13,7 +13,16 @@ import java.util.stream.Collectors;
 public interface ScheduleMapper{
     Schedule schedulePostDtoToSchedule (SchedulePostDto schedulePostDto);
     Schedule schedulePatchDtoToSchedule (SchedulePatchDto schedulePatchDto);
-    ScheduleResponseDto scheduleToscheduleResponseDto (Schedule schedule);
+    default ScheduleResponseDto scheduleToscheduleResponseDto (Schedule schedule) {
+        ScheduleResponseDto responseDto = new ScheduleResponseDto();
+        responseDto.setScheduleId(schedule.getScheduleId());
+        responseDto.setTitle(schedule.getTitle());
+        responseDto.setStartDateTime(schedule.getStartDateTime());
+        responseDto.setEndDateTime(schedule.getEndDateTime());
+        responseDto.setCreatedAt(schedule.getCreatedAt());
+        responseDto.setModifiedAt(schedule.getModifiedAt());
+        return responseDto;
+    }
     default List<ScheduleResponseDto> schedulesToScheduleResponseDtos (List<Schedule> schedules) {
         List<ScheduleResponseDto> scheduleResponseDtos = schedules.stream()
                 .map(schedule -> scheduleToscheduleResponseDto(schedule))
