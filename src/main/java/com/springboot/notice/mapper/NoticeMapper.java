@@ -27,7 +27,8 @@ public interface NoticeMapper {
               notice.getNoticeType(),
               notice.getNoticeStatus(),
               notice.getIsPinned(),
-              notice.getCreatedAt()
+              notice.getCreatedAt(),
+              notice.getModifiedAt()
       );
       return response;
    }
