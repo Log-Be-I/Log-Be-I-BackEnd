@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public interface ScheduleMapper{
     default Schedule schedulePostDtoToSchedule (SchedulePostDto schedulePostDto){
         Schedule schedule = new Schedule();
-        schedule.setTitle(schedule.getTitle());
+        schedule.setTitle(schedulePostDto.getTitle());
         schedule.setStartDateTime(postStringToLocalDateTime(schedulePostDto.getStartDateTime()));
         schedule.setEndDateTime(postStringToLocalDateTime(schedulePostDto.getEndDateTime()));
 
