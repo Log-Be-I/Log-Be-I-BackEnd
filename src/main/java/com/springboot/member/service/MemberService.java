@@ -142,21 +142,20 @@ public class MemberService {
         // 검색 조건
         // email 과 name 전부 들어왔다면
         if(email != null && name != null) {
-            filteredMember = members.stream().filter(member -> {
-                Objects.equals(member.getEmail(), email);
-                Objects.equals(member.getName(), name);
-                return true;
-            }).collect(Collectors.toList());
+            filteredMember = filteredMember.stream().filter(member ->
+                Objects.equals(member.getEmail(), email) && Objects.equals(member.getName(), name)
+//                return true;
+            ).collect(Collectors.toList());
 
             // email 만 들어왔을 때
         } else if (email != null){
-            filteredMember = members.stream().filter(member ->
+            filteredMember = filteredMember.stream().filter(member ->
                             Objects.equals(member.getEmail(), email))
                     .collect(Collectors.toList());
 
             // name 만 들어왔을 때
         } else if (name != null) {
-            filteredMember = members.stream().filter(member ->
+            filteredMember = filteredMember.stream().filter(member ->
                             Objects.equals(member.getName(), name))
                     .collect(Collectors.toList());
         }
@@ -169,13 +168,13 @@ public class MemberService {
         // memberStatus 로 필터링
         if(filters.get("memberStatus") != null) {
             filteredMember = filteredMember.stream().filter(member ->
-                            member.getMemberStatus().equals(filters.get("memberStatus")))
+                            member.getMemberStatus().equals(Member.MemberStatus.valueOf(filters.get("memberStatus"))))
                     .collect(Collectors.toList());
         }
         // region 으로 필터링
         if (region != null) {
             filteredMember = filteredMember.stream().filter(member ->
-                    member.getRegion() == region)
+                            Objects.equals(member.getRegion(), region))
                     .collect(Collectors.toList());
         }
         return filteredMember;

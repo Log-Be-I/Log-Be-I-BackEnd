@@ -16,5 +16,10 @@ public interface MemberMapper {
     Member memberPostDtoToMember(MemberPostDto memberPostDto);
     Member memberPatchDtoToMember(MemberPatchDto memberPatchDto);
     MemberResponseDto memberToMemberResponseDto(Member member);
-    List<MemberResponseDto> membersToMemberResponseDtos(List<Member> members);
+    default List<MemberResponseDto> membersToMemberResponseDtos(List<Member> members) {
+        List<MemberResponseDto> memberResponseDtoList =
+                members.stream().map(member -> memberToMemberResponseDto(member))
+                        .collect(Collectors.toList());
+        return memberResponseDtoList;
+    }
 }
