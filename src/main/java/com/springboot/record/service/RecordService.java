@@ -53,6 +53,8 @@ public class RecordService {
     private final CategoryService categoryService;
     private final LogStorageService logStorageService;
 
+
+
     @Value("${clova.api.key}")
     private String API_KEY;
     @Value("${clova.api.id}")
@@ -64,12 +66,14 @@ public class RecordService {
         // type 뽑기
         if(data.get("type").equals("schedule")) {
             try{
+                String startDateTime = data.get("startDateTime");
+                String endDateTime = data.get("endDateTime");
                 // 스케쥴 레포 save 로직
                 // 스케쥴 객체 생성
                 Schedule schedule = new Schedule();
                 schedule.setTitle(data.get("title"));
-                schedule.setStartDateTime(LocalDateTime.parse(data.get("startDateTime")));
-                schedule.setEndDateTime(LocalDateTime.parse(data.get("endDateTime")));
+                schedule.setStartDateTime(DateUtil.parseToLocalDateTime(startDateTime,"yyyy-MM-dd'T'HH:mm:ss"));
+                schedule.setEndDateTime(DateUtil.parseToLocalDateTime(endDateTime,"yyyy-MM-dd'T'HH:mm:ss"));
 
                 Member member = new Member();
                 member.setMemberId(customPrincipal.getMemberId());
@@ -79,10 +83,12 @@ public class RecordService {
                 throw new BusinessLogicException(ExceptionCode.RECORD_FAILED);
             }
         } else if (data.get("type").equals("record")) {
+            String recordDateTime = data.get("recordDateTime");
             // record 레포 save 로직
             Record record = new Record();
             record.setContent(data.get("content"));
-            record.setRecordDateTime(DateUtil.parseToLocalDateTime(data.get("recordDateTime")));
+            record.setRecordDateTime(DateUtil.parseToLocalDateTime(recordDateTime,"yyyy-MM-dd'T'HH:mm:ss"));
+//            (DateUtil.parseToLocalDateTime());
             record.setCategory(categoryService.findCategory(Long.parseLong(data.get("categoryId")), customPrincipal.getMemberId()));
             record.setMember(memberService.validateExistingMember(customPrincipal.getMemberId()));
             return repository.save(record);

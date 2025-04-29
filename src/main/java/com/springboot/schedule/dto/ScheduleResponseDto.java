@@ -14,19 +14,19 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class ScheduleResponseDto {
-    @Schema(description = "일정 Id", example = "1")
+//    @Schema(description = "일정 Id", example = "1")
     private Long scheduleId;
 
-    @Schema(description = "제목", example = "점심점심")
+//    @Schema(description = "제목", example = "점심점심")
     @NotBlank
     private String title;
 
-    @Schema(description = "시작 날짜", example = "2025-04-12T13:30")
+//    @Schema(description = "시작 날짜", example = "2025-04-12T13:30")
     @NotBlank
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDateTime;
 
-    @Schema(description = "종료 날짜", example = "2025-04-12T14:30")
+//    @Schema(description = "종료 날짜", example = "2025-04-12T14:30")
     @NotBlank
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endDateTime;
