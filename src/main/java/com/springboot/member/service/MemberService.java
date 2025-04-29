@@ -141,11 +141,21 @@ public class MemberService {
         List<Member> filteredMember = new ArrayList<>(members);
         // 검색 조건
         // email 과 name 전부 들어왔다면
-        if(email != null && name != null) {
-            filteredMember = filteredMember.stream().filter(member ->
-                Objects.equals(member.getEmail(), email) && Objects.equals(member.getName(), name)
-//                return true;
-            ).collect(Collectors.toList());
+//        if(email != null && name != null) {
+//            filteredMember = filteredMember.stream().filter(member ->
+//                Objects.equals(member.getEmail(), email) && Objects.equals(member.getName(), name)
+////                return true;
+//            ).collect(Collectors.toList());
+        // email, name 조건 필터링 (포함 여부 기준)
+        if (email != null || name != null) {
+            filteredMember = filteredMember.stream().filter(
+                            member -> {
+                                boolean emailMatch = (email == null || member.getEmail().contains(email));
+                                boolean titleMatch = (name == null || member.getName().contains(name));
+                                return emailMatch && titleMatch;
+                            })
+                    .collect(Collectors.toList());
+
 
             // email 만 들어왔을 때
         } else if (email != null){

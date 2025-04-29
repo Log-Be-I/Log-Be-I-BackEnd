@@ -243,4 +243,6 @@ public class MemberController {
         memberService.deleteMember(memberId, customPrincipal.getMemberId(), customPrincipal.getEmail(), request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
 }
