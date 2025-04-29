@@ -38,17 +38,16 @@ public class ReportController {
 //    (@RequestParam("weekStart") LocalDateTime weekStart,
 //    @RequestParam("weekEnd") LocalDateTime weekEnd
     @PostMapping("/test")
-    public ResponseEntity testGenerateReports(@RequestParam("weekStart") LocalDateTime weekStart,
-                                              @RequestParam("weekEnd") LocalDateTime weekEnd) {
+    public ResponseEntity testGenerateReports() {
 
-//        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
-//        LocalDateTime today = LocalDateTime.now(koreaZone);
-//
-////        LocalDateTime today = LocalDateTime.now();
-//        //전 주 월요일(4/7) 00:00:00
-//        LocalDateTime weekStart = today.minusWeeks(8).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
-////        //전 주 일요일(4/13) 23:59:59
-//        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime today = LocalDateTime.now(koreaZone);
+
+//        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks(12).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
         List<Record> weeklyRecords = recordService.   getWeeklyRecords(weekStart, weekEnd);
 
@@ -69,7 +68,7 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(7).with(DayOfWeek.MONDAY).minusDays(1).toLocalDate().atStartOfDay();//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekStart = today.minusWeeks(11).with(DayOfWeek.MONDAY).minusDays(1).toLocalDate().atStartOfDay();//        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
         List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
@@ -91,7 +90,7 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(6).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(10).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
@@ -114,7 +113,7 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(5).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(9).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
@@ -136,7 +135,7 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(4).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(8).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
@@ -158,7 +157,7 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(3).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(7).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
@@ -180,7 +179,51 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(2).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(6).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
+        // GPT 분석 → Report 생성 -> DB 저장
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
+
+        return new ResponseEntity<>(new ListResponseDto<>(
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+    }
+    @PostMapping("/test11")
+public ResponseEntity testGenerateReportsssdddd() {
+
+        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime today = LocalDateTime.now(koreaZone);
+
+//        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks(6).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+        List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
+
+        List<ReportAnalysisRequest> weeklies = ReportUtil.toReportRequests(weeklyRecords, Report.ReportType.REPORT_WEEKLY);
+        // GPT 분석 → Report 생성 -> DB 저장
+//        List<Report> reports = openAiService.createReportsFromAi(weeklies);
+        List<Report> reports = openAiService.createReportsFromAiInBatch(weeklies);
+
+        return new ResponseEntity<>(new ListResponseDto<>(
+                mapper.reportsToReportsResponseDtos(reports)), HttpStatus.CREATED);
+    }
+    @PostMapping("/test12")
+    public ResponseEntity testGenerateReportsssdasfsdddd() {
+
+        ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+        LocalDateTime today = LocalDateTime.now(koreaZone);
+
+//        LocalDateTime today = LocalDateTime.now();
+        //전 주 월요일(4/7) 00:00:00
+        LocalDateTime weekStart = today.minusWeeks().with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
@@ -216,14 +259,13 @@ public class ReportController {
 
 
     @PostMapping("/test8")
-    public ResponseEntity testMonthlyReports(@RequestParam("weekStart") LocalDateTime monthStart,
-                                             @RequestParam("weekEnd") LocalDateTime monthEnd){
+    public ResponseEntity testMonthlyReports(){
 
-//        YearMonth lastMonth = YearMonth.now().minusMonths(1);
-//        //전 달 1일 00:00:00
-//        LocalDateTime monthStart = lastMonth.atDay(1).atStartOfDay();
-//        //전 달 말일 23:59:59
-//        LocalDateTime monthEnd = lastMonth.atEndOfMonth().atTime(23, 59, 59);
+        YearMonth lastMonth = YearMonth.now().minusMonths(1);
+        //전 달 1일 00:00:00
+        LocalDateTime monthStart = lastMonth.atDay(2).atStartOfDay();
+        //전 달 말일 23:59:59
+        LocalDateTime monthEnd = lastMonth.atEndOfMonth().atTime(23, 59, 59);
 
 
         List<Record> monthlyRecords = recordService.getMonthlyRecords(monthStart, monthEnd);
