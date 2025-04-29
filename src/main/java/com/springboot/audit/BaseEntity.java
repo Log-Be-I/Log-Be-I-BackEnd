@@ -20,7 +20,7 @@ public abstract class BaseEntity {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "LAST_MODIFIED_AT")
+    @Column(name = "MODIFIED_AT")
     private LocalDateTime modifiedAt;
 
     @javax.persistence.PrePersist
