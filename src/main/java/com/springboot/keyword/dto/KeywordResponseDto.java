@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,4 +16,6 @@ public class KeywordResponseDto {
     private Long keywordId;
     @Schema(description = "키워드 이름", example = "봄.")
     private String name;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 }

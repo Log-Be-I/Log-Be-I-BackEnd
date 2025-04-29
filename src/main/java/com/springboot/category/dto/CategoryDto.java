@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 public class CategoryDto {
 
@@ -54,6 +55,8 @@ public class CategoryDto {
         private String name;
         private String image;
         private Long memberId;
+        private LocalDateTime createdAt;
+        private LocalDateTime modifiedAt;
     }
 
 }

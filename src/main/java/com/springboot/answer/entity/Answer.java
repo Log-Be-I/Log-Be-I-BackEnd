@@ -1,5 +1,6 @@
 package com.springboot.answer.entity;
 
+import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;
 import com.springboot.question.entity.Question;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Answer {
+public class Answer extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
