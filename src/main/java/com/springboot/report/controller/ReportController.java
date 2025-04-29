@@ -224,6 +224,7 @@ public class ReportController {
     return new ResponseEntity<>(audioReports, HttpStatus.OK);
    }
 
+
 //연도별 그룹 조회
     @GetMapping
     public ResponseEntity getReportList(@Positive @RequestParam(value = "year", required = false) Integer year,  // year를 안보내도 기본값 처리 하도록 설정

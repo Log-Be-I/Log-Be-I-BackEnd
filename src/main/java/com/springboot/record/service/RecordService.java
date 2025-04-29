@@ -68,8 +68,8 @@ public class RecordService {
                 // 스케쥴 객체 생성
                 Schedule schedule = new Schedule();
                 schedule.setTitle(data.get("title"));
-                schedule.setStartDateTime(data.get("startDateTime"));
-                schedule.setEndDateTime(data.get("endDateTime"));
+                schedule.setStartDateTime(LocalDateTime.parse(data.get("startDateTime")));
+                schedule.setEndDateTime(LocalDateTime.parse(data.get("endDateTime")));
 
                 Member member = new Member();
                 member.setMemberId(customPrincipal.getMemberId());
@@ -77,7 +77,6 @@ public class RecordService {
                 return scheduleRepository.save(schedule);
             } catch (Exception e) {
                 throw new BusinessLogicException(ExceptionCode.RECORD_FAILED);
-
             }
         } else if (data.get("type").equals("record")) {
             // record 레포 save 로직

@@ -45,7 +45,6 @@ public class ScheduleController {
     // 1. DB에 먼저 저장
     scheduleService.postTextSchedule(schedule, customPrincipal);
 
-//
         scheduleRepository.save(schedule);
 
         return new ResponseEntity<>(scheduleMapper.scheduleToscheduleResponseDto(schedule), HttpStatus.CREATED);
@@ -125,7 +124,6 @@ public class ScheduleController {
 
         // 일정 상태 변경
         scheduleService.deletedSchedule(schedule.getScheduleId());
-
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

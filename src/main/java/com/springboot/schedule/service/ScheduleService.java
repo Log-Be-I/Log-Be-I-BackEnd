@@ -79,12 +79,10 @@ public class ScheduleService {
                 .filter(schedule -> schedule.getScheduleStatus() != Schedule.ScheduleStatus.SCHEDULE_DELETED)
                 .filter(schedule ->
                         // 일정의 시작 시간 이전을 파싱
-                        !LocalDateTime.parse(schedule.getEndDateTime().replaceAll("\\+.*", "")).isBefore(targetStart) &&
-                                // {}
-                                !LocalDateTime.parse(schedule.getStartDateTime().replaceAll("\\+.*", "")).isAfter(targetEnd)
+                        !schedule.getEndDateTime().isBefore(targetStart) &&
+                                !schedule.getStartDateTime().isAfter(targetEnd)
                 )
                 .collect(Collectors.toList());
-
         // 최종 데이터 반영된 findScheduleList 리턴
         return findScheduleList;
     }
@@ -156,7 +154,6 @@ public class ScheduleService {
         } else {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
         }
-
     }
 
     // 일정 삭제
