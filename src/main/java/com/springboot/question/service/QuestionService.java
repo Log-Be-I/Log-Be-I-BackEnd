@@ -70,10 +70,8 @@ public class QuestionService {
         //email, title 조건 추가 필터링
         List<Question> filteredQuestions = questions.getContent().stream().filter(
                 question -> {
-                    Member member = memberService.validateExistingMember(question.getMember().getMemberId());
-
                     //사용자가 email 검색어를 안넣거나, 넣었을 경우 포함하는지
-                    boolean emailMatch = (email == null || member.getEmail().contains(email));
+                    boolean emailMatch = (email == null || question.getMember().getEmail().contains(email));
                     //사용자가 title 검색어를 안넣거나, 넣었을 경우 포함하는지
                     boolean titleMatch = (title == null || question.getTitle().contains(title));
                     //조회하고자하는 내용과 검색어가 유사한 글+이메일만 조회할 수 있도록 가능
