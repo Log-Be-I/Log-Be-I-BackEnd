@@ -3,6 +3,7 @@ package com.springboot.report.dto;
 import com.springboot.report.entity.Report;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data

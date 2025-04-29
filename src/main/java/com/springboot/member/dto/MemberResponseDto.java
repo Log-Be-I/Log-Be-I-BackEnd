@@ -42,4 +42,6 @@ public class MemberResponseDto {
     private LocalDateTime lastLoginAt;
 
     private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+
 }

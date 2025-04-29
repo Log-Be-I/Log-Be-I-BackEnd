@@ -37,6 +37,10 @@ public class HistoricalRecord {
     @Enumerated(value = EnumType.STRING)
     private RecordStatus recordStatus = RecordStatus.RECORD_UPDATED;
 
+
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+
     public enum RecordStatus{
         RECORD_REGISTERED("기록 등록"),
         RECORD_UPDATED("기록 수정"),
@@ -44,6 +48,8 @@ public class HistoricalRecord {
 
         @Getter
         private String status;
+
+
 
         RecordStatus(String status) {
             this.status = status;
