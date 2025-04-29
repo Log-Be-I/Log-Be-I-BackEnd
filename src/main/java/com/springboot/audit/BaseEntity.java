@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public abstract class BaseEntity {
 
     @CreatedDate
-    @Column(name = "CREATED_AT", updatable = false, columnDefinition = "DATETIME(0)")
+    @Column(name = "CREATED_AT", updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
@@ -24,14 +24,14 @@ public abstract class BaseEntity {
 
     private LocalDateTime modifiedAt;
 
-//    @javax.persistence.PrePersist
-//    public void prePersist() {
-//        this.createdAt = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
-//        this.modifiedAt = this.createdAt;
-//    }
-//
-//    @javax.persistence.PreUpdate
-//    public void preUpdate() {
-//        this.modifiedAt = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
-//    }
+    @javax.persistence.PrePersist
+    public void prePersist() {
+        this.createdAt = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
+        this.modifiedAt = this.createdAt;
+    }
+
+    @javax.persistence.PreUpdate
+    public void preUpdate() {
+        this.modifiedAt = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
+    }
 }

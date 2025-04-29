@@ -143,6 +143,7 @@ public class OpenAiService {
             throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED); // 너가 따로 정의한 예외 던짐
         }
     }
+
     //기록 리스트 JSON 문자열로 직렬화 (객체 -> JSON)
     public String serializeRecords(List<RecordForAnalysisDto> dtos) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
