@@ -223,7 +223,7 @@ public ResponseEntity testGenerateReportsssdddd() {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks().with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(5).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
