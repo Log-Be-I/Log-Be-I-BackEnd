@@ -171,8 +171,8 @@ public PasswordEncoder passwordEncoder() {
         ));
         
         // 파라미터로 지정한 HTTP Method 에 대한 HTTP 통신을 허용
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE","OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization"));
         configuration.setAllowCredentials(true);
         configuration.addExposedHeader("Authorization");
 //        configuration.setExposedHeaders(List.of("Authorization", "RefreshToken"));
