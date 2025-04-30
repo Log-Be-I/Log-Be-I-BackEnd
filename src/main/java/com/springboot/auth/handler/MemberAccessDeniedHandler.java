@@ -21,7 +21,10 @@ public class MemberAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
-
+        response.setHeader("Access-Control-Allow-Origin", "https://web.logbe-i.com");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
         // 에러 상태에 따라 에러 메세지 발생
         ErrorResponder.sendErrorResponse(response, HttpStatus.FORBIDDEN);
 

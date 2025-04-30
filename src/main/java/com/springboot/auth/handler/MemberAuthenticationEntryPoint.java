@@ -20,6 +20,11 @@ public class MemberAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
+
+        response.setHeader("Access-Control-Allow-Origin", "https://web.logbe-i.com");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
         // request 의 속성중 "exception" 이라는 속성을 추출
         // 이때 Object 속성으로 담겨있음으로 Exception 으로 형변환 해줘야함
         Exception exception = (Exception) request.getAttribute("exception");
