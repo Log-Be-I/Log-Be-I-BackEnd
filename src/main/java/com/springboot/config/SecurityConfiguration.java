@@ -38,6 +38,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import java.util.List;
 
 
 @Slf4j
@@ -169,6 +170,9 @@ public PasswordEncoder passwordEncoder() {
                 "https://logbe-i.com",
                 "https://web.logbe-i.com"
         ));
+
+        // 테스트용 (더 유연하게 허용)
+        configuration.setAllowedOriginPatterns(List.of("https://web.logbe-i.com"));
         
         // 파라미터로 지정한 HTTP Method 에 대한 HTTP 통신을 허용
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
