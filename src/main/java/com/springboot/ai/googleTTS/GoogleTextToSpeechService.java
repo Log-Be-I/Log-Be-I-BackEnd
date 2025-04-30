@@ -21,7 +21,7 @@ public class GoogleTextToSpeechService {
     @Value("${google.api.key}")
     private String apiKey;
 
-    private LogStorageService logStorageService;
+//    private LogStorageService logStorageService;
     String logName = "Google_TTS";
     // toggle
     // text -> voice 로 변환할 글, outputFilePath -> 파일 저장할 경로 ( 저장될 파일 이름만 작성하면 경로는 자동으로 현 파일 위치로 잡는다)
@@ -67,7 +67,7 @@ public class GoogleTextToSpeechService {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
                 String error = br.lines().reduce("", (acc, line) -> acc + line);
                 // TTS 요청 실패시 로그 남기기
-                logStorageService.logAndStoreWithError("TTS API Request Failed: {}", error, logName);
+//                logStorageService.logAndStoreWithError("TTS API Request Failed: {}", error, logName);
                 throw new RuntimeException("TTS API Request Failed: " + error);
             }
         }
@@ -92,6 +92,6 @@ public class GoogleTextToSpeechService {
             fos.write(audioBytes);
         }
 
-        logStorageService.logAndStoreWithError("Audio saved to: {}", outputFilePath, logName);
+//        logStorageService.logAndStoreWithError("Audio saved to: {}", outputFilePath, logName);
     }
 }
