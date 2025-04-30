@@ -28,7 +28,7 @@ public class ClovaSpeechService {
     @Value("${clova.api.id}")
     private String CLIENT_ID;
 
-    private final LogStorageService logStorageService;
+//    private final LogStorageService logStorageService;
 
     String logName = "Clova";
     // 클로바 STT API 에 오디오 파일을 전송하고, 텍스트로 변환된 결과를 받아오는 메서드
@@ -95,8 +95,8 @@ public class ClovaSpeechService {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            logStorageService.logAndStoreWithError("Clova STT request failed: {}", logName, e.getMessage(), e);
+//            e.printStackTrace();
+//            logStorageService.logAndStoreWithError("Clova STT request failed: {}", logName, e.getMessage(), e);
             throw new RuntimeException("Clova STT 요청 중 오류 발생", e);
         }
         // 최종 문자열을 반환
@@ -143,6 +143,7 @@ public class ClovaSpeechService {
 
         // tempFile 을 CLOVA 에 전송해서 음성 -> 텍스트 변환 결과 받아오기
         String result = recognizeSpeech(tempFile);
+        log.info("CLOVA: " + result);
         // CLOVA 전송을 위해 임시저장해둔 파일 삭제
         tempFile.delete();
 
