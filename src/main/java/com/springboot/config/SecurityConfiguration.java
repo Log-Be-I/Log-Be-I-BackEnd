@@ -163,16 +163,12 @@ public PasswordEncoder passwordEncoder() {
         // ex) AJAX 요청, Fetch API 등
         // 모든 출처(Origin)에 대해 스크립트 기반의 HTTP 통신을 허용하도록 설정
 //        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
-                "http://localhost:8081",
-                "http://localhost:8080",
-                "https://logbe-i.com",
-                "https://web.logbe-i.com"
-        ));
 
         // 테스트용 (더 유연하게 허용)
-        configuration.setAllowedOriginPatterns(List.of("https://web.logbe-i.com"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:*", // 로컬 테스트 포함
+                "https://*.logbe-i.com" // 서브 도메인 포함
+        ));
         
         // 파라미터로 지정한 HTTP Method 에 대한 HTTP 통신을 허용
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
