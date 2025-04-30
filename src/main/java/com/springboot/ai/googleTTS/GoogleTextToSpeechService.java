@@ -67,7 +67,7 @@ public class GoogleTextToSpeechService {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
                 String error = br.lines().reduce("", (acc, line) -> acc + line);
                 // TTS 요청 실패시 로그 남기기
-                logStorageService.logAndStoreWithError("TTS API Request Failed: {}", error, logName);
+//                logStorageService.logAndStoreWithError("TTS API Request Failed: {}", error, logName);
                 throw new RuntimeException("TTS API Request Failed: " + error);
             }
         }
@@ -92,6 +92,6 @@ public class GoogleTextToSpeechService {
             fos.write(audioBytes);
         }
 
-        logStorageService.logAndStoreWithError("Audio saved to: {}", outputFilePath, logName);
+//        logStorageService.logAndStoreWithError("Audio saved to: {}", outputFilePath, logName);
     }
 }
