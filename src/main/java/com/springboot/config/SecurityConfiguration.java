@@ -96,6 +96,7 @@ public class SecurityConfiguration {
                 // 모든 요청에 대해 인증 없이 접근 가능
                 // 여러개의 요청에 대한 권한 정의가 가능하다
                 .authorizeHttpRequests(authorize -> authorize
+                        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 브라우저의 preflight 요청이 통과, CORS 에러가 사라진다.
                         .antMatchers("/log").permitAll()
                         .antMatchers("/auth/login", "/oauth/login").permitAll()
                         .antMatchers("/logout").permitAll()
@@ -161,8 +162,13 @@ public PasswordEncoder passwordEncoder() {
         // ex) AJAX 요청, Fetch API 등
         // 모든 출처(Origin)에 대해 스크립트 기반의 HTTP 통신을 허용하도록 설정
 //        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:8081", "http://localhost:8080",
-                "https://logbe-i.com", "http://logbe-i.s3-website.ap-northeast-2.amazonaws.com", "https://web.logbe-i.com/login"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:8081",
+                "http://localhost:8080",
+                "https://logbe-i.com",
+                "https://web.logbe-i.com"
+        ));
         
         // 파라미터로 지정한 HTTP Method 에 대한 HTTP 통신을 허용
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
