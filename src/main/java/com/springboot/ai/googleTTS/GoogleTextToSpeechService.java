@@ -87,8 +87,11 @@ public class GoogleTextToSpeechService {
         String audioContent = (String)mapper.readValue(jsonResponse, Map.class).get("audioContent");
         // audioBytes = 디코딩된  audioContent 를 디코딩하여 audioBytes 에 담기
         byte[] audioBytes = Base64.getDecoder().decode(audioContent);
-        // outputFilePath 파일 저장 경로를 데이터 통로로 내보내기
-        try (FileOutputStream fos = new FileOutputStream(outputFilePath)) {
+        // Ensure output directory exists
+        File outputFile = new File("/app/audio/" + outputFilePath);
+        outputFile.getParentFile().mkdirs(); // 폴더가 없으면 생성
+        // 기존 코드 변경
+        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
             fos.write(audioBytes);
         }
 

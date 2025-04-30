@@ -104,7 +104,7 @@ public class ReportService {
                     // 제목과 내용을 같이 전달해서 시작하는 글의 날짜를 말하게 함
                     googleTextToSpeechService.synthesizeText(report.getTitle() + report.getContent(), fileName);
                     // 생성된 파일 경로 복사
-                    filePathList.add(fileName);
+                    filePathList.add("https://logbe-i.com/" + fileName);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
