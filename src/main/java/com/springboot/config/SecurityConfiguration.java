@@ -165,9 +165,9 @@ public PasswordEncoder passwordEncoder() {
 //        configuration.setAllowedOrigins(Arrays.asList("*"));
 
         // 테스트용 (더 유연하게 허용)
-        configuration.setAllowedOriginPatterns(List.of(
+        configuration.setAllowedOrigins(List.of(
                 "https://web.logbe-i.com", // 정확한 도메인
-                "http://localhost:5173" // 포트까지 명시
+                "http://localhost:3000" // 포트까지 명시
         ));
         
         // 파라미터로 지정한 HTTP Method 에 대한 HTTP 통신을 허용
