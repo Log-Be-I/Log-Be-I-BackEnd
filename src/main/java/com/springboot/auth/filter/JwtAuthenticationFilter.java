@@ -50,6 +50,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     // 사용자의 입력 정보를 받아 인증을 거친 토큰을 생성하는 역할
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        // ✅ OPTIONS 요청은 인증 처리하지 않고 넘김
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return null; // 또는 throw new AuthenticationServiceException("OPTIONS bypass"); 등
+        }
         // ObjectMapper = 자바 객체를 JSON 으로 변환하거나, JSON 을 자바 객체로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         try {
