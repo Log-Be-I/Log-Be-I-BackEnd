@@ -45,7 +45,7 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(12).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(4).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
@@ -68,7 +68,7 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(11).with(DayOfWeek.MONDAY).minusDays(1).toLocalDate().atStartOfDay();//        //전 주 일요일(4/13) 23:59:59
+        LocalDateTime weekStart = today.minusWeeks(3).with(DayOfWeek.MONDAY).minusDays(1).toLocalDate().atStartOfDay();//        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
         List<Record> weeklyRecords = recordService.getWeeklyRecords(weekStart, weekEnd);
@@ -90,7 +90,7 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(10).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(2).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
@@ -113,7 +113,7 @@ public class ReportController {
 
 //        LocalDateTime today = LocalDateTime.now();
         //전 주 월요일(4/7) 00:00:00
-        LocalDateTime weekStart = today.minusWeeks(9).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+        LocalDateTime weekStart = today.minusWeeks(1).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 //        //전 주 일요일(4/13) 23:59:59
         LocalDateTime weekEnd = weekStart.plusDays(6).withHour(23).withMinute(59).withSecond(59);
 
