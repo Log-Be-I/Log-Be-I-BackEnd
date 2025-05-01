@@ -261,7 +261,7 @@ public ResponseEntity testGenerateReportsssdddd() {
     @PostMapping("/test8")
     public ResponseEntity testMonthlyReports(){
 
-        YearMonth lastMonth = YearMonth.now().minusMonths(2);
+        YearMonth lastMonth = YearMonth.now().minusMonths(3);
         //전 달 1일 00:00:00
         LocalDateTime monthStart = lastMonth.atDay(1).atStartOfDay();
         //전 달 말일 23:59:59
