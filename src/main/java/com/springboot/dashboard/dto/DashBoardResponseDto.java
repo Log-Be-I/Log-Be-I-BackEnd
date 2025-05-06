@@ -20,17 +20,4 @@ public class DashBoardResponseDto {
     private List<UnansweredQuestion> questionTitles;
 
     private List<RecentNotice> recentNotices;
-
-    @Getter
-    @AllArgsConstructor
-    public static class RecentNotice {
-        private String title;
-        private LocalDateTime createdAt;
-    }
-
-    @Getter
-    @AllArgsConstructor
-    public static class UnansweredQuestion {
-        private String title;
-    }
 }

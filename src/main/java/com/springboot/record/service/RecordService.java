@@ -1,6 +1,5 @@
 package com.springboot.record.service;
 
-import com.google.api.services.calendar.model.Event;
 import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.category.entity.Category;
@@ -12,7 +11,7 @@ import com.springboot.exception.ExceptionCode;
 //import com.springboot.googleCalendar.service.GoogleCalendarService;
 
 
-import com.springboot.log.LogStorageService;
+import com.springboot.log.service.LogStorageService;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.HistoricalRecord;
@@ -33,7 +32,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;

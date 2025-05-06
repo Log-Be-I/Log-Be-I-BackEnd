@@ -1,4 +1,4 @@
-package com.springboot.log;
+package com.springboot.log.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

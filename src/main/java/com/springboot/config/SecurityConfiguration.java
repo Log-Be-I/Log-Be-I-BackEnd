@@ -200,11 +200,9 @@ public PasswordEncoder passwordEncoder() {
             // OAuthAuthenticationFilter 등록
             OAuthAuthenticationFilter oAuthAuthenticationFilter = new OAuthAuthenticationFilter("/oauth/login", authenticationManager);
 
-//            builder.addFilter(oAuthAuthenticationFilter);
             builder.addFilterBefore(oAuthAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
             builder.addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-            builder.addFilterAfter(jwtVerificationFilter, UsernamePasswordAuthenticationFilter.class); // (1)
-
+            builder.addFilterAfter(jwtVerificationFilter, UsernamePasswordAuthenticationFilter.class);
         }
     }
 //    @Bean

@@ -1,7 +1,9 @@
 package com.springboot.notice.mapper;
 
 
-import com.springboot.notice.dto.NoticeDto;
+import com.springboot.notice.dto.NoticePatchDto;
+import com.springboot.notice.dto.NoticePostDto;
+import com.springboot.notice.dto.NoticeResponseDto;
 import com.springboot.notice.entity.Notice;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,13 +14,13 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface NoticeMapper {
    @Mapping(target = "member.memberId", source = "memberId")
-   Notice noticePostToNotice(NoticeDto.Post post);
-   Notice noticePatchToNotice(NoticeDto.Patch patch);
+   Notice noticePostToNotice(NoticePostDto post);
+   Notice noticePatchToNotice(NoticePatchDto patch);
 //   @Mapping(target = "memberId", source = "member.memberId")
 //   NoticeDto.Response noticeToNoticeResponse(Notice notice);
 
-   default NoticeDto.Response noticeToNoticeResponse(Notice notice){
-      NoticeDto.Response response = new NoticeDto.Response(
+   default NoticeResponseDto noticeToNoticeResponse(Notice notice){
+      NoticeResponseDto noticeResponseDto = new NoticeResponseDto(
               notice.getNoticeId(),
               notice.getTitle(),
               notice.getContent(),
@@ -30,10 +32,10 @@ public interface NoticeMapper {
               notice.getCreatedAt(),
               notice.getModifiedAt()
       );
-      return response;
+      return noticeResponseDto;
    }
 
-   default List<NoticeDto.Response> noticesToNoticeResponses(List<Notice> notices) {
+   default List<NoticeResponseDto> noticesToNoticeResponses(List<Notice> notices) {
       return notices.stream().filter(notice -> notice.getNoticeStatus() != Notice.NoticeStatus.NOTICE_DELETED)
               .map(notice -> noticeToNoticeResponse(notice))
               .collect(Collectors.toList());

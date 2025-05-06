@@ -95,16 +95,9 @@ public class MemberController {
         headers.set("Authorization", "Bearer " + tokens.get("accessToken"));
         headers.set(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
-
-
-
         MemberResponseDto memberResponseDto = memberMapper.memberToMemberResponseDto(member);
 
-
-
-
         return new ResponseEntity<>(new SingleResponseDto<>(memberResponseDto), headers, HttpStatus.CREATED);
-
     }
 
     //swagger API - 앱 푸쉬 알림 수신동의
@@ -136,13 +129,12 @@ public class MemberController {
     })
     // 회원 수정
     @PatchMapping("/{member-id}")
-    public ResponseEntity patchMember(@Valid @RequestBody MemberPatchDto requestBody,
+    public ResponseEntity patchMember(@Valid @RequestBody MemberPatchDto patchDto,
                                       @Parameter(description = "수정할 멤버의 ID", example = "1")
                                       @PathVariable("member-id") long memberId,
                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        Member member = memberMapper.memberPatchDtoToMember(requestBody);
 
-        Member uodateMember = memberService.updateMember(member, memberId, customPrincipal.getEmail());
+        Member uodateMember = memberService.updateMember(memberMapper.memberPatchDtoToMember(patchDto), memberId, customPrincipal.getEmail());
         return new ResponseEntity<>(new SingleResponseDto<>(
                 memberMapper.memberToMemberResponseDto(uodateMember)),HttpStatus.OK);
     }
@@ -240,7 +232,7 @@ public class MemberController {
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal,
                                        @RequestBody String request) {
 //        memberService.deleteMember(memberId, customPrincipal.getEmail(), request);
-        memberService.deleteMember(memberId, customPrincipal.getMemberId(), customPrincipal.getEmail(), request);
+        memberService.deleteMember(customPrincipal.getEmail(), request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

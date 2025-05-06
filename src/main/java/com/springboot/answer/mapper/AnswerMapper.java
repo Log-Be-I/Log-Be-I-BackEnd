@@ -1,7 +1,9 @@
 package com.springboot.answer.mapper;
 
 
-import com.springboot.answer.dto.AnswerDto;
+import com.springboot.answer.dto.AnswerPatchDto;
+import com.springboot.answer.dto.AnswerPostDto;
+import com.springboot.answer.dto.AnswerResponseDto;
 import com.springboot.answer.entity.Answer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,11 +12,11 @@ import org.mapstruct.Mapping;
 public interface AnswerMapper {
     @Mapping(target = "member.memberId", source = "memberId")
     @Mapping(target = "question.questionId", source = "questionId")
-    Answer answerPostToAnswer(AnswerDto.Post postDto);
-    Answer answerPatchToAnswer(AnswerDto.Patch patchDto);
+    Answer answerPostToAnswer(AnswerPostDto postDto);
+    Answer answerPatchToAnswer(AnswerPatchDto patchDto);
 
-    default AnswerDto.Response answerToAnswerResponse(Answer answer) {
-        AnswerDto.Response answerResponseDto = new AnswerDto.Response();
+    default AnswerResponseDto answerToAnswerResponse(Answer answer) {
+        AnswerResponseDto answerResponseDto = new AnswerResponseDto();
         answerResponseDto.setAnswerId(answer.getAnswerId());
         answerResponseDto.setContent(answer.getContent());
         answerResponseDto.setMemberId(answer.getMember().getMemberId());
@@ -22,5 +24,4 @@ public interface AnswerMapper {
 
         return answerResponseDto;
     }
-
 }
