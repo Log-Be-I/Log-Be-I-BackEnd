@@ -54,7 +54,6 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
-
             try {
 //                Map<String, Object> claims = verifyJws(request);
                 Map<String, Object> claims = verifyJws(token);
@@ -68,11 +67,8 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
                 return;
             }
         }
-
         chain.doFilter(request, response);
     }
-
-
 
     @Override
     // JWT 가 인증 헤더에 포함되지 않았다면 자격증명이 필요하지 않은 리소스에 대한 요청이라고 판단후

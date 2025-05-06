@@ -23,9 +23,8 @@ public class DashBoardController {
 
 
     @GetMapping
-    public ResponseEntity getDashBoard(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
+    public ResponseEntity getDashBoard() {
 
-        DashBoardResponseDto dto = dashBoardService.findDashBoard();
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        return new ResponseEntity<>(dashBoardService.findVerifiedExistsDashBoard(), HttpStatus.OK);
     }
 }

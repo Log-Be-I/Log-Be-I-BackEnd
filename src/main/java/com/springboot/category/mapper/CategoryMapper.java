@@ -1,6 +1,8 @@
 package com.springboot.category.mapper;
 
-import com.springboot.category.dto.CategoryDto;
+import com.springboot.category.dto.CategoryPatchDto;
+import com.springboot.category.dto.CategoryPostDto;
+import com.springboot.category.dto.CategoryResponseDto;
 import com.springboot.category.entity.Category;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,10 +12,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
-    Category categoryPostToCategory(CategoryDto.Post post);
+    Category categoryPostToCategory(CategoryPostDto post);
     @Mapping(target = "member.memberId", source = "memberId")
-    Category categoryPatchToCategory(CategoryDto.Patch patch);
+    Category categoryPatchToCategory(CategoryPatchDto patch);
     @Mapping(target = "memberId", source = "member.memberId")
-    CategoryDto.Response categoryToCategoryResponse(Category category);
-    List<CategoryDto.Response> categoriesToCategoryResponses(List<Category> categories);
+    CategoryResponseDto categoryToCategoryResponse(Category category);
+    List<CategoryResponseDto> categoriesToCategoryResponses(List<Category> categories);
 }

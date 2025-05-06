@@ -1,42 +1,43 @@
 package com.springboot.question.mapper;
 
-import com.springboot.answer.dto.AnswerDto;
+import com.springboot.answer.dto.AnswerResponseDto;
 import com.springboot.answer.entity.Answer;
-import com.springboot.question.dto.QuestionDto;
+import com.springboot.question.dto.QuestionPatchDto;
+import com.springboot.question.dto.QuestionPostDto;
+import com.springboot.question.dto.QuestionResponseDto;
 import com.springboot.question.entity.Question;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface QuestionMapper {
     @Mapping(target = "member.memberId", source = "memberId")
-    Question questionPostToQuestion(QuestionDto.Post postDto);
+    Question questionPostToQuestion(QuestionPostDto questionPostDto);
     @Mapping(target = "member.memberId", source = "memberId")
-    Question questionPatchToQuestion(QuestionDto.Patch patchDto);
-    AnswerDto.Response answerToAnswerResponse(Answer answer);
+    Question questionPatchToQuestion(QuestionPatchDto patchDto);
+    AnswerResponseDto answerToAnswerResponse(Answer answer);
     @Mapping(target = "answer", source = "answer")
     @Mapping(target = "memberId", source = "member.memberId")
-    default QuestionDto.Response questionToQuestionResponse(Question question) {
-        AnswerDto.Response answerResponse = new AnswerDto.Response();
+    default QuestionResponseDto questionToQuestionResponse(Question question) {
+        AnswerResponseDto answerResponseDto = new AnswerResponseDto();
         if(question.getAnswer() != null) {
-            answerResponse.setAnswerId(question.getAnswer().getAnswerId());  // ✅ 추가!
-            answerResponse.setQuestionId(question.getQuestionId());
-            answerResponse.setMemberId(question.getAnswer().getMember().getMemberId());
-            answerResponse.setContent(question.getAnswer().getContent());
+            answerResponseDto.setAnswerId(question.getAnswer().getAnswerId());  // ✅ 추가!
+            answerResponseDto.setQuestionId(question.getQuestionId());
+            answerResponseDto.setMemberId(question.getAnswer().getMember().getMemberId());
+            answerResponseDto
+                    .setContent(question.getAnswer().getContent());
         } else {
-            answerResponse.setAnswerId(null);
-            answerResponse.setQuestionId(null);
-            answerResponse.setContent(null);
-            answerResponse.setMemberId(null);
+            answerResponseDto.setAnswerId(null);
+            answerResponseDto.setQuestionId(null);
+            answerResponseDto.setContent(null);
+            answerResponseDto.setMemberId(null);
         }
 
-        QuestionDto.Response questionResponse =
-                new QuestionDto.Response(
+        QuestionResponseDto questionResponseDto =
+                new QuestionResponseDto(
                         question.getQuestionId(),
                         question.getTitle(),
                         question.getContent(),
@@ -44,14 +45,14 @@ public interface QuestionMapper {
                         question.getImage(),
                         question.getMember().getMemberId(),
                         question.getMember().getEmail(),
-                        answerResponse,
+                        answerResponseDto,
                         question.getCreatedAt(),
                         question.getModifiedAt(),
                         question.getQuestionAnswerStatus()
                 );
-        return questionResponse;
+        return questionResponseDto;
     }
-    default List<QuestionDto.Response> questionsToQuestionResponses(List<Question> questions) {
+    default List<QuestionResponseDto> questionsToQuestionResponses(List<Question> questions) {
 
             return questions.stream().filter(question -> question.getQuestionStatus() == Question.QuestionStatus.QUESTION_REGISTERED)
                     .map(question -> questionToQuestionResponse(question))

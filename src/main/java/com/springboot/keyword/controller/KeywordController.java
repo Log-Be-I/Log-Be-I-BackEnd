@@ -2,19 +2,14 @@ package com.springboot.keyword.controller;
 
 import com.google.gson.Gson;
 import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.auth.utils.MemberDetails;
 import com.springboot.keyword.API.NaverNewsApiService;
 import com.springboot.keyword.dto.KeywordPostDto;
 import com.springboot.keyword.dto.KeywordResponseDto;
 import com.springboot.keyword.entity.Keyword;
 import com.springboot.keyword.mapper.KeywordMapper;
-import com.springboot.keyword.repository.KeywordRepository;
 import com.springboot.keyword.service.KeywordService;
-import com.springboot.member.entity.Member;
-import com.springboot.member.service.MemberService;
-import com.springboot.question.dto.QuestionDto;
 import com.springboot.responsedto.ListResponseDto;
-import com.springboot.responsedto.SingleResponseDto;
+import com.springboot.utils.UriCreator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,16 +28,18 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-//@RequestMapping("/keywords")
+@RequestMapping
 @Validated
 @Tag(name = "Keyword API", description = "Keyword API")
 public class KeywordController {
 
+    private final static String KEYWORD_DEFAULT_URL = "/keywords";
         private final KeywordMapper keywordMapper;
         private final KeywordService keywordService;
         private final NaverNewsApiService naverNewsApiService;
@@ -57,16 +54,14 @@ public class KeywordController {
     })
 
     // 키워드 등록
-    @PostMapping("/keywords")
+    @PostMapping
     public ResponseEntity postKeyword(@Valid @RequestBody List<KeywordPostDto> keywordPostDtoList,
                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-        // 키워드 생성
         List<Keyword> keywordList = keywordService.createKeyword(
-                keywordMapper.KeywordPostDtoListToKeywordList(keywordPostDtoList), customPrincipal);
-
-        return new ResponseEntity<>(
-                new ListResponseDto<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList)),HttpStatus.CREATED);
+                keywordMapper.KeywordPostDtoListToKeywordList(keywordPostDtoList), customPrincipal.getMemberId());
+        URI location = UriCreator.createUri(KEYWORD_DEFAULT_URL);
+        return ResponseEntity.created(location).body(new ListResponseDto<>(keywordMapper.keywordListToKeywordResponseDtoList(keywordList)));
     }
 
     //swagger API - 조회
@@ -80,18 +75,24 @@ public class KeywordController {
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
     })
     // 키워드 조회
-    @GetMapping("/keywords")
-    public ResponseEntity getKeyword(@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) throws IOException {
+    @GetMapping
+    public ResponseEntity getKeywords(@Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) throws IOException {
 
-        List<Keyword> keywordList = keywordService.getKeywords(customPrincipal);
+        // 회원이 설정한 키워드 리스트 받아오기
+        List<Keyword> keywordList = keywordService.findKeywords(customPrincipal.getMemberId());
+        // 앞단에 보내줄 반환값 리스트임 여러개의 키벨류를 리스트로 받음
         List<Map<String, Object>> response = new ArrayList<>();
 
+        // 회원이 설정한 키워드 리스트 for 문으로 돌거야
         for (Keyword keyword : keywordList) {
+            // keyword 의 이름과 회원의 id 로
             String newsJson = naverNewsApiService.searchNews(keyword.getName(), customPrincipal.getMemberId());
             log.info("Request{}:{}", customPrincipal.getEmail(), keyword.getName());
             // JSON 문자열을 리스트로 파싱
+            // 이젠 JSON으로 변환된 데이터를 GSON이 읽을 수 있음 GSON에 결과 리스트를 넣어서 최종 데이터 폼으로 변환
             List<Map<String, String>> newsList = new Gson().fromJson(newsJson, List.class);
 
+            // map 형태로 키워드와 뉴스 리스트를 한번에 받는 이유는 하나의 데이터셋으로 전부 관리 가능하기 때문이다.
             Map<String, Object> keywordWithNews = new HashMap<>();
             keywordWithNews.put("keyword", keyword.getName());
             keywordWithNews.put("news", newsList);

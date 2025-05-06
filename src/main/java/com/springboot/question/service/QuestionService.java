@@ -1,18 +1,20 @@
 package com.springboot.question.service;
 
-import com.springboot.dashboard.dto.DashBoardResponseDto;
+import com.springboot.auth.utils.CustomPrincipal;
+import com.springboot.dashboard.dto.UnansweredQuestion;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
-import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.question.entity.Question;
 import com.springboot.question.repository.QuestionRepository;
+import com.springboot.record.entity.Record;
 import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,15 +26,15 @@ public class QuestionService {
 
     public Question createQuestion(Question question, Long memberId){
         //회원이 존재하는지 확인
-        Member member = memberService.validateExistingMember(memberId);
-        question.setMember(member);
+        question.setMember(memberService.findVerifiedExistsMember(memberId));
         return questionRepository.save(question);
     }
 
     public Question updateQuestion(Question question, Long memberId){
-        Question findQuestion = findVerifiedQuestion(question.getQuestionId());
+        Question findQuestion = findVerifiedExistsQuestion(question.getQuestionId());
         // 작성자인지 확인
         AuthorizationUtils.isOwner(findQuestion.getMember().getMemberId(), memberId);
+        findQuestion.setMember(memberService.findVerifiedExistsMember(memberId));
         // 답변 완료시 수정 불가능
         isAnswered(question.getQuestionId());
         // 제목, 내용, visibility
@@ -80,18 +82,12 @@ public class QuestionService {
                 .collect(Collectors.toList());
         return new PageImpl<>(filteredQuestions, pageable, filteredQuestions.size());
     }
-//
-//    //조건에 맞춘 회원 검색 결과 : 작성자(email)+제목(title)
-//    public List<Question> findFilterQuestions(List<Question> questions){
-//
-//
-//    }
 
     //회원의 질문 글 전체 조회
     public Page<Question> findMyQuestions(int page, int size, long memberId, String orderBy){
-        memberService.validateExistingMember(memberId);
+        memberService.findVerifiedExistsMember(memberId);
 
-        if(page < 1 && orderBy == "DESC"){
+        if(page < 1 && Objects.equals(orderBy, "DESC")){
             //페이징 및 정렬 정보 생성
             Pageable pageable = PageRequest.of(page -1, size, Sort.by("createdAt").descending());
             //특정 회원이 작성한 질문글을 페이징 처리하여 조회
@@ -102,50 +98,59 @@ public class QuestionService {
             //특정 회원이 작성한 질문글을 페이징 처리하여 조회
             return questionRepository.findAllByMember_MemberId(memberId, pageable);
         }
-
-
     }
 
     //질문글 상세 조회
     public Question findQuestion(Long questionId, Long memberId){
-        Question findQuestion = findVerifiedQuestion(questionId);
+        Question findQuestion = findVerifiedExistsQuestion(questionId);
         // Authentication 통해서 memberId와 관리자인지 받아와서 권한 없는 글에 접근 시 예외처리
         AuthorizationUtils.isAdminOrOwner(findQuestion.getMember().getMemberId(), memberId);
-        return findQuestion;
+        // 삭제 상태 검증 이후 반환
+        return verifyExistsQuestion(findQuestion);
     }
 
     public void deleteQuestion(Long questionId, long memberId){
         // 질문 존재 확인해서 가져오고
-        Question findQuestion = findVerifiedQuestion(questionId);
+        Question findQuestion = findVerifiedExistsQuestion(questionId);
+        // 삭제 상태일 경우 예외 발생
+        verifyExistsQuestion(findQuestion);
         // 관리자 또는 작성자와 현재 사용자 같은지 확인
         AuthorizationUtils.isAdminOrOwner(findQuestion.getMember().getMemberId(), memberId);
-        // 이미 삭제 상태인지 확인
-        verifyQuestionStatus(findQuestion);
         // 상태 변경
         findQuestion.setQuestionStatus(Question.QuestionStatus.QUESTION_DELETED);
-        // 저장
-        questionRepository.save(findQuestion);
-
+        // 이미 삭제 상태인지 확인하고 저장
+        questionRepository.save(verifyExistsQuestion(findQuestion));
     }
 
     // 질문 존재하는지 검증
-    public Question findVerifiedQuestion(Long questionId){
+    public Question findVerifiedExistsQuestion(Long questionId){
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
+
         return optionalQuestion.orElseThrow(() -> new BusinessLogicException(ExceptionCode.QUESTION_NOT_FOUND));
     }
 
     // 답변은 하나밖에 못하기 때문에 있는지 검증
     public void isAnswered(Long questionId){
-        if(findVerifiedQuestion(questionId).getQuestionAnswerStatus() == Question.QuestionAnswerStatus.DONE_ANSWER){
+        if(findVerifiedExistsQuestion(questionId).getQuestionAnswerStatus() == Question.QuestionAnswerStatus.DONE_ANSWER){
             throw new BusinessLogicException(ExceptionCode.CANNOT_CHANGE_QUESTION);
         }
     }
 
     // 질문이 삭제 상태인지 검증
-    public void verifyQuestionStatus(Question question){
+    public Question verifyExistsQuestion(Question question){
         if(question.getQuestionStatus() == Question.QuestionStatus.QUESTION_DELETED){
             throw new BusinessLogicException(ExceptionCode.QUESTION_NOT_FOUND);
         }
+        return  question;
+    }
+
+    public List<Question> nonDeletedQuestionAndAuth (List<Question> questions, Long memberId) {
+        return questions.stream().filter(question -> question.getQuestionStatus() != Question.QuestionStatus.QUESTION_DELETED)
+                .peek(question ->
+                        // 관리자 or owner 가 아니라면 예외 처리
+                        AuthorizationUtils.isAdminOrOwner(question.getMember().getMemberId(), memberId)
+                ).collect(Collectors.toList());
+
     }
 
     // 정렬조건 설정
@@ -160,17 +165,17 @@ public class QuestionService {
         }
     }
 
-    // 답변 삭제 시 질문의 answer null로 만드는 메서드
+    // 답변 삭제 시 질문의 answer null 로 만드는 메서드
     public void setAnswerNull(long questionId){
-        Question findQuestion = findVerifiedQuestion(questionId);
+        Question findQuestion = findVerifiedExistsQuestion(questionId);
         findQuestion.setAnswer(null);
         findQuestion.setQuestionAnswerStatus(Question.QuestionAnswerStatus.NONE_ANSWER);
-
     }
 
-    public List<DashBoardResponseDto.UnansweredQuestion> findUnansweredQuestions() {
+    public List<UnansweredQuestion> findUnansweredQuestions() {
         List<Question> questions = questionRepository.findAllByQuestionAnswerStatus(Question.QuestionAnswerStatus.NONE_ANSWER);
-        return  questions.stream().map(question -> new DashBoardResponseDto.UnansweredQuestion(question.getTitle()))
+        return  questions.stream().map(question -> new UnansweredQuestion(question.getTitle()))
                         .collect(Collectors.toList());
     }
+
 }

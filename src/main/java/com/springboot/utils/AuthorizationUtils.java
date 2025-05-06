@@ -21,7 +21,6 @@ public class AuthorizationUtils {
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
     }
 
-    //
     public static void verifyAdmin(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(!authentication.getAuthorities().stream()

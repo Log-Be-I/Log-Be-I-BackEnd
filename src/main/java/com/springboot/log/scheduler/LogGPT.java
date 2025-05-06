@@ -1,5 +1,7 @@
-package com.springboot.log;
+package com.springboot.log.scheduler;
 
+import com.springboot.log.LogPost;
+import com.springboot.log.LogReset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 

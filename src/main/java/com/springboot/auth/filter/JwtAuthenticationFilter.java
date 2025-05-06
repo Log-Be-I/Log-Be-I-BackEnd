@@ -57,19 +57,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // ObjectMapper = 자바 객체를 JSON 으로 변환하거나, JSON 을 자바 객체로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            // request 의 입력 스트림을 가져와서 바디(JSON 데이터) 를 읽어온다.
-            // 읽어온 데이터를 loginDto 에 할당
             LoginDto loginDto = objectMapper.readValue(request.getInputStream(), LoginDto.class);
-            // 여기서 password가 ""라면 OAuth 방식으로 토큰 생성 시도
             if (loginDto.getPassword().isEmpty()) {
-                // 커스텀 토큰 사용 (email 만 있는 토큰)
                 OAuthAuthenticationToken token = new OAuthAuthenticationToken(loginDto.getUsername());
                 return authenticationManager.authenticate(token);
             } else {
-                // 받아온 데이터에서 username, password 를 사용해 토큰을 생성한다
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
-                // 만들어진 토큰을 검증하여 성공하면 인증된 Authentication 객체를 반환하고 실패하면 예외를 발생시킨다.
                 return authenticationManager.authenticate(authenticationToken);
             }
         } catch (IOException e) {
