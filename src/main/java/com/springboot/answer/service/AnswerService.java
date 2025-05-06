@@ -24,6 +24,7 @@ public class AnswerService {
 
 
     public Answer createAnswer(Answer answer, Long adminId){
+
         //로그인한 회원이 관리자인지 확인
         AuthorizationUtils.verifyAdmin();
         Member member = memberService.findVerifiedExistsMember(adminId);

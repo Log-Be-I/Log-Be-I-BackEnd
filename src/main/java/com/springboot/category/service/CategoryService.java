@@ -27,7 +27,7 @@ public class CategoryService {
 
 
     public Category createCategory(Category category, Long memberId) {
-        //회원인지 확인
+
         Member findMember = memberService.findVerifiedExistsMember(memberId);
         //카테고리 생성시 영속성전이
         findMember.setCategory(category);

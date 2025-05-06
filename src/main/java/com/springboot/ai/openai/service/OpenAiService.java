@@ -553,7 +553,7 @@ public class OpenAiService {
     }
 
 
-//aiResponse - content 파싱 (-> Map<K,V>)
+    //aiResponse - content 파싱 (-> Map<K,V>)
     public String extractContent(OpenAiResponse response) {
         return response.getChoices().get(0).getMessage().getContent();
     }

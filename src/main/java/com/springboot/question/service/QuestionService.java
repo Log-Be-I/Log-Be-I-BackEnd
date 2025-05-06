@@ -27,6 +27,7 @@ public class QuestionService {
     public Question createQuestion(Question question, Long memberId){
         //회원이 존재하는지 확인
         question.setMember(memberService.findVerifiedExistsMember(memberId));
+
         return questionRepository.save(question);
     }
 
@@ -85,6 +86,7 @@ public class QuestionService {
 
     //회원의 질문 글 전체 조회
     public Page<Question> findMyQuestions(int page, int size, long memberId, String orderBy){
+
         memberService.findVerifiedExistsMember(memberId);
 
         if(page < 1 && Objects.equals(orderBy, "DESC")){

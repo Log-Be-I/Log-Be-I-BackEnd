@@ -5,7 +5,8 @@ import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
-import com.springboot.record.dto.RecordDto;
+import com.springboot.record.dto.RecordPatchDto;
+import com.springboot.record.dto.RecordPostDto;
 import com.springboot.record.entity.Record;
 import com.springboot.record.mapper.RecordMapper;
 import com.springboot.record.service.RecordService;
@@ -41,19 +42,19 @@ import java.util.Map;
 public class RecordController {
 //    private final static String RECORD_DEFAULT_URL = "/records";
     private final RecordService recordService;
-    private final RecordMapper mapper;
+    private final RecordMapper recordMapper;
     private final ClovaSpeechService clovaSpeechService;
     private final OpenAiService openAiService;
     private final ScheduleMapper scheduleMapper;
 
 
     @PostMapping("/audio-records")
-    public ResponseEntity uploadAndRecognize(@RequestParam("audio") MultipartFile audioFile,
+    public ResponseEntity processVoiceInput(@RequestParam("audio") MultipartFile audioFile,
                                              @AuthenticationPrincipal CustomPrincipal customPrincipal) throws IOException {
 
         //사용자 입력 음성 -> text -> Map<String, String> 타입 변환
         Map<String, String> result = openAiService.createRecordOrSchedule( clovaSpeechService.voiceToText(audioFile) );
-        Object response = recordService.saveByType(result, customPrincipal);
+        Object response = recordService.saveByType(result, customPrincipal.getMemberId());
 
         // response 타입이 Schedule 이라면
         if (response instanceof Schedule) {
@@ -63,7 +64,7 @@ public class RecordController {
             // 만약 Record 타입이라면
         } else if (response instanceof Record) {
             Record record = (Record) response;
-            return ResponseEntity.ok(mapper.recordToRecordResponse(record));
+            return ResponseEntity.ok(recordMapper.recordToRecordResponse(record));
         } else {
 
             throw new BusinessLogicException(ExceptionCode.GPT_FAILED);
@@ -71,40 +72,27 @@ public class RecordController {
     }
 
     @PostMapping("/text-records")
-    public ResponseEntity postRecord(@RequestBody RecordDto.Post post,
+    public ResponseEntity postRecord(@Valid @RequestBody RecordPostDto post,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-//        post.setMemberId(customPrincipal.getMemberId());
 
-        post.setMemberId(customPrincipal.getMemberId());
-        //RecordDateTime을 입력 값이 있다면, 해당 문자열을 LocalDateTime으로 변환
-        //문자열을 LocalDateTime 로 변환
-//        LocalDateTime recordDateTime = DateUtil.parseToLocalDateTime(post.getRecordDateTime(), "yyyy-MM-dd HH:mm:ss");
-        //Dto-> Entity 변환
-        Record textRecord = mapper.recordPostDtoToRecord(post);
-        //LocalDate 타입으로 변경된 RecordTime set
-//        textRecord.setRecordDateTime(recordDateTime);
-        Record record =recordService.createRecord(textRecord, customPrincipal.getMemberId());
-      
-//        URI location = UriCreator.createUri(RECORD_DEFAULT_URL, record.getRecordId());
-        RecordDto.Response response = mapper.recordToRecordResponse(record);
-//        Member member = memberService.validateExistingMember(response.);
-//        response.set
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        Record record =recordService.createRecord(recordMapper.recordPostDtoToRecord(post), customPrincipal.getMemberId());
+
+        return new ResponseEntity<>(new SingleResponseDto<>(recordMapper.recordToRecordResponse(record)), HttpStatus.CREATED);
     }
 
     @PatchMapping("/records/{record-id}")
     public ResponseEntity patchRecord(@Positive @PathVariable("record-id") long recordId,
-                                      @Valid  @RequestBody RecordDto.Patch patch,
+                                      @Valid @RequestBody RecordPatchDto patch,
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal){
         patch.setRecordId(recordId);
         patch.setMemberId(customPrincipal.getMemberId());
         //recordTime이 null이 아닐 때 변환
 //        LocalDateTime recordDateTime = DateUtil.parseToLocalDateTime(patch.getRecordDateTime());
 
-        Record textRecord = mapper.recordPatchDtoToRecord(patch);
+        Record textRecord = recordMapper.recordPatchDtoToRecord(patch);
 //        textRecord.setRecordDateTime(recordDateTime);
-        Record record = recordService.updateRecord(textRecord, customPrincipal.getMemberId());
-        return new ResponseEntity<>( new SingleResponseDto<>(mapper.recordToRecordResponse(record)), HttpStatus.OK);
+        Record record = recordService.updateRecord(recordId, textRecord, customPrincipal.getMemberId());
+        return new ResponseEntity<>( new SingleResponseDto<>(recordMapper.recordToRecordResponse(record)), HttpStatus.OK);
     }
 
     @GetMapping("/records/{record-id}")
@@ -113,7 +101,7 @@ public class RecordController {
         Record record = recordService.findRecord(recordId, customPrincipal.getMemberId());
 
         return new ResponseEntity<>( new SingleResponseDto<>(
-                mapper.recordToRecordResponse(record)), HttpStatus.OK);
+                recordMapper.recordToRecordResponse(record)), HttpStatus.OK);
     }
 
     @GetMapping("/records")
@@ -128,7 +116,7 @@ public class RecordController {
         List<Record> records = recordPage.getContent();
         return new ResponseEntity<>( new MultiResponseDto<>(
                 // 삭제상태가 아닌 record 만 필터링, 관리자 및 본인만 접근 가능
-                mapper.recordsToRecordResponses(recordService.nonDeletedRecordAndAuth(records, customPrincipal)),
+                recordMapper.recordsToRecordResponses(recordService.nonDeletedRecordAndAuth(records, customPrincipal.getMemberId())),
                 recordPage), HttpStatus.OK);
     }
 

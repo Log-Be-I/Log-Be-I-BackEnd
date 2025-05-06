@@ -59,6 +59,7 @@ public class MemberController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Bad Request\", \"message\": \"잘못된 입력 형태입니다.\"}")))
     })
+
     // 회원가입
     @PostMapping
     public ResponseEntity postMember(@Valid @RequestBody MemberPostDto memberPostDto) {
@@ -108,6 +109,7 @@ public class MemberController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
     })
+
     @PatchMapping("/{member-id}/notification")
     //앱 푸쉬 알림 수신동의 여부 저장
     public ResponseEntity setNotificationConsent(@PathVariable("member-id") @Positive long memberId,
@@ -127,6 +129,7 @@ public class MemberController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Bad Request\", \"message\": \"잘못된 입력 형태입니다.\"}")))
     })
+
     // 회원 수정
     @PatchMapping("/{member-id}")
     public ResponseEntity patchMember(@Valid @RequestBody MemberPatchDto patchDto,
@@ -152,6 +155,7 @@ public class MemberController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Bad Request\", \"message\": \"조회하신 회원이 없습니다.\"}")))
     })
+
     // 회원 단일 조회
     @GetMapping("/{member-id}")
     public ResponseEntity getMember(@Parameter(description = "조회할 멤버의 ID", example = "1")
@@ -206,7 +210,6 @@ public class MemberController {
         }
 
         Page<Member> pageMember = memberService.findMembers(page-1, size, sortBy, order);
-
         List<Member> members = memberService.findFilterMembers(pageMember.getContent(), filters, email, name, region);
 
         return new ResponseEntity<>(

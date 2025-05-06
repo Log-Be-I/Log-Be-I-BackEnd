@@ -29,7 +29,9 @@ public class NoticeService {
 
     //notice 등록
     public Notice createNotice(Notice notice, Long adminId) {
+
         memberService.findVerifiedExistsMember(adminId);
+
         //작성자가 관리자인지 확인하고 아니면 예외
         AuthorizationUtils.verifyAuthorIsAdmin(notice.getMember().getMemberId(), adminId);
         //notice 등록 후 반환
@@ -40,7 +42,9 @@ public class NoticeService {
        //기존 등록된 데이터
         Notice findNotice = findVerifiedExistsNotice(notice.getNoticeId());
        //등록된 회원인지 확인
+
         memberService.findVerifiedExistsMember(adminId);
+
         //관리자인지 확인
        AuthorizationUtils.verifyAuthorIsAdmin(findNotice.getMember().getMemberId(), adminId);
         //변경가능한 필드 확인 후 변경
@@ -83,7 +87,9 @@ public class NoticeService {
         //삭제 상태의 경우 예외발생
         getDeletedNotice(findNotice);
         //회원인지 확인
+
         memberService.findVerifiedExistsMember(adminId);
+
         AuthorizationUtils.verifyAuthorIsAdmin(findNotice.getMember().getMemberId(), adminId);
         findNotice.setNoticeStatus(Notice.NoticeStatus.NOTICE_DELETED);
         //변경사항 저장

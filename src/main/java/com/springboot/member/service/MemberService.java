@@ -104,6 +104,7 @@ public class MemberService {
     public Member findMember(long memberId, long currentMemberId) {
         // 유저 존재 확인
         AuthorizationUtils.isAdminOrOwner(memberId, currentMemberId);
+
         return findVerifiedExistsMember(memberId);
 
 //        // 유저 정보 owner 의 email 과 관리자 email 을 담은 리스트
@@ -193,6 +194,7 @@ public class MemberService {
     public void deleteMember(String memberEmail, String response) {
         // 존재하는 회원인지 검증
         Member member = findMemberByEmail(memberEmail);
+
         // 회원 상태가 활동중인지 검증
         // 활동중인 경우에만 삭제 가능 ( 보통 휴면계정 또한 휴면을 풀어야 삭제든 뭐든 가능)
         validateMemberStatus(member);
@@ -219,7 +221,6 @@ public class MemberService {
             deletedMember.setReason(response);
             deletedMemberRepository.save(deletedMember);
 
-
         } else {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
         }
@@ -245,6 +246,7 @@ public class MemberService {
 
     // 가입된 회원인지 검증(id)
     public Member findVerifiedExistsMember(long memberId) {
+
         Optional<Member> findMember = memberRepository.findByMemberId(memberId);
         return findMember.orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
 
@@ -278,6 +280,7 @@ public class MemberService {
 
     // 탈퇴 회원 재가입 가능한지 검증
     public Member validateRejoinableMember(String email) {
+
         // 회원 id 로 탈퇴 내역있는지 조회
         Optional<DeletedMember> deletedMember = deletedMemberRepository.findByEmail(email);
         // 탈퇴한 내역이 있다면
@@ -307,6 +310,7 @@ public class MemberService {
     //검증 로직 : 회원가입 직후에 사용자에게 앱 푸쉬알림 허용 여부 받기
     public void updateNotificationConsent(long memberId, boolean notification) {
         Member findMember = findVerifiedExistsMember(memberId);
+
 
         findMember.setNotification(notification);
         //저장

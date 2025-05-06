@@ -68,7 +68,6 @@ public class ReportService {
             return repository.saveAll(reports);
     }
 
-
     // GET : 연도별 전체조회
     public List<Report> findMonthlyReports(long memberId, int year) {
         String yearStr = year + "년";
@@ -84,14 +83,14 @@ public class ReportService {
     //등록된 Report -> TTS : 음성 출력
     public List<String> reportToGoogleAudio(List<Long> reportsId, long memberId){
         // 유효한 회원인지 검증
-        Member member = memberService.validateExistingMember(memberId);
+        Member member = memberService.findVeryfiedExistsMember(memberId);
         //활동중인 회원인지 확인
         memberService.validateMemberStatus(member);
 
         try {
             // reportId 로 report 를 찾아서 List<Report> 생성
             List<Report> reportList = reportsId.stream()
-                    .map(reportId -> findReport(reportId))
+                    .map(reportId -> findVerifiedExistsReport(reportId))
                     .collect(Collectors.toList());
             // 생성된 파일 이름을 담을 리스트
             List<String> filePathList = new ArrayList<>();
@@ -139,17 +138,6 @@ public class ReportService {
         }
     }
 
-    //ReportType 설정
-    public void setReportType(Report report){
-        if(report.getPeriodNumber() == 0){
-            //reportType -> month로 변경
-            report.setReportType(Report.ReportType.REPORT_MONTHLY);
-        } else {
-            //periodNumber 1,2,3,4,5 라면 WEEKLY로 변경
-            report.setReportType(Report.ReportType.REPORT_WEEKLY);
-        }
-    }
-
     //주간 분석 개수 반환 : 월간 분석 조건 - 주간분석 2개 이상 시 실행
     public int getWeeklyReportCount(YearMonth lastMonth) {
         String yearMonthPrefix = String.format("%d년 %02d월", lastMonth.getYear(), lastMonth.getMonthValue());
@@ -159,10 +147,8 @@ public class ReportService {
     }
   
     // report 단건 조회
-    public Report findReport(long reportId) {
+    public Report findVerifiedExistsReport(long reportId) {
         return repository.findById(reportId).orElseThrow(
                 () -> new BusinessLogicException(ExceptionCode.REPORT_NOT_FOUND));
     }
-
-
 }

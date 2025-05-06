@@ -25,6 +25,7 @@ public class KeywordService {
     public List<Keyword> createKeyword (List<Keyword> keywordList, Long memberId) {
         //member 찾기
         Member member = memberService.findVerifiedExistsMember(memberId);
+      
         // memberId 로 기존 키워드 리스트 찾기
         List<Keyword> keywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
 
@@ -46,7 +47,7 @@ public class KeywordService {
 
     // keyword 조회
     public List<Keyword> findKeywords (Long memberId) {
-        //member 찾기
+
         Member member = memberService.findVerifiedExistsMember(memberId);
 
         // 키워드 찾기

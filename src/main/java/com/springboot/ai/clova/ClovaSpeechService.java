@@ -20,9 +20,9 @@ import java.util.List;
 public class ClovaSpeechService {
 
     @Value("${clova.api.key}")
-    private String API_KEY;
+    private String CLOVA_API_SECRET;
     @Value("${clova.api.id}")
-    private String CLIENT_ID;
+    private String CLOVA_CLIENT_ID;
 
 //    private final LogStorageService logStorageService;
 
@@ -53,8 +53,8 @@ public class ClovaSpeechService {
             // 요청 본문의 데이터 타입 설정 -> 바이너리 데이터 전송 (음성 파일)
             conn.setRequestProperty("Content-Type", "application/octet-stream");
             // 인증용 헤더 작성
-            conn.setRequestProperty("X-NCP-APIGW-API-KEY-ID", CLIENT_ID);
-            conn.setRequestProperty("X-NCP-APIGW-API-KEY", API_KEY);
+            conn.setRequestProperty("X-NCP-APIGW-API-KEY-ID", CLOVA_CLIENT_ID);
+            conn.setRequestProperty("X-NCP-APIGW-API-KEY", CLOVA_API_SECRET);
             // 설정한 내용을 바탕으로 실제 서버 연결 시작
             conn.connect();
 
@@ -134,8 +134,8 @@ public class ClovaSpeechService {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
         // api 요청을 위한 key 설정
-        headers.set("X-NCP-APIGW-API-KEY-ID", CLIENT_ID);  // 네이버 콘솔 Client ID
-        headers.set("X-NCP-APIGW-API-KEY", API_KEY);       // 네이버 콘솔 Secret Key
+        headers.set("X-NCP-APIGW-API-KEY-ID", CLOVA_CLIENT_ID);  // 네이버 콘솔 Client ID
+        headers.set("X-NCP-APIGW-API-KEY", CLOVA_API_SECRET);       // 네이버 콘솔 Secret Key
 
         // tempFile 을 CLOVA 에 전송해서 음성 -> 텍스트 변환 결과 받아오기
         String result = recognizeSpeech(tempFile);

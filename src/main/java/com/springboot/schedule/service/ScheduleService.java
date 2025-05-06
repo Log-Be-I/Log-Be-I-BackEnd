@@ -17,9 +17,11 @@ import com.springboot.schedule.entity.HistoricalSchedule;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.repository.HistoricalScheduleRepository;
 import com.springboot.schedule.repository.ScheduleRepository;
+import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
@@ -41,24 +44,75 @@ public class ScheduleService {
     private final MemberService memberService;
 
     // 일정 등록 - text
-    public void postTextSchedule(Schedule schedule, CustomPrincipal customPrincipal) {
-
-        schedule.setMember(memberService.validateExistingMember(customPrincipal.getMemberId()));
+    public Schedule createTextSchedule(Schedule schedule, Long memberId) {
+        // 가입된 회원인지 검증
+        Member member = memberService.findVeryfiedExistsMember(memberId);
+        //활동 중인 상태인지 검증
+        memberService.validateMemberStatus(member);
+        schedule.setMember(member);
         // 일정 저장
-        scheduleRepository.save(schedule);
+        return scheduleRepository.save(schedule);
     }
 
+    // 일정 수정( 서버 수정 )
+    // 수정을 원하는 일정 Id, 유저 기본 정보, 원하는 변경 사항을 파라미터로 받는다
+    @Transactional
+    public Schedule updateSchedule(Schedule schedule, long scheduleId, Long memberId) {
+        // 가입된 회원인지 검증
+        Member member = memberService.findVeryfiedExistsMember(memberId);
+        //활동 중인 상태인지 검증
+        memberService.validateMemberStatus(member);
+        // 등록된 일정 찾기
+        Schedule findSchedule = findVeryfiedExistsSchedule(scheduleId);
+
+        // 데이터 수정
+        if (Objects.equals(memberId, findSchedule.getMember().getMemberId())) {
+            // 데이터 이관
+            HistoricalSchedule historicalSchedule = new HistoricalSchedule();
+            historicalSchedule.setScheduleStatus(HistoricalSchedule.ScheduleStatus.SCHEDULE_UPDATED);
+            historicalSchedule.setMemberId(memberId);
+            historicalSchedule.setEndDateTime(findSchedule.getEndDateTime());
+            historicalSchedule.setStartDateTime(findSchedule.getStartDateTime());
+            historicalSchedule.setOriginalScheduleId(findSchedule.getScheduleId());
+            historicalSchedule.setTitle(findSchedule.getTitle());
+
+            // 이관 완료
+            historicalScheduleRepository.save(historicalSchedule);
+
+            // 데이터 이관 이후 항상 하던데로 데이터 변경 시작
+            findSchedule.setTitle(
+                    Optional.ofNullable(schedule.getTitle())
+                            .orElse(findSchedule.getTitle()));
+            findSchedule.setEndDateTime(
+                    Optional.ofNullable(schedule.getEndDateTime())
+                            .orElse(findSchedule.getEndDateTime()));
+            findSchedule.setStartDateTime(
+                    Optional.ofNullable(schedule.getStartDateTime())
+                            .orElse(findSchedule.getStartDateTime()));
+            // 수정 끝난 일정 데이터 등록
+            return scheduleRepository.save(findSchedule);
+
+        } else {
+            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
+        }
+    }
     // 일정 조회_단일
-    public Schedule findSchedule(long scheduleId) {
+    public Schedule findSchedule(long scheduleId, long memberId) {
+        // 가입된 회원인지 검증
+        Member member = memberService.findVeryfiedExistsMember(memberId);
+        // 정상적인 상태인지 검증
+        memberService.validateMemberStatus(member);
+        Schedule findSchedule = findVeryfiedExistsSchedule(scheduleId);
+        //관리자 또는 작성자 본인인지 확인
+        AuthorizationUtils.isAdminOrOwner(findSchedule.getMember().getMemberId(), memberId);
         // 일정 찾기
-        return validateExistingSchedule(scheduleId);
+        return findSchedule;
     }
 
     // 일정 조회_전체 (페이지네이션 필요 x) 한달 일정 전체를 리스트로 줘야함
-    public List<Schedule> findSchedules(int year, int month, CustomPrincipal customPrincipal) {
+    public List<Schedule> findSchedules(int year, int month, Long memberId) {
         // member 검증
-        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
-
+        Member member = memberService.findVeryfiedExistsMember(memberId);
         //정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
 
@@ -71,7 +125,7 @@ public class ScheduleService {
         LocalDateTime targetEnd = LocalDateTime.parse(date.get(2));
 
         // memberId 로 일정 찾기
-        List<Schedule> scheduleList = scheduleRepository.findAllByMember_MemberId(customPrincipal.getMemberId());
+        List<Schedule> scheduleList = scheduleRepository.findAllByMember_MemberId(memberId);
 
         // "year" 과 "month" 가 포함된 모든 일정 조회
         List<Schedule> findScheduleList = scheduleList.stream()
@@ -87,7 +141,7 @@ public class ScheduleService {
         return findScheduleList;
     }
 
-    // 오늘 날짜 기준 // 하루 일정일 경우 -> 하루 시작부터 마지막 시간 반환 // 월 일정일 경우 -> 월 시작부터 월 마지막 시간 반환
+    //main -> 오늘 날짜 기준 // 하루 일정일 경우 -> 하루 시작부터 마지막 시간 반환 // 월 일정일 경우 -> 월 시작부터 월 마지막 시간 반환
     public List<String> dayOrMonthGetDate(int year, int month) {
         // year 과 month 를 강제로 0 으로 할당 (FE가 주는 정보는 하나도 없음)
         // 0 이 들어왔다는건 /main 조회한다는것
@@ -119,49 +173,14 @@ public class ScheduleService {
         }
     }
 
-    // 일정 수정( 서버 수정 )
-    // 수정을 원하는 일정 Id, 유저 기본 정보, 원하는 변경 사항을 파라미터로 받는다
-    public void updateServerSchedule(long scheduleId, CustomPrincipal customPrincipal, Schedule schedule) {
-        // 일정 찾기
-        Schedule findSchedule = validateExistingSchedule(scheduleId);
-
-        // 데이터 수정
-        if (Objects.equals(customPrincipal.getEmail(), findSchedule.getMember().getEmail())) {
-            // 데이터 이관
-            HistoricalSchedule historicalSchedule = new HistoricalSchedule();
-            historicalSchedule.setScheduleStatus(HistoricalSchedule.ScheduleStatus.SCHEDULE_UPDATED);
-            historicalSchedule.setMemberId(customPrincipal.getMemberId());
-            historicalSchedule.setEndDateTime(findSchedule.getEndDateTime());
-            historicalSchedule.setStartDateTime(findSchedule.getStartDateTime());
-            historicalSchedule.setOriginalScheduleId(findSchedule.getScheduleId());
-            historicalSchedule.setTitle(findSchedule.getTitle());
-
-            // 데이터 이관 이후 항상 하던데로 데이터 변경 시작
-            findSchedule.setTitle(
-                    Optional.ofNullable(schedule.getTitle())
-                            .orElse(findSchedule.getTitle()));
-            findSchedule.setEndDateTime(
-                    Optional.ofNullable(schedule.getEndDateTime())
-                            .orElse(findSchedule.getEndDateTime()));
-            findSchedule.setStartDateTime(
-                    Optional.ofNullable(schedule.getStartDateTime())
-                            .orElse(findSchedule.getStartDateTime()));
-
-            // 수정 끝난 일정 데이터 등록
-            scheduleRepository.save(findSchedule);
-            // 이관 완료
-            historicalScheduleRepository.save(historicalSchedule);
-        } else {
-            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
-        }
-    }
-
     // 일정 삭제
-    public void deletedSchedule(long scheduleId) {
+    public void deletedSchedule(long scheduleId, Long memberId) {
+        // 가입된 회원인지 검증
+        Member member = memberService.findVeryfiedExistsMember(memberId);
+        // 정상적인 상태인지 검증
+        memberService.validateMemberStatus(member);
         // scheduleId 로 schedule 찾기
-        Schedule schedule = validateExistingSchedule(scheduleId);
-        // 삭제 가능한 상태인지 확인
-        validateExistingSchedule(schedule.getScheduleId());
+        Schedule schedule = findVeryfiedExistsSchedule(scheduleId);
         // schedule 삭제 상태로 변경
         schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_DELETED);
         // 상태 변경한 schedule 저장
@@ -170,7 +189,7 @@ public class ScheduleService {
 
 
     // 존재하는 일정인지 확인
-    public Schedule validateExistingSchedule(long scheduleId) {
+    public Schedule findVeryfiedExistsSchedule(long scheduleId) {
         Optional<Schedule> findSchedule = scheduleRepository.findById(scheduleId);
         Schedule schedule = findSchedule.orElseThrow(() -> new BusinessLogicException(ExceptionCode.NOT_FOUND));
         if (schedule.getScheduleStatus() != Schedule.ScheduleStatus.SCHEDULE_DELETED) {
@@ -181,28 +200,28 @@ public class ScheduleService {
 
 
     // ISO 8601 기본형 포맷 으로 해당 월의 시작 시간 연/월/일 시/분/초 반환
-    public String getStartOfMonth(int year, int month) {
-        LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
-        return startOfMonth.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-    }
+//    public String getStartOfMonth(int year, int month) {
+//        LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
+//        return startOfMonth.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+//    }
 
     // ISO 8601 기본형 포맷 으로 해당 월의 마지막 시간 연/월/일 시/분/초 반환
-    public String getEndOfMonth(int year, int month) {
-        LocalDateTime endOfMonth = YearMonth.of(year, month)
-                .atEndOfMonth()
-                .atTime(23, 59, 59);
-        return endOfMonth.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-    }
+//    public String getEndOfMonth(int year, int month) {
+//        LocalDateTime endOfMonth = YearMonth.of(year, month)
+//                .atEndOfMonth()
+//                .atTime(23, 59, 59);
+//        return endOfMonth.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+//    }
 
     // ISO 8601 기본형 포맷 으로 해당 일의 마지막 시간대 연/월/일 시/분/초 포멧으로 반환
-    public String getEndOfDay(int year, int month, int day) {
-        LocalDateTime endOfDay = LocalDate.of(year, month, day).atTime(23, 59, 59);
-        return endOfDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-    }
+//    public String getEndOfDay(int year, int month, int day) {
+//        LocalDateTime endOfDay = LocalDate.of(year, month, day).atTime(23, 59, 59);
+//        return endOfDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+//    }
 
     // ISO 8601 기본형 포맷 으로 해당 일의 시작 시간 연/월/일 시/분/초 반환
-    public String getStartOfDay(int year, int month, int day) {
-        LocalDateTime startOfDay = LocalDate.of(year, month, day).atTime(00, 00, 00);
-        return startOfDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-    }
+//    public String getStartOfDay(int year, int month, int day) {
+//        LocalDateTime startOfDay = LocalDate.of(year, month, day).atTime(00, 00, 00);
+//        return startOfDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+//    }
 }
