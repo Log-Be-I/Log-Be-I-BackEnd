@@ -28,10 +28,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = (String) authentication.getPrincipal();
         String rawPassword = (String) authentication.getCredentials();
-//        Member member = null;
-//        log.info("DB password: {}", );
-//        log.info("입력 password: {}", rawPassword.);
-//        log.info("✅ FormLoginAuthenticationProvider 호출됨 - 이메일: {}", email);
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일 없음: " + email));
@@ -49,6 +45,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         );
     }
 
+    //        Member member = null;
+//        log.info("DB password: {}", );
+//        log.info("입력 password: {}", rawPassword.);
+//        log.info("✅ FormLoginAuthenticationProvider 호출됨 - 이메일: {}", email);
 
 //    private String extractId(String prefixEncodedPassword) {
 //        if (prefixEncodedPassword == null) {

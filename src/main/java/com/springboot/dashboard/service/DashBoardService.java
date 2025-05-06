@@ -1,6 +1,8 @@
 package com.springboot.dashboard.service;
 
 import com.springboot.dashboard.dto.DashBoardResponseDto;
+import com.springboot.dashboard.dto.RecentNotice;
+import com.springboot.dashboard.dto.UnansweredQuestion;
 import com.springboot.member.service.MemberService;
 import com.springboot.notice.service.NoticeService;
 import com.springboot.question.service.QuestionService;
@@ -16,21 +18,18 @@ public class DashBoardService {
     private final QuestionService questionService;
     private final NoticeService noticeService;
 
-    public DashBoardResponseDto findDashBoard() {
+    public DashBoardResponseDto findVerifiedExistsDashBoard() {
         //오늘 회원가입한 회원의 이름
         List<String> newMemberNames = memberService.findTodayRegisteredMembers();
         //question 답변 미등록 수
-        List<DashBoardResponseDto.UnansweredQuestion> questions = questionService.findUnansweredQuestions();
-
+        List<UnansweredQuestion> questions = questionService.findUnansweredQuestions();
         //새 공지 : title, 등록일자
-        List<DashBoardResponseDto.RecentNotice> recentNotices = noticeService.findTop5RecentNotices();
-
+        List<RecentNotice> recentNotices = noticeService.findTop5RecentNotices();
         return dashBoardToResponse(newMemberNames, questions, recentNotices);
-
     }
 
-    public DashBoardResponseDto dashBoardToResponse (List<String> memberNames, List<DashBoardResponseDto.UnansweredQuestion> questions,
-                                                         List<DashBoardResponseDto.RecentNotice> recentNotices){
+    public DashBoardResponseDto dashBoardToResponse (List<String> memberNames, List<UnansweredQuestion> questions,
+                                                         List<RecentNotice> recentNotices){
         DashBoardResponseDto dto = new DashBoardResponseDto();
         dto.setTodayMemberCount(memberNames.size());
         dto.setTodayMemberNames(memberNames);

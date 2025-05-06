@@ -1,6 +1,8 @@
 package com.springboot.answer.controller;
 
-import com.springboot.answer.dto.AnswerDto;
+import com.springboot.answer.dto.AnswerPatchDto;
+import com.springboot.answer.dto.AnswerPostDto;
+import com.springboot.answer.dto.AnswerResponseDto;
 import com.springboot.answer.entity.Answer;
 import com.springboot.answer.mapper.AnswerMapper;
 import com.springboot.answer.service.AnswerService;
@@ -31,9 +33,8 @@ import java.net.URI;
 @RequiredArgsConstructor
 @Tag(name = "Answer API", description = "답변 API")
 public class AnswerController {
-    private final static String ANSWER_DEFAULT_URL = "/questions/{question-id}/answers";
     private final AnswerService answerService;
-    private final AnswerMapper mapper;
+    private final AnswerMapper answerMapper;
     //swagger API - 등록
     @Operation(summary = "답변 등록", description = "관리자가 문의 글에 답변을 등록합니다.")
     @ApiResponses(value = {
@@ -48,15 +49,13 @@ public class AnswerController {
 
     @PostMapping
     public ResponseEntity postAnswer(@PathVariable("question-id") Long questionId,
-                                     @Valid @RequestBody AnswerDto.Post postDto,
+                                     @Valid @RequestBody AnswerPostDto answerPostDto,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        postDto.setQuestionId(questionId);
-        postDto.setMemberId(customPrincipal.getMemberId());
-        Answer answer = mapper.answerPostToAnswer(postDto);
-        Answer createdAnswer = answerService.createAnswer(answer);
-        AnswerDto.Response answerResponseDto = mapper.answerToAnswerResponse(createdAnswer);
+        answerPostDto.setQuestionId(questionId);
+        Answer answer = answerService.createAnswer(answerMapper.answerPostToAnswer(answerPostDto), customPrincipal.getMemberId());
         URI location = UriCreator.createUri(questionId);
-        return ResponseEntity.created(location).body(new SingleResponseDto<>(answerResponseDto));
+        return ResponseEntity.created(location).body(new SingleResponseDto<>(
+                answerMapper.answerToAnswerResponse(answer)));
     }
 
     //swagger API - 수정
@@ -64,7 +63,7 @@ public class AnswerController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "기존에 등록된 답변 수정 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation =  AnswerDto.Response.class))),
+                            schema = @Schema(implementation =  AnswerResponseDto.class))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
@@ -75,11 +74,12 @@ public class AnswerController {
 
     @PatchMapping("/{answer-id}")
     public ResponseEntity patchAnswer(@PathVariable("answer-id") @Positive long answerId,
-                                      @Valid @RequestBody AnswerDto.Patch patchDto,
+                                      @Valid @RequestBody AnswerPatchDto answerPatchDto,
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        patchDto.setAnswerId(answerId);
-        Answer updatedAnswer = answerService.updateAnswer(mapper.answerPatchToAnswer(patchDto), customPrincipal.getMemberId());
-        return new ResponseEntity<>(new SingleResponseDto<>(mapper.answerToAnswerResponse(updatedAnswer)), HttpStatus.OK);
+        answerPatchDto.setAnswerId(answerId);
+        Answer answer =  answerService.updateAnswer(answerMapper.answerPatchToAnswer(answerPatchDto), customPrincipal.getMemberId());
+        return new ResponseEntity<>(new SingleResponseDto<>(
+                answerMapper.answerToAnswerResponse(answer)), HttpStatus.OK);
     }
 
     //swagger API - 삭제

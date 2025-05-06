@@ -2,7 +2,7 @@ package com.springboot.advice;
 
 
 import com.springboot.exception.BusinessLogicException;
-import com.springboot.log.LogStorageService;
+import com.springboot.log.service.LogStorageService;
 import com.springboot.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

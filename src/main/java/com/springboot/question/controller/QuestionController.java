@@ -1,11 +1,9 @@
 package com.springboot.question.controller;
 
-
 import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.member.entity.Member;
-import com.springboot.member.service.MemberService;
-import com.springboot.notice.dto.NoticeDto;
-import com.springboot.question.dto.QuestionDto;
+import com.springboot.question.dto.QuestionPatchDto;
+import com.springboot.question.dto.QuestionPostDto;
+import com.springboot.question.dto.QuestionResponseDto;
 import com.springboot.question.entity.Question;
 import com.springboot.question.mapper.QuestionMapper;
 import com.springboot.question.service.QuestionService;
@@ -24,8 +22,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,10 +43,9 @@ public class QuestionController {
     private static final String QUESTION_DEFAULT_URL = "/questions";
     private final QuestionService questionService;
     private final QuestionMapper questionMapper;
-    private final MemberService memberService;
 
     //swagger API - 등록
-//    @PostMapping
+   @PostMapping
 //    @Operation(summary = "문의 글 등록", description = "회원이 새로운 문의 글을 등록합니다.",
 //            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
 //                    description = "문의 글 등록 요청", required = true,
@@ -64,14 +59,14 @@ public class QuestionController {
 //                    content = @Content(mediaType = "application/json",
 //                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
 //    })
-    public ResponseEntity postQuestion(@RequestBody QuestionDto.Post dto,
+
+    public ResponseEntity postQuestion(@Valid @RequestBody QuestionPostDto questionPostDto,
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         // dto에 memberId set
 //        dto.setMemberId(customPrincipal.getMemberId());
-        // mapper로 dto -> entity
-        Question question = questionMapper.questionPostToQuestion(dto);
         // question만들고
-        Question createdQuestion = questionService.createQuestion(question, customPrincipal.getMemberId());
+        Question createdQuestion = questionService.createQuestion(
+                questionMapper.questionPostToQuestion(questionPostDto), customPrincipal.getMemberId());
         // URI
         URI location = UriCreator.createUri(QUESTION_DEFAULT_URL, createdQuestion.getQuestionId());
         return ResponseEntity.created(location).body(new SingleResponseDto<>(questionMapper.questionToQuestionResponse(createdQuestion)));
@@ -82,7 +77,7 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "기존에 등록된 문의 글 수정 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation =  QuestionDto.Response.class))),
+                            schema = @Schema(implementation =  QuestionResponseDto.class))),
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
@@ -95,14 +90,14 @@ public class QuestionController {
     @PatchMapping("/{question-id}")
     public ResponseEntity patchQuestion(
             @PathVariable("question-id") @Positive long questionId,
-            @Valid @RequestBody QuestionDto.Patch patchDto,
+            @Valid @RequestBody QuestionPatchDto questionPatchDto,
             @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        patchDto.setQuestionId(questionId);
-        patchDto.setMemberId(customPrincipal.getMemberId());
-        Question updatedQuestion = questionService.updateQuestion(questionMapper
-                .questionPatchToQuestion(patchDto), customPrincipal.getMemberId());
+
+        Question question =  questionService.updateQuestion(questionMapper
+                .questionPatchToQuestion(questionPatchDto), customPrincipal.getMemberId());
         return new ResponseEntity<>(
-                new SingleResponseDto<>(questionMapper.questionToQuestionResponse(updatedQuestion)), HttpStatus.OK);
+                new SingleResponseDto<>(
+                        questionMapper.questionToQuestionResponse(question)), HttpStatus.OK);
     }
 
     //swagger API - 관리자의 전체 조회
@@ -162,15 +157,6 @@ public class QuestionController {
                                        @RequestParam(value = "title", required = false) String title,
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
-//        Member currentMember = memberService.validateExistingMember(customPrincipal.getMemberId());
-
-//        PageRequest pageRequest = PageRequest.of(page -1,
-//                size,
-//                sortType.equalsIgnoreCase("newest")
-//                    ? Sort.by(Sort.Direction.DESC, "questionId")
-//                    : Sort.by(Sort.Direction.ASC,"questionId"));
-
-//        Page<Question> questionPage = questionService.findQuestions(pageRequest, onlyNotAnswer, currentMember);
         Page<Question> questionPage = questionService.findQuestions(page, size, sortType, onlyNotAnswer, email, title);
         List<Question> questions = questionPage.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>
@@ -182,7 +168,7 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "문의 글 상세 조회",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = QuestionDto.Response.class))),
+                            schema = @Schema(implementation = QuestionResponseDto.class))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
@@ -198,9 +184,8 @@ public class QuestionController {
                                          @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         Page<Question> questionPage = questionService.findMyQuestions(page, size, customPrincipal.getMemberId(), orderBy);
-        List<Question> questions = questionPage.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>
-                (questionMapper.questionsToQuestionResponses(questions), questionPage), HttpStatus.OK);
+                (questionMapper.questionsToQuestionResponses(questionService.nonDeletedQuestionAndAuth(questionPage.getContent(), customPrincipal.getMemberId())), questionPage), HttpStatus.OK);
     }
 
   //swagger API - 상세 조회
@@ -208,7 +193,7 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "문의 글 상세 조회",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = QuestionDto.Response.class))),
+                            schema = @Schema(implementation = QuestionResponseDto.class))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
@@ -224,9 +209,10 @@ public class QuestionController {
     public ResponseEntity getQuestion(
             @PathVariable("question-id") @Positive long questionId,
             @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        Question question = questionService.findQuestion(
-                questionId, customPrincipal.getMemberId());
-        return new ResponseEntity<>(new SingleResponseDto<>(questionMapper.questionToQuestionResponse(question)), HttpStatus.OK);
+
+        Question question = questionService.findQuestion(questionId, customPrincipal.getMemberId());
+        return new ResponseEntity<>(new SingleResponseDto<>(
+                questionMapper.questionToQuestionResponse(question)), HttpStatus.OK);
     }
 
     //swagger API - 삭제

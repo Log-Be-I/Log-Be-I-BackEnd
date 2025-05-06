@@ -15,11 +15,6 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long>, JpaSpecificationExecutor<Member> {
     Optional<Member> findByEmail(String email);
     Optional<Member> findByMemberId(long memberId);
-    Optional<Member> findByNickname(String nickname);
-    Page<Member> findByName(String name, Pageable pageable);
-    Page<Member> findByEmail(String email, Pageable pageable);
-    Page<Member> findByBirth(String birth, Pageable pageable);
-    Page<Member> findByMemberStatus(Member.MemberStatus status, Pageable pageable);
     //관리자 Web - 조회 로직
     //금일 날짜로 조회
     List<Member> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);

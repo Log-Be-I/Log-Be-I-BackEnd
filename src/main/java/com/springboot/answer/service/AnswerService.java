@@ -23,11 +23,12 @@ public class AnswerService {
     private final QuestionService questionService;
 
 
-    public Answer createAnswer(Answer answer){
-        Member member = memberService.findVeryfiedExistsMember(answer.getMember().getMemberId());
+    public Answer createAnswer(Answer answer, Long adminId){
+
         //로그인한 회원이 관리자인지 확인
         AuthorizationUtils.verifyAdmin();
-        Question question = verifyExistsAnswerInQuestion(answer);
+        Member member = memberService.findVerifiedExistsMember(adminId);
+        Question question = verifyExistsAnswerInQuestion(answer.getQuestion().getQuestionId());
         question.setQuestionAnswerStatus(Question.QuestionAnswerStatus.DONE_ANSWER);
         answer.setMember(member);
         answer.setQuestion(question);
@@ -60,9 +61,9 @@ public class AnswerService {
     }
 
     // 질문에 답변이 있는지 검증 후 질문 객체 반환
-    private Question verifyExistsAnswerInQuestion(Answer answer) {
-        // answer에 담긴 questionId로 question 있는지 검증 후 있으면 객체에 답변 있는지 검증
-        Question question = questionService.findVerifiedQuestion(answer.getQuestion().getQuestionId());
+    private Question verifyExistsAnswerInQuestion(Long questionId) {
+        // answer 에 담긴 questionId로 question 있는지 검증 후 있으면 객체에 답변 있는지 검증
+        Question question = questionService.findVerifiedExistsQuestion(questionId);
         if (question.getAnswer() != null) {
             throw new BusinessLogicException(ExceptionCode.ANSWER_EXISTS);
         }

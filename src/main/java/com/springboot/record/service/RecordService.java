@@ -7,7 +7,8 @@ import com.springboot.category.service.CategoryService;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 
-import com.springboot.log.LogStorageService;
+import com.springboot.log.service.LogStorageService;
+
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.record.entity.HistoricalRecord;

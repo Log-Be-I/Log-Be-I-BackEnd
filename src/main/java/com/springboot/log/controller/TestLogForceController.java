@@ -1,5 +1,8 @@
-package com.springboot.log;
+package com.springboot.log.controller;
 
+import com.springboot.log.LogReset;
+import com.springboot.log.TestLogForceUploader;
+import com.springboot.log.service.LogStorageService;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Slf4j

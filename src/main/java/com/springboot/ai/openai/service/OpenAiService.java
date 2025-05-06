@@ -12,7 +12,7 @@ import com.springboot.ai.openai.dto.OpenAiRequest;
 import com.springboot.ai.openai.dto.OpenAiResponse;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
-import com.springboot.log.LogStorageService;
+import com.springboot.log.service.LogStorageService;
 import com.springboot.report.dto.RecordForAnalysisDto;
 import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.report.dto.ReportAnalysisResponse;

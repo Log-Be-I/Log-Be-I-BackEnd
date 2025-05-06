@@ -22,15 +22,13 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
-    private final static String CATEGORY_DEFAULT_URL = "/categories";
     private final CategoryRepository categoryRepository;
-    private final CategoryMapper categoryMapper;
     private final MemberService memberService;
 
 
     public Category createCategory(Category category, Long memberId) {
-        //회원인지 확인
-        Member findMember = memberService.findVeryfiedExistsMember(memberId);
+
+        Member findMember = memberService.findVerifiedExistsMember(memberId);
         //카테고리 생성시 영속성전이
         findMember.setCategory(category);
         //이름이 중복되면 예외발생
@@ -41,7 +39,7 @@ public class CategoryService {
 
     public Category updateCategory(Category category, Long memberId){
         //등록되어있는 카테고리 인지 확인
-        Category findCategory = findVerifiedCategory(category.getCategoryId());
+        Category findCategory = findVerifiedExistsCategory(category.getCategoryId());
         //등록했던 작성자인지 확인
         AuthorizationUtils.isOwner(findCategory.getMember().getMemberId(), memberId);
         //해당 카테고리가 기본 제공 카테고리라면 수정되지 않아야 한다.
@@ -58,8 +56,8 @@ public class CategoryService {
     }
 
     //특정 회원의 카테고리 전체 조회
-    public List<Category> findCategories ( long memberId) {
-        memberService.findVeryfiedExistsMember(memberId);
+    public List<Category> findCategories (Long memberId) {
+        memberService.findVerifiedExistsMember(memberId);
 
         //특정 회원의 카테고리 조회
         return categoryRepository.findByMember_MemberId(memberId);
@@ -67,25 +65,23 @@ public class CategoryService {
 
     //카테고리 단일 조회
     public Category findCategory (Long categoryId, Long memberId) {
-        Category findCategory = findVerifiedCategory(categoryId);
-        //조회자가 작성자 or 관리자 인지 확인, 아니라면 예외처리
-//        AuthorizationUtils.isAdminOrOwner(findCategory.getMember().getMemberId(), memberId);
-        return findCategory;
+        memberService.findVerifiedExistsMember(memberId);
+        return findVerifiedExistsCategory(categoryId);
     }
 
     //카테고리 삭제
     public void deleteCategory(Long categoryId, Long memberId) {
-        Category findCategory = findVerifiedCategory(categoryId);
+        Category findCategory = findVerifiedExistsCategory(categoryId);
         //작성자 또는 관리자만 가능
         AuthorizationUtils.isAdminOrOwner(findCategory.getMember().getMemberId(), memberId);
         //기본 카테고리 삭제 불가
         defaultCategory(findCategory);
-        //DB에서 삭제
+        // DB 에서 삭제
         categoryRepository.delete(findCategory);
     }
 
     //이미 등록되어 있는지 검증
-    public Category findVerifiedCategory(long categoryId){
+    public Category findVerifiedExistsCategory(long categoryId){
         if(categoryId == 0){
             Category allCat = new Category();
             allCat.setCategoryId(0L);
