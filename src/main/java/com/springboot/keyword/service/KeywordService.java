@@ -22,7 +22,7 @@ public class KeywordService {
     // keyword 생성
     public List<Keyword> createKeyword (List<Keyword> keywordList, CustomPrincipal customPrincipal) {
         //member 찾기
-        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
+        Member member = memberService.findVeryfiedExistsMember(customPrincipal.getMemberId());
         // memberId 로 기존 키워드 리스트 찾기
         List<Keyword> keywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
 
@@ -45,7 +45,7 @@ public class KeywordService {
     // keyword 조회
     public List<Keyword> getKeywords (CustomPrincipal customPrincipal) {
         //member 찾기
-        Member member = memberService.validateExistingMember(customPrincipal.getMemberId());
+        Member member = memberService.findVeryfiedExistsMember(customPrincipal.getMemberId());
 
         // 키워드 찾기
         List<Keyword> keywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());

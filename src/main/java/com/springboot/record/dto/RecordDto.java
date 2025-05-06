@@ -14,10 +14,7 @@ import java.time.LocalDateTime;
 
 public class RecordDto {
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
+
     public static class Post {
 
         @Schema(description = "기록 등록 시간", example = "09시 30분")
@@ -36,10 +33,7 @@ public class RecordDto {
 
     }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
+
     public static class Patch {
 
         private Long recordId;
@@ -60,10 +54,7 @@ public class RecordDto {
 
     }
 
-    @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Setter
+
     public static class Response {
         private Long recordId;
         private LocalDateTime recordDateTime;

@@ -45,11 +45,11 @@ public class MemberService {
 
     public Map<String, String> createMember(Member member) {
         // 탈퇴한 내역이 있는지 있다면 재가입 가능한지 검증
-        validateRejoinableMember(member);
+        validateRejoinableMember(member.getEmail());
         // 중복된 회원인지 이메일로 검증
         isMemberAlreadyRegistered(member.getEmail());
         // 중복된 닉네임인지 검증
-        isNicknameAlreadyUsed(member);
+//        isNicknameAlreadyUsed(member);
 
         List<String> roles = authorityUtils.createRoles(member.getEmail());
         member.setRoles(roles);
@@ -69,7 +69,7 @@ public class MemberService {
 
     public Member updateMember(Member member, long memberId, String email) {
         // MemberId 로 존재하는 회원인지 검증
-        Member findMember = validateExistingMember(memberId);
+        Member findMember = findVeryfiedExistsMember(memberId);
         validateMemberStatus(findMember);
 
         // uri 에 있는 memberId 의 owner email 추출
@@ -106,7 +106,7 @@ public class MemberService {
     public Member findMember(long memberId, long currentMemberId) {
         // 유저 존재 확인
         AuthorizationUtils.isAdminOrOwner(memberId, currentMemberId);
-        return validateExistingMember(memberId);
+        return findVeryfiedExistsMember(memberId);
 
 //        // 유저 정보 owner 의 email 과 관리자 email 을 담은 리스트
 //        List<String> authentication = List.of(findMember.getEmail(), adminEmail);
@@ -194,10 +194,7 @@ public class MemberService {
     @Transactional
     public void deleteMember(long memberId, long loginMemberId, String memberEmail, String response) {
         // 존재하는 회원인지 검증
-        Member member = validateExistingMember(memberId);
-        AuthorizationUtils.isAdminOrOwner(memberId, loginMemberId);
-        //memberId와 email이 같은 회원의 정보인지 확인
-        checkMemberIdentityByIdAndEmail(member, memberEmail);
+        Member member = findVeryfiedExistsMember(memberId);
         // 회원 상태가 활동중인지 검증
         // 활동중인 경우에만 삭제 가능 ( 보통 휴면계정 또한 휴면을 풀어야 삭제든 뭐든 가능)
         validateMemberStatus(member);
@@ -224,7 +221,6 @@ public class MemberService {
             deletedMember.setReason(response);
             deletedMemberRepository.save(deletedMember);
 
-
         } else {
             throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
         }
@@ -240,35 +236,35 @@ public class MemberService {
         }
     }
 
-    // 이미 사용중인 닉네임인지 닉네임 예외처리
-    public void isNicknameAlreadyUsed(Member member) {
-        Optional<Member> findMember = memberRepository.findByNickname(member.getNickname());
-        if (findMember.isPresent()) {
-            throw new BusinessLogicException(ExceptionCode.NICKNAME_ALREADY_USED);
-        }
-    }
+//    // 이미 사용중인 닉네임인지 닉네임 예외처리
+//    public void isNicknameAlreadyUsed(Member member) {
+//        Optional<Member> findMember = memberRepository.findByNickname(member.getNickname());
+//        if (findMember.isPresent()) {
+//            throw new BusinessLogicException(ExceptionCode.NICKNAME_ALREADY_USED);
+//        }
+//    }
 
     // 가입된 회원인지 검증(id)
-    public Member validateExistingMember(long memberId) {
+    public Member findVeryfiedExistsMember(long memberId) {
         Optional<Member> findMember = memberRepository.findByMemberId(memberId);
         return findMember.orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
 
     }
 
-    // 가입된 회원인지 검증(email)
-    public Member validateExistingMemberUsedEmail(String email) {
-        Optional<Member> findMember = memberRepository.findByEmail(email);
-        Member member = findMember.orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
-        return member;
-    }
+//    // 가입된 회원인지 검증(email)
+//    public Member findVeryfiedExistsMemberUsedEmail(String email) {
+//        Optional<Member> findMember = memberRepository.findByEmail(email);
+//        Member member = findMember.orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+//        return member;
+//    }
 
-    //memberId로 찾은 회원과 email로 찾은 회원이 서로 같지않다면 예외발생
-    public void checkMemberIdentityByIdAndEmail(Member member, String memberEmail) {
-        Member wishDeleteMember = validateExistingMemberUsedEmail(memberEmail);
-        if (!member.getEmail().equals(wishDeleteMember.getEmail())) {
-            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
-        }
-    }
+//    //memberId로 찾은 회원과 email로 찾은 회원이 서로 같지않다면 예외발생
+//    public void checkMemberIdentityByIdAndEmail(Member member, String memberEmail) {
+//        Member wishDeleteMember = validateExistingMemberUsedEmail(memberEmail);
+//        if (!member.getEmail().equals(wishDeleteMember.getEmail())) {
+//            throw new BusinessLogicException(ExceptionCode.FORBIDDEN);
+//        }
+//    }
 
     // 회원 상태 검증
     public void validateMemberStatus(Member member) {
@@ -282,9 +278,9 @@ public class MemberService {
     }
 
     // 탈퇴 회원 재가입 가능한지 검증
-    public void validateRejoinableMember(Member member) {
+    public void validateRejoinableMember(String email) {
         // 회원 id 로 탈퇴 내역있는지 조회
-        Optional<DeletedMember> deletedMember = deletedMemberRepository.findByEmail(member.getEmail());
+        Optional<DeletedMember> deletedMember = deletedMemberRepository.findByEmail(email);
         // 탈퇴한 내역이 있다면
         if (deletedMember.isPresent()) {
             //탈퇴 후 6개월이 지나지 않았다면 회원가입 불가
@@ -311,7 +307,7 @@ public class MemberService {
 
     //검증 로직 : 회원가입 직후에 사용자에게 앱 푸쉬알림 허용 여부 받기
     public void updateNotificationConsent(long memberId, boolean notification) {
-        Member findMember = validateExistingMember(memberId);
+        Member findMember = findVeryfiedExistsMember(memberId);
 
         findMember.setNotification(notification);
         //저장

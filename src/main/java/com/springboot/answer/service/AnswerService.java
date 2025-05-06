@@ -24,7 +24,7 @@ public class AnswerService {
 
 
     public Answer createAnswer(Answer answer){
-        Member member = memberService.validateExistingMember(answer.getMember().getMemberId());
+        Member member = memberService.findVeryfiedExistsMember(answer.getMember().getMemberId());
         //로그인한 회원이 관리자인지 확인
         AuthorizationUtils.verifyAdmin();
         Question question = verifyExistsAnswerInQuestion(answer);

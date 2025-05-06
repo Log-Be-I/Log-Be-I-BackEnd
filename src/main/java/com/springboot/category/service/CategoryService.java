@@ -30,7 +30,7 @@ public class CategoryService {
 
     public Category createCategory(Category category, Long memberId) {
         //회원인지 확인
-        Member findMember = memberService.validateExistingMember(memberId);
+        Member findMember = memberService.findVeryfiedExistsMember(memberId);
         //카테고리 생성시 영속성전이
         findMember.setCategory(category);
         //이름이 중복되면 예외발생
@@ -59,7 +59,7 @@ public class CategoryService {
 
     //특정 회원의 카테고리 전체 조회
     public List<Category> findCategories ( long memberId) {
-        memberService.validateExistingMember(memberId);
+        memberService.findVeryfiedExistsMember(memberId);
 
         //특정 회원의 카테고리 조회
         return categoryRepository.findByMember_MemberId(memberId);

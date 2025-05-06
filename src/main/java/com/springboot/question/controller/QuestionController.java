@@ -50,6 +50,7 @@ public class QuestionController {
     private final MemberService memberService;
 
     //swagger API - 등록
+//    @PostMapping
 //    @Operation(summary = "문의 글 등록", description = "회원이 새로운 문의 글을 등록합니다.",
 //            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
 //                    description = "문의 글 등록 요청", required = true,
@@ -63,8 +64,6 @@ public class QuestionController {
 //                    content = @Content(mediaType = "application/json",
 //                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
 //    })
-
-    @PostMapping
     public ResponseEntity postQuestion(@RequestBody QuestionDto.Post dto,
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         // dto에 memberId set
@@ -119,22 +118,42 @@ public class QuestionController {
 //                    content = @Content(mediaType = "application/json",
 //                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}")))
 //    })
-    @Operation(summary = "관리자의 문의 글 전체 조회", description = "관리자가 등록된 모든 문의 글을 페이징하여 조회합니다.")
-    @Parameters({
-            @Parameter(name = "page", description = "페이지 번호", in = ParameterIn.QUERY),
-            @Parameter(name = "size", description = "페이지당 요소 수", in = ParameterIn.QUERY),
-            @Parameter(name = "sortType", description = "정렬 방식 (예: newest, oldest)", in = ParameterIn.QUERY)
-    })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "전체 문의 글 목록 조회",
-                    content = @Content(schema = @Schema(implementation = MultiResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "관리자 권한 없음")
-    })
+//    @Operation(summary = "관리자의 문의 글 전체 조회", description = "관리자가 등록된 모든 문의 글을 페이징하여 조회합니다.")
+//    @Parameters({
+//            @Parameter(name = "page", description = "페이지 번호", in = ParameterIn.QUERY),
+//            @Parameter(name = "size", description = "페이지당 요소 수", in = ParameterIn.QUERY),
+//            @Parameter(name = "sortType", description = "정렬 방식 (예: newest, oldest)", in = ParameterIn.QUERY)
+//    })
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "전체 문의 글 목록 조회",
+//                    content = @Content(schema = @Schema(implementation = MultiResponseDto.class))),
+//            @ApiResponse(responseCode = "403", description = "관리자 권한 없음")
+//    })
 
     //관리자용 전체조회
     //Spring Security에서 제공, 관리자만 접근하도록 설정
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/office")
+    @Operation(summary = "관리자용 문의 글 목록 조회", description = "관리자가 등록된 문의 글을 페이징, 필터링하여 조회합니다.")
+    @Parameters({
+            @Parameter(name = "page", description = "페이지 번호 (1부터 시작)", example = "1", in = ParameterIn.QUERY),
+            @Parameter(name = "size", description = "페이지당 조회 수", example = "10", in = ParameterIn.QUERY),
+            @Parameter(name = "sortType", description = "정렬 기준 (newest 또는 oldest)", example = "newest", in = ParameterIn.QUERY),
+            @Parameter(name = "onlyNotAnswer", description = "미답변 문의만 조회 여부", example = "false", in = ParameterIn.QUERY),
+            @Parameter(name = "email", description = "회원 이메일(부분 일치 검색)", example = "user@example.com", in = ParameterIn.QUERY),
+            @Parameter(name = "title", description = "문의 제목(부분 일치 검색)", example = "로그인 오류", in = ParameterIn.QUERY)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "문의 글 목록 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MultiResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
+            @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"관리자 권한이 필요합니다.\"}")))
+    })
     public ResponseEntity getQuestions(@Positive @RequestParam(value = "page") int page,
                                        @Positive @RequestParam(value = "size") int size,
                                        @RequestParam(value = "sortType", defaultValue = "newest") String sortType,

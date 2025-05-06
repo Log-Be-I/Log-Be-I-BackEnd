@@ -1,6 +1,8 @@
 package com.springboot.record.mapper;
 
-import com.springboot.record.dto.RecordDto;
+import com.springboot.record.dto.RecordPatchDto;
+import com.springboot.record.dto.RecordPostDto;
+import com.springboot.record.dto.RecordResponseDto;
 import com.springboot.record.entity.Record;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,15 +18,15 @@ public interface RecordMapper {
     @Mapping(target = "member.memberId", source = "memberId")
     @Mapping(target = "category.categoryId", source = "categoryId")
     @Mapping(target = "recordDateTime", expression = "java(stringToLocalDateTime(post.getRecordDateTime()))")
-    Record recordPostDtoToRecord(RecordDto.Post post);
+    Record recordPostDtoToRecord(RecordPostDto post);
 
     @Mapping(target = "member.memberId", source = "memberId")
     @Mapping(target = "category.categoryId", source = "categoryId")
     @Mapping(target = "recordDateTime", expression = "java(updateStringToLocalDateTime(patch.getRecordDateTime()))")
-    Record recordPatchDtoToRecord(RecordDto.Patch patch);
+    Record recordPatchDtoToRecord(RecordPatchDto patch);
 
-    default RecordDto.Response recordToRecordResponse(Record record) {
-        RecordDto.Response response = new RecordDto.Response(
+    default RecordResponseDto recordToRecordResponse(Record record) {
+        RecordResponseDto response = new RecordResponseDto(
                 record.getRecordId(), record.getRecordDateTime(),
                 record.getContent(),
                 record.getRecordStatus(),
@@ -36,7 +38,7 @@ public interface RecordMapper {
         return response;
     }
 
-    default List<RecordDto.Response> recordsToRecordResponses(List<Record> records) {
+    default List<RecordResponseDto> recordsToRecordResponses(List<Record> records) {
         return records.stream().map(
                 record -> recordToRecordResponse(record))
                 .collect(Collectors.toList());
