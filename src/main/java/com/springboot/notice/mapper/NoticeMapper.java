@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface NoticeMapper {
-//   @Mapping(target = "member.memberId", source = "memberId")
+  @Mapping(target = "member.memberId", source = "memberId")
    Notice noticePostToNotice(NoticePostDto post);
-   @Mapping(target = "member.memberId", source = "memberId")
+   // @Mapping(target = "member.memberId", source = "memberId")
    Notice noticePatchToNotice(NoticePatchDto patch);
 //   @Mapping(target = "memberId", source = "member.memberId")
 //   NoticeDto.Response noticeToNoticeResponse(Notice notice);
