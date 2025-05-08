@@ -1,17 +1,13 @@
 package com.springboot.category.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;
-import com.springboot.record.entity.Record;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
