@@ -7,6 +7,7 @@ import com.springboot.question.dto.QuestionResponseDto;
 import com.springboot.question.entity.Question;
 import com.springboot.question.mapper.QuestionMapper;
 import com.springboot.question.service.QuestionService;
+import com.springboot.response.ErrorResponse;
 import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
 import com.springboot.utils.UriCreator;
@@ -59,12 +60,28 @@ public class QuestionController {
 //                    content = @Content(mediaType = "application/json",
 //                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
 //    })
-
+   @Operation(summary = "문의 글 등록", description = "회원이 새로운 문의 글을 등록합니다.",
+           requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                   description = "문의 글 등록 요청", required = true,
+                   content = @Content(
+                           schema = @Schema(implementation = QuestionPostDto.class),
+                           examples = @ExampleObject(value = "{ \"title\": \"로그인 문의\", \"content\" : \"자동로그인 해주세요\", \"image\": \"https://cdn.example.com/img.png\" }")
+                   )
+           )
+   )
+   @ApiResponses(value = {
+           @ApiResponse(responseCode = "201", description = "문의 글 등록 성공",
+                   content = @Content(schema = @Schema(implementation = QuestionResponseDto.class))),
+           @ApiResponse(responseCode = "401", description = "인증 실패",
+                   content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                           examples = @ExampleObject(value = "{ \"error\": \"Unauthorized\", \"message\": \"로그인이 필요합니다.\" }"))),
+           @ApiResponse(responseCode = "403", description = "권한 없음",
+                   content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                           examples = @ExampleObject(value = "{ \"error\": \"Forbidden\", \"message\": \"접근 권한이 없습니다.\" }")))
+   })
     public ResponseEntity postQuestion(@Valid @RequestBody QuestionPostDto questionPostDto,
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        // dto에 memberId set
-//        dto.setMemberId(customPrincipal.getMemberId());
-        // question만들고
+
         Question createdQuestion = questionService.createQuestion(
                 questionMapper.questionPostToQuestion(questionPostDto), customPrincipal.getMemberId());
         // URI

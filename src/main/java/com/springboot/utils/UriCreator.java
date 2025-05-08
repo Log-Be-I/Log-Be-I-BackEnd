@@ -21,11 +21,11 @@ public class UriCreator {
                 .toUri();
     }
 
-//    public static URI createUri(String defaultUrl) {
-//        return UriComponentsBuilder
-//                .newInstance()
-//                .path(defaultUrl)
-//                .build()
-//                .toUri();
-//    }
+    public static URI createUri(String defaultUrl) {
+        return UriComponentsBuilder
+                .newInstance()
+                .path(defaultUrl)
+                .build()
+                .toUri();
+    }
 }

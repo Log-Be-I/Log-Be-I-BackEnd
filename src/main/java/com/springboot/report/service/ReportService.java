@@ -83,7 +83,7 @@ public class ReportService {
     //등록된 Report -> TTS : 음성 출력
     public List<String> reportToGoogleAudio(List<Long> reportsId, long memberId){
         // 유효한 회원인지 검증
-        Member member = memberService.findVeryfiedExistsMember(memberId);
+        Member member = memberService.findVerifiedExistsMember(memberId);
         //활동중인 회원인지 확인
         memberService.validateMemberStatus(member);
 

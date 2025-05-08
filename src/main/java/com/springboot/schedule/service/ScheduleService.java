@@ -46,7 +46,7 @@ public class ScheduleService {
     // 일정 등록 - text
     public Schedule createTextSchedule(Schedule schedule, Long memberId) {
         // 가입된 회원인지 검증
-        Member member = memberService.findVeryfiedExistsMember(memberId);
+        Member member = memberService.findVerifiedExistsMember(memberId);
         //활동 중인 상태인지 검증
         memberService.validateMemberStatus(member);
         schedule.setMember(member);
@@ -59,7 +59,7 @@ public class ScheduleService {
     @Transactional
     public Schedule updateSchedule(Schedule schedule, long scheduleId, Long memberId) {
         // 가입된 회원인지 검증
-        Member member = memberService.findVeryfiedExistsMember(memberId);
+        Member member = memberService.findVerifiedExistsMember(memberId);
         //활동 중인 상태인지 검증
         memberService.validateMemberStatus(member);
         // 등록된 일정 찾기
@@ -99,7 +99,7 @@ public class ScheduleService {
     // 일정 조회_단일
     public Schedule findSchedule(long scheduleId, long memberId) {
         // 가입된 회원인지 검증
-        Member member = memberService.findVeryfiedExistsMember(memberId);
+        Member member = memberService.findVerifiedExistsMember(memberId);
         // 정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
         Schedule findSchedule = findVeryfiedExistsSchedule(scheduleId);
@@ -112,7 +112,7 @@ public class ScheduleService {
     // 일정 조회_전체 (페이지네이션 필요 x) 한달 일정 전체를 리스트로 줘야함
     public List<Schedule> findSchedules(int year, int month, Long memberId) {
         // member 검증
-        Member member = memberService.findVeryfiedExistsMember(memberId);
+        Member member = memberService.findVerifiedExistsMember(memberId);
         //정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
 
@@ -176,7 +176,7 @@ public class ScheduleService {
     // 일정 삭제
     public void deletedSchedule(long scheduleId, Long memberId) {
         // 가입된 회원인지 검증
-        Member member = memberService.findVeryfiedExistsMember(memberId);
+        Member member = memberService.findVerifiedExistsMember(memberId);
         // 정상적인 상태인지 검증
         memberService.validateMemberStatus(member);
         // scheduleId 로 schedule 찾기

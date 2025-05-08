@@ -79,8 +79,8 @@ public class RecordService {
             record.setContent(data.get("content"));
             record.setRecordDateTime(DateUtil.parseToLocalDateTime(recordDateTime));
 //            (DateUtil.parseToLocalDateTime());
-            record.setCategory(categoryService.findVerifiedCategory(Long.parseLong(data.get("categoryId"))));
-            record.setMember(memberService.findVeryfiedExistsMember(memberId));
+            record.setCategory(categoryService.findVerifiedExistsCategory(Long.parseLong(data.get("categoryId"))));
+            record.setMember(memberService.findVerifiedExistsMember(memberId));
             return recordRepository.save(record);
         } else {
             throw new BusinessLogicException(ExceptionCode.GPT_FAILED);
@@ -90,7 +90,7 @@ public class RecordService {
 
     public Record createRecord(Record record, long memberId){
 
-       Member member = memberService.findVeryfiedExistsMember(memberId);
+       Member member = memberService.findVerifiedExistsMember(memberId);
        record.setMember(member);
 
        return recordRepository.save(record);
@@ -100,7 +100,7 @@ public class RecordService {
     @Transactional
     public Record updateRecord(Long recordId, Record record, long memberId) {
 
-        Member member = memberService.findVeryfiedExistsMember(memberId);
+        Member member = memberService.findVerifiedExistsMember(memberId);
         Record findRecord = findVerifiedExistsRecord(recordId);
         //작성자인지 확인
         AuthorizationUtils.isOwner(findRecord.getMember().getMemberId(), memberId);
@@ -139,7 +139,7 @@ public class RecordService {
        if(record.getCategory() == null) {
            throw new BusinessLogicException(ExceptionCode.CATEGORY_NOT_FOUND);
        }
-        Category category = categoryService.findVerifiedCategory(record.getCategory().getCategoryId());
+        Category category = categoryService.findVerifiedExistsCategory(record.getCategory().getCategoryId());
         findRecord.setCategory(category);
         //수정 데이터 저장
         return recordRepository.save(findRecord);
@@ -147,9 +147,9 @@ public class RecordService {
 
     //기록 단일 조회
     public Record findRecord(long recordId, long memberId) {
-        Member member = memberService.findVeryfiedExistsMember(memberId);
+        Member member = memberService.findVerifiedExistsMember(memberId);
         Record findRecord = findVerifiedExistsRecord(recordId);
-        Category category = categoryService.findVerifiedCategory(findRecord.getCategory().getCategoryId());
+        Category category = categoryService.findVerifiedExistsCategory(findRecord.getCategory().getCategoryId());
         findRecord.setCategory(category);
 
         //작성자 or 관리지만 조회 가능
@@ -161,8 +161,8 @@ public class RecordService {
 
     //기록 전체 조회
     public Page<Record> findRecords(int page, int size, long memberId, Long categoryId, LocalDateTime startDate, LocalDateTime endDate) {
-        memberService.findVeryfiedExistsMember(memberId);
-        Category category = categoryService.findVerifiedCategory(categoryId);
+        memberService.findVerifiedExistsMember(memberId);
+        Category category = categoryService.findVerifiedExistsCategory(categoryId);
 
         if(page < 1) {
             throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
