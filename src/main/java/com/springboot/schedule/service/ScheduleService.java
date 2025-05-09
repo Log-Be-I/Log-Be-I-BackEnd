@@ -126,11 +126,7 @@ public class ScheduleService {
         LocalDateTime targetStart = zonedStart.toLocalDateTime();
         // targetEnd = 시작 시간 할당
         LocalDateTime targetEnd = zonedEnd.toLocalDateTime();
-<<<<<<< Updated upstream
-=======
 
-
->>>>>>> Stashed changes
         // memberId 로 일정 찾기
         List<Schedule> scheduleList = scheduleRepository.findAllByMember_MemberId(memberId);
 
