@@ -10,18 +10,18 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @NoArgsConstructor
 @Setter
+@Schema(description = "일정 등록 요청 DTO")
 public class SchedulePostDto {
 
-    @Schema(description = "제목", example = "점심점심")
     @NotBlank
+    @Schema(description = "제목", example = "오늘 점심은 한식")
     private String title;
 
-    @Schema(description = "시작 날짜", example = "2025-04-12T13:30")
     @NotBlank
+    @Schema(description = "시작 날짜", example = "2025-04-12T13:30")
     private String startDateTime;
 
-    @Schema(description = "종료 날짜", example = "2025-04-12T14:30")
     @NotBlank
+    @Schema(description = "종료 날짜", example = "2025-04-12T14:30")
     private String endDateTime;
-
 }
