@@ -81,7 +81,7 @@ public class QuestionService {
                     return emailMatch && titleMatch;
                 })
                 .collect(Collectors.toList());
-        return new PageImpl<>(filteredQuestions, pageable, filteredQuestions.size());
+        return new PageImpl<>(filteredQuestions, pageable, questions.getTotalElements());
     }
 
     //회원의 질문 글 전체 조회
