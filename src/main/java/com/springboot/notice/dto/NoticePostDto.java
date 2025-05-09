@@ -23,7 +23,6 @@ public class NoticePostDto {
     private String content;
 
     private Long memberId;
-    private String image;
     private Notice.NoticeType noticeType;
     private Notice.IsPinned isPinned;
 }

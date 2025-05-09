@@ -47,7 +47,7 @@ public class NoticeService {
     }
 
     //notice 수정 -> 덮어씌워 저장
-    public Notice updateNotice(Notice notice, long adminId) {
+    public Notice updateNotice(Notice notice, long adminId, List<MultipartFile> images) {
        //기존 등록된 데이터
         Notice findNotice = findVerifiedExistsNotice(notice.getNoticeId());
        //등록된 회원인지 확인
@@ -67,6 +67,22 @@ public class NoticeService {
                 .ifPresent(image ->  findNotice.setImage(image));
         Optional.ofNullable(notice.getIsPinned())
                 .ifPresent(isPinned ->  findNotice.setIsPinned(isPinned));
+
+        //이미지 병합
+        List<String> mergedUrls = new ArrayList<>();
+
+        //유지할 기존 이미지 URL
+        if(notice.getFileUrls() != null) {
+            mergedUrls.addAll(notice.getFileUrls());
+        }
+        //새로 업로드된 이미지가 있다면 S3 업로드 후 병합
+        if(images != null && !images.isEmpty()) {
+            for (MultipartFile file : images) {
+                String url =  s3Service.upload(file, "notice-files");
+                mergedUrls.add(url);
+            }
+        }
+        findNotice.setFileUrls(mergedUrls);
 
         //수정 후 상태 변경
         findNotice.setNoticeStatus(Notice.NoticeStatus.NOTICE_UPDATED);
@@ -96,10 +112,9 @@ public class NoticeService {
         //삭제 상태의 경우 예외발생
         getDeletedNotice(findNotice);
         //회원인지 확인
-
         memberService.findVerifiedExistsMember(adminId);
-
         AuthorizationUtils.verifyAuthorIsAdmin(findNotice.getMember().getMemberId(), adminId);
+
         findNotice.setNoticeStatus(Notice.NoticeStatus.NOTICE_DELETED);
         //변경사항 저장
         noticeRepository.save(findNotice);

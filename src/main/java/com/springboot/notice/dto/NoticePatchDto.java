@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,7 +24,8 @@ public class NoticePatchDto {
     @Schema(description = "공지사항 내용", example = "LOG BE I 이용 방법")
     private String content;
 
-    private String image;
+    @Schema(description = "수정할 첨부 이미지 URL 리스트", example = "[\"https://...\", \"https://...\"]")
+    private List<String> fileUrls;
 
     @Schema(description = "공지 글 타입", example = "NOTICE")
     private Notice.NoticeType noticeType;

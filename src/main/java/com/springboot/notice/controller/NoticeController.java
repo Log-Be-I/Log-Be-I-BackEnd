@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -52,7 +53,7 @@ public class NoticeController {
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}")))
     })
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity postNotice(@Valid @RequestBody NoticePostDto noticePostDto,
                                      @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
@@ -78,13 +79,14 @@ public class NoticeController {
                             examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
     })
 
-    @PatchMapping("/{notice-id}")
+    @PatchMapping(value = "/{notice-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity patchNotice(@Valid @RequestBody NoticePatchDto noticePatchDto,
                                       @PathVariable("notice-id") @Positive long noticeId,
+                                      @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         //수정할 notice
         noticePatchDto.setNoticeId(noticeId);
-        Notice notice =  noticeService.updateNotice(mapper.noticePatchToNotice(noticePatchDto), customPrincipal.getMemberId());
+        Notice notice =  noticeService.updateNotice(mapper.noticePatchToNotice(noticePatchDto), customPrincipal.getMemberId(), images);
         return new ResponseEntity<>(new SingleResponseDto<>(
                 mapper.noticeToNoticeResponse(notice)), HttpStatus.OK);
     }
