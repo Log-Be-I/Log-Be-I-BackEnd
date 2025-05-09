@@ -18,4 +18,8 @@ public class LogBeIApplication {
         .properties("spring.config.location=classpath:/application.yml")
         .run(args);
   }
+    @PostConstruct
+  public void setTimezone() {
+    TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
+  }
 }
