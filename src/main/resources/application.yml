@@ -9,8 +9,8 @@ spring:
     console:
       enabled: false
       path: /h2
-  jackson:
-    time-zone: Asia/Seoul
+  # jackson:
+    # time-zone: Asia/Seoul
   datasource:
     url: jdbc:mysql://database-1.c10a226u86g0.ap-northeast-2.rds.amazonaws.com:3306/logbe_i_DB?serverTimezone=Asia/Seoul
     username: ${RDS_USERNAME}
