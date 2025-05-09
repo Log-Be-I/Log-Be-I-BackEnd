@@ -1,21 +1,20 @@
 package com.springboot.notice.service;
 
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.dashboard.dto.DashBoardResponseDto;
 import com.springboot.dashboard.dto.RecentNotice;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.service.MemberService;
 import com.springboot.notice.entity.Notice;
 import com.springboot.notice.repository.NoticeRepository;
-import com.springboot.record.entity.Record;
 import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,17 +25,27 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
     private final MemberService memberService;
+    private final S3Service s3Service;
 
     //notice 등록
-    public Notice createNotice(Notice notice, Long adminId) {
+    public Notice createNotice(Notice notice, Long adminId, List<MultipartFile> images) {
+
+        List<String> fileUrls = new ArrayList<>();
+        if(images != null && !images.isEmpty()) {
+            for(MultipartFile file : images) {
+                String url = s3Service.upload(file, "notice-files");
+                fileUrls.add(url);
+            }
+        }
 
         memberService.findVerifiedExistsMember(adminId);
-
         //작성자가 관리자인지 확인하고 아니면 예외
         AuthorizationUtils.verifyAuthorIsAdmin(notice.getMember().getMemberId(), adminId);
+        notice.setFileUrls(fileUrls);
         //notice 등록 후 반환
         return noticeRepository.save(notice);
     }
+
     //notice 수정 -> 덮어씌워 저장
     public Notice updateNotice(Notice notice, long adminId) {
        //기존 등록된 데이터

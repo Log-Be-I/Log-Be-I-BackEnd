@@ -25,9 +25,7 @@ import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
@@ -128,6 +126,11 @@ public class ScheduleService {
         LocalDateTime targetStart = zonedStart.toLocalDateTime();
         // targetEnd = 시작 시간 할당
         LocalDateTime targetEnd = zonedEnd.toLocalDateTime();
+<<<<<<< Updated upstream
+=======
+
+
+>>>>>>> Stashed changes
         // memberId 로 일정 찾기
         List<Schedule> scheduleList = scheduleRepository.findAllByMember_MemberId(memberId);
 

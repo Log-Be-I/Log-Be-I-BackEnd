@@ -30,6 +30,7 @@ public interface ScheduleMapper{
 
         return schedule;
     }
+
     default ScheduleResponseDto scheduleToscheduleResponseDto (Schedule schedule) {
         ScheduleResponseDto responseDto = new ScheduleResponseDto();
         responseDto.setScheduleId(schedule.getScheduleId());
@@ -40,6 +41,7 @@ public interface ScheduleMapper{
         responseDto.setModifiedAt(schedule.getModifiedAt());
         return responseDto;
     }
+
     default List<ScheduleResponseDto> schedulesToScheduleResponseDtos (List<Schedule> schedules) {
         List<ScheduleResponseDto> scheduleResponseDtos = schedules.stream()
                 .map(schedule -> scheduleToscheduleResponseDto(schedule))

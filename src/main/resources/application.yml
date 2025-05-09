@@ -17,7 +17,9 @@ spring:
     password: ${RDS_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    hibernate:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
       ddl-auto: update  # (1) 스키마 자동 생성
     show-sql: true      # (2) SQL 쿼리 출력
   web: # (1) 도커 리소스 활용
@@ -106,7 +108,9 @@ cloud:
     region:
       static: ap-northeast-2
     s3:
-      bucket: logbe-i-log
+      bucket:
+        logs: logbe-i-log
+        images: logbe-i-image
 management:
   endpoints:
     web:

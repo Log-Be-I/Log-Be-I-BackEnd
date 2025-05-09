@@ -24,12 +24,16 @@ public class ScheduleResponseDto {
     private String title;
 
     @NotBlank
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime startDateTime;
 
     @NotBlank
+<<<<<<< Updated upstream
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "종료 날짜", example = "2025-04-12T14:30")
+=======
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+>>>>>>> Stashed changes
     private LocalDateTime endDateTime;
 
     @Schema(description = "생성일", example = "2025-04-11T11:30")

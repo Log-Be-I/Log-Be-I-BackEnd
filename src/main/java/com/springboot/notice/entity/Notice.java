@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
@@ -37,6 +39,12 @@ public class Notice extends BaseEntity {
 
     @Enumerated(value = EnumType.STRING)
     private IsPinned isPinned = IsPinned.NONE;
+
+    //첨부파일
+    @ElementCollection  //List<String> 지원 -> notice_images 라는 별도 테이블 생성
+    @CollectionTable(name = "notice_images", joinColumns = @JoinColumn(name = "notice_id"))
+    @Column(name = "file_url")
+    private List<String> fileUrls = new ArrayList<>();
 
     //관리자 페이지 구현시 적용
     @ManyToOne

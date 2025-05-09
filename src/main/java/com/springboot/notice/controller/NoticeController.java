@@ -7,6 +7,7 @@ import com.springboot.notice.dto.NoticeResponseDto;
 import com.springboot.notice.service.NoticeService;
 import com.springboot.notice.entity.Notice;
 import com.springboot.notice.mapper.NoticeMapper;
+import com.springboot.notice.service.S3Service;
 import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
 import com.springboot.utils.UriCreator;
@@ -24,10 +25,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -51,10 +54,11 @@ public class NoticeController {
 
     @PostMapping
     public ResponseEntity postNotice(@Valid @RequestBody NoticePostDto noticePostDto,
+                                     @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
 
         noticePostDto.setMemberId(customPrincipal.getMemberId());
-        Notice createdNotice = noticeService.createNotice(mapper.noticePostToNotice(noticePostDto), customPrincipal.getMemberId());
+        Notice createdNotice = noticeService.createNotice(mapper.noticePostToNotice(noticePostDto), customPrincipal.getMemberId(), images);
         URI location = UriCreator.createUri(NOTICE_DEFAULT_URL, createdNotice.getNoticeId());
 
         return ResponseEntity.created(location).body(new SingleResponseDto<>(mapper.noticeToNoticeResponse(createdNotice)));
