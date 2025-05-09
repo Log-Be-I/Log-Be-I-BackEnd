@@ -23,10 +23,10 @@ public class ScheduleResponseDto {
 
 //    @Schema(description = "시작 날짜", example = "2025-04-12T13:30")
     @NotBlank
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDateTime;
 
-//    @Schema(description = "종료 날짜", example = "2025-04-12T14:30", timezone = "Asia/Seoul")
+//    @Schema(description = "종료 날짜", example = "2025-04-12T14:30")
     @NotBlank
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endDateTime;
