@@ -22,7 +22,7 @@ public class LogBeIApplication {
         .run(args);
   }
     @PostConstruct
-    public void setTimezone() {
+     public void setTimezone() {
     TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
   }
 }
