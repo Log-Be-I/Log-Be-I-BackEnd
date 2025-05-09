@@ -177,13 +177,13 @@ public class MemberService {
         // memberStatus 로 필터링
         if(filters.get("memberStatus") != null) {
             filteredMember = filteredMember.stream().filter(member ->
-                            member.getMemberStatus().equals(Member.MemberStatus.valueOf(filters.get("memberStatus"))))
+                            member.getMemberStatus().name().equals(filters.get("memberStatus")))
                     .collect(Collectors.toList());
         }
         // region 으로 필터링
         if (region != null) {
             filteredMember = filteredMember.stream().filter(member ->
-                            Objects.equals(member.getRegion(), region))
+                            member.getRegion().contains(region))
                     .collect(Collectors.toList());
         }
         return filteredMember;
