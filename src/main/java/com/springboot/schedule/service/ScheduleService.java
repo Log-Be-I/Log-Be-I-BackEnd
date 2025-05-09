@@ -118,12 +118,14 @@ public class ScheduleService {
 
         //String target = String.format("%d-%02d", year, month);
         List<String> date = dayOrMonthGetDate(year, month);
+        // 변경: 시간대 보정 (KST 기준)
+        ZonedDateTime zonedStart = LocalDateTime.parse(date.get(1)).atZone(ZoneId.of("Asia/Seoul"));
+        ZonedDateTime zonedEnd = LocalDateTime.parse(date.get(2)).atZone(ZoneId.of("Asia/Seoul"));
         //String target = date.get(0);
         // targetStart = 오늘 일 or 월 할당
-        LocalDateTime targetStart = LocalDateTime.parse(date.get(1));
+        LocalDateTime targetStart = zonedStart.toLocalDateTime();
         // targetEnd = 시작 시간 할당
-        LocalDateTime targetEnd = LocalDateTime.parse(date.get(2));
-
+        LocalDateTime targetEnd = zonedEnd.toLocalDateTime();
         // memberId 로 일정 찾기
         List<Schedule> scheduleList = scheduleRepository.findAllByMember_MemberId(memberId);
 
