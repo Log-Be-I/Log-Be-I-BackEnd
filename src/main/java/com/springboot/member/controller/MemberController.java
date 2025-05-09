@@ -192,7 +192,7 @@ public class MemberController {
                                      @RequestParam(value = "sortBy", required = false) String sortBy,
                                      @Parameter(description = "필터 조건", example = "birth")
                                      @RequestParam(value = "order", required = false) String order,
-                                     @RequestParam(value = "member_Status", required = false) String memberStatus,
+                                     @RequestParam(value = "memberStatus", required = false) String memberStatus,
                                      @RequestParam(value = "birth", required = false) String birth,
                                      @RequestParam(value = "email", required = false) String email,
                                      @RequestParam(value =  "name", required = false) String name,

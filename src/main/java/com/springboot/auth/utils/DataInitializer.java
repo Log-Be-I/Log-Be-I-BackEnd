@@ -34,7 +34,7 @@ public class DataInitializer implements CommandLineRunner {
         if (userRepository.count() == 0) {
             Member member = new Member();
             member.setBirth("2006-11-11");
-            member.setRegion("세종시");
+            member.setRegion("세종특별자치시");
             member.setName("관리자01");
             member.setNickname("관리자01");
             member.setProfile("url");
@@ -49,7 +49,7 @@ public class DataInitializer implements CommandLineRunner {
             
             Member member01 = new Member();
             member01.setBirth("2008-12-12");
-            member01.setRegion("대전시");
+            member01.setRegion("대전광역시 서구");
             member01.setNickname("관리자02");
             member01.setName("관리자02");
             member01.setProfile("url");
@@ -60,7 +60,7 @@ public class DataInitializer implements CommandLineRunner {
             Member member03 = new Member();
             member03.setBirth("2004-01-01");
             member03.setNickname("관리자03");
-            member03.setRegion("서울시");
+            member03.setRegion("서울특별시 강북구");
             member03.setName("관리자03");
             member03.setProfile("url");
             member03.setEmail("admin3@gmail.com");
@@ -70,7 +70,7 @@ public class DataInitializer implements CommandLineRunner {
             Member member04 = new Member();
             member04.setBirth("1995-10-24");
             member04.setNickname("미나리");
-            member04.setRegion("서울시");
+            member04.setRegion("서울특별시 강남구");
             member04.setName("나리나리");
             member04.setProfile("url");
             member04.setEmail("menari@gmail.com");
