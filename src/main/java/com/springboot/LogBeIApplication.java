@@ -21,13 +21,8 @@ public class LogBeIApplication {
         .properties("spring.config.location=classpath:/application.yml")
         .run(args);
   }
-<<<<<<< Updated upstream
     @PostConstruct
-=======
-
-  @PostConstruct
->>>>>>> Stashed changes
-  public void setTimezone() {
+    public void setTimezone() {
     TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
   }
 }
