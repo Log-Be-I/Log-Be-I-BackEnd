@@ -48,4 +48,12 @@ public class S3Service {
         return amazonS3.getUrl(bucket, fileName).toString();
     }
 
+    //DELETED_NOTICE 상태인 notice 의 file 이동
+    public void moveDeletedFile(String sourceKey, String targetKey) {
+        //images S3의 파일 복사 -> deletedImages S3로 이동
+        amazonS3.copyObject(bucket, sourceKey, bucket, targetKey);
+        //복사 후 images S3의 파일 삭제
+        amazonS3.deleteObject(bucket, sourceKey);
+    }
+
 }

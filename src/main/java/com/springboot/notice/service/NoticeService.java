@@ -63,8 +63,6 @@ public class NoticeService {
                 .ifPresent(title ->  findNotice.setTitle(title));
         Optional.ofNullable(notice.getContent())
                 .ifPresent(content ->  findNotice.setContent(content));
-        Optional.ofNullable(notice.getImage())
-                .ifPresent(image ->  findNotice.setImage(image));
         Optional.ofNullable(notice.getIsPinned())
                 .ifPresent(isPinned ->  findNotice.setIsPinned(isPinned));
 
@@ -114,7 +112,13 @@ public class NoticeService {
         //회원인지 확인
         memberService.findVerifiedExistsMember(adminId);
         AuthorizationUtils.verifyAuthorIsAdmin(findNotice.getMember().getMemberId(), adminId);
+        //삭제된 notice 첨부파일을 deletedImages/로 이동
 
+       for(String imageUrl : findNotice.getFileUrls()) {
+           String sourceKey = extractKeyFromUrl(imageUrl);
+           String targetKey = sourceKey.replace("notice-files/", "deletedImages/");
+           s3Service.moveDeletedFile(sourceKey, targetKey);
+       }
         findNotice.setNoticeStatus(Notice.NoticeStatus.NOTICE_DELETED);
         //변경사항 저장
         noticeRepository.save(findNotice);
@@ -154,6 +158,17 @@ public class NoticeService {
                         AuthorizationUtils.verifyAdmin()
                 ).collect(Collectors.toList());
 
+    }
+
+    //S3 이미지 URL에서 key(=파일경로) 추출
+    public String extractKeyFromUrl(String url) {
+        // S3 도메인을 기준으로 key 추출
+        // 예: https://bucket-name.s3.amazonaws.com/notice-files/img.png → notice-files/img.png
+        int index = url.indexOf(".com/"); // 고정된 S3 URL 패턴 기준
+        if (index == -1 || index + 5 >= url.length()) {
+            throw new IllegalArgumentException("S3 URL 형식이 올바르지 않습니다: " + url);
+        }
+        return url.substring(index + 5); // ".com/" 다음부터 끝까지가 key
     }
 
 }

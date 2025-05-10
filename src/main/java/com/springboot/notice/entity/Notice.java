@@ -28,9 +28,6 @@ public class Notice extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
-    @Column
-    private String image;
-
     @Enumerated(value = EnumType.STRING)
     private NoticeType noticeType = NoticeType.NOTICE;
 

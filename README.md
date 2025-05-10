@@ -1,6 +1,6 @@
 ## Log_Be_I
 <br>
-<img src="assets/logo.png">
+<img src="src/main/resources/assets/logo.png">
 
 ### 프로젝트 소개
 - React-Native 기반의 기록, 개인 비서 애플리케이션입니다.
@@ -92,7 +92,7 @@
 
 
 ## [ERD] (https://dbdiagram.io/d/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-2%EC%B0%A8-Log-Be-I-67f2ab404f7afba18486fe21)
- <img src="assets/Logbe-i ERD.png">
+ <img src="src/main/resources/assets/Logbe-i ERD.png">
 <br>
 <br>
 <br>
