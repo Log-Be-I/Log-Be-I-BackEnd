@@ -40,7 +40,7 @@ public class Notice extends BaseEntity {
     //첨부파일
     @ElementCollection  //List<String> 지원 -> notice_images 라는 별도 테이블 생성
     @CollectionTable(name = "notice_images", joinColumns = @JoinColumn(name = "notice_id"))
-    @Column(name = "file_url")
+    @Column(name = "file_urls")
     private List<String> fileUrls = new ArrayList<>();
 
     //관리자 페이지 구현시 적용
