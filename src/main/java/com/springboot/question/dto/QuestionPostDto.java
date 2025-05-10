@@ -21,9 +21,6 @@ public class QuestionPostDto {
     @NotBlank(message = "내용은 필수 입력란입니다.")
     private String content;
 
-    @Schema(description = "문의 글 첨부파일", example = "uri")
-    private String image;
-
     @Schema(description = "문의 글 작성자", example = "23")
     private Long memberId;
 }

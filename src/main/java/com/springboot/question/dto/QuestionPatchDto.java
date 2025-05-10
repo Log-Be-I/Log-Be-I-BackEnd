@@ -23,11 +23,9 @@ public class QuestionPatchDto {
     @NotSpace
     private String content;
 
-    @Schema(description = "문의 글 첨부파일", example = "uri")
-    private String image;
-
     @Schema(description = "문의 글 작성자", example = "23")
     private long memberId;
 
+    @Schema(description = "문의 글 상태", example = "QUESTION_REGISTERED")
     private Question.QuestionStatus questionStatus;
 }
