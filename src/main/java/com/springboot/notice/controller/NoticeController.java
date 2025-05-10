@@ -54,7 +54,7 @@ public class NoticeController {
     })
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity postNotice(@RequestPart NoticePostDto postDto,
+    public ResponseEntity postNotice(@RequestPart NoticePostDto noticePostDto,
         // @Valid @RequestBody NoticePostDto noticePostDto,
                                      @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
