@@ -81,7 +81,8 @@ public class NoticeController {
     })
 
     @PatchMapping(value = "/{notice-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity patchNotice(@Valid @RequestBody NoticePatchDto noticePatchDto,
+    public ResponseEntity patchNotice(@RequestPart("noticePatchDto") NoticePatchDto noticePatchDto,
+                                      // @Valid @RequestBody NoticePatchDto noticePatchDto,
                                       @PathVariable("notice-id") @Positive long noticeId,
                                       @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                       @AuthenticationPrincipal CustomPrincipal customPrincipal) {
