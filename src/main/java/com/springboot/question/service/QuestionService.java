@@ -121,7 +121,7 @@ public class QuestionService {
         // 상태 변경
         findQuestion.setQuestionStatus(Question.QuestionStatus.QUESTION_DELETED);
         // 이미 삭제 상태인지 확인하고 저장
-        questionRepository.save(verifyExistsQuestion(findQuestion));
+        questionRepository.save(findQuestion);
     }
 
     // 질문 존재하는지 검증

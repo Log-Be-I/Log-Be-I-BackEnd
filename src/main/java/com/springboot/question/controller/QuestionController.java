@@ -67,7 +67,7 @@ public class QuestionController {
                            examples = @ExampleObject(value = "{ \"error\": \"Forbidden\", \"message\": \"접근 권한이 없습니다.\" }")))
    })
     public ResponseEntity postQuestion(@Valid @RequestBody QuestionPostDto questionPostDto,
-                                       @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         Question createdQuestion = questionService.createQuestion(
                 questionMapper.questionPostToQuestion(questionPostDto), customPrincipal.getMemberId());
@@ -93,7 +93,7 @@ public class QuestionController {
     public ResponseEntity patchQuestion(
             @PathVariable("question-id") @Positive long questionId,
             @Valid @RequestBody QuestionPatchDto questionPatchDto,
-            @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         Question question =  questionService.updateQuestion(questionMapper
                 .questionPatchToQuestion(questionPatchDto), customPrincipal.getMemberId());
@@ -133,7 +133,7 @@ public class QuestionController {
                                        @RequestParam(value = "onlyNotAnswer", defaultValue = "false") boolean onlyNotAnswer,
                                        @RequestParam(value = "email", required = false) String email,
                                        @RequestParam(value = "title", required = false) String title,
-                                       @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         Page<Question> questionPage = questionService.findQuestions(page, size, sortType, onlyNotAnswer, email, title);
         List<Question> questions = questionPage.getContent();
@@ -163,7 +163,7 @@ public class QuestionController {
     @GetMapping("/my")
     public ResponseEntity getMyQuestions(@Positive @RequestParam int page, @Positive @RequestParam int size,
                                          @RequestParam String orderBy,
-                                         @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                         @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         Page<Question> questionPage = questionService.findMyQuestions(page, size, customPrincipal.getMemberId(), orderBy);
         return new ResponseEntity<>(new MultiResponseDto<>
@@ -186,11 +186,12 @@ public class QuestionController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
     })
+    @Parameter(name = "question-id", description = "조회할 문의 글 ID", required = true, example = "1", in = ParameterIn.PATH)
     //질문 글 상세조회
     @GetMapping("/{question-id}")
     public ResponseEntity getQuestion(
             @PathVariable("question-id") @Positive long questionId,
-            @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         Question question = questionService.findQuestion(questionId, customPrincipal.getMemberId());
         return new ResponseEntity<>(new SingleResponseDto<>(
@@ -201,6 +202,9 @@ public class QuestionController {
     @Operation(summary = "문의 글 삭제", description = "등록된 문의 글을 삭제 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "문의 글 삭제"),
+//            @ApiResponse(responseCode = "204", description = "문의 글 삭제",
+//                    content = @Content(mediaType = "application/json",
+//                            examples = @ExampleObject(value = "{\"status\": \"NO_CONTENT\", \"message\": \"삭제 완료.\"}"))),
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
@@ -208,10 +212,11 @@ public class QuestionController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
     })
+    @Parameter(name = "question-id", description = "삭제할 문의 글 ID", required = true, example = "1", in = ParameterIn.PATH)
     //문의글 삭제
     @DeleteMapping("/{question-id}")
     public ResponseEntity deleteQuestion(@PathVariable("question-id") long questionId,
-                                         @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                         @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         questionService.deleteQuestion(questionId, customPrincipal.getMemberId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
