@@ -38,7 +38,7 @@ public class S3Service {
         try (InputStream inputStream = file.getInputStream()) {
             amazonS3.putObject(
                     new PutObjectRequest(bucket, fileName, inputStream, metadata)
-                            .withCannedAcl(CannedAccessControlList.PublicRead) // 공개 읽기 권한
+                            // .withCannedAcl(CannedAccessControlList.PublicRead) // 공개 읽기 권한
             );
         } catch (IOException e) {
             //업로드 중 예외가 발생하면 RuntimeException 으로 래핑해 던짐
