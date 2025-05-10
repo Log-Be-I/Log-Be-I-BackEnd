@@ -5,11 +5,23 @@ import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.record.entity.Record;
 import com.springboot.record.service.RecordService;
 import com.springboot.report.dto.ReportAnalysisRequest;
+import com.springboot.report.dto.ReportResponseDto;
+import com.springboot.report.dto.SummaryResponseDto;
 import com.springboot.report.entity.Report;
 import com.springboot.report.mapper.ReportMapper;
 import com.springboot.report.service.ReportService;
 import com.springboot.responsedto.ListResponseDto;
+import com.springboot.schedule.dto.ScheduleResponseDto;
+import com.springboot.swagger.SwaggerErrorResponse;
 import com.springboot.utils.ReportUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.index.qual.Positive;
@@ -27,6 +39,7 @@ import java.util.List;
 @RequestMapping("/reports")
 @Validated
 @RequiredArgsConstructor
+@Tag(name = "분석 API", description = "분석 등록, 조회 관련 API")
 public class ReportController {
     private final ReportService reportService;
     private final ReportMapper mapper;
@@ -281,6 +294,26 @@ public class ReportController {
 //    }
 
     // 구글 TTS (유저가 선택한 reportId 리스트를 받는다)
+    @Operation(summary = "TTS 변환", description = "회원이 선택한 레포트들을 음성 데이터로 변환하는 요청.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "변환 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(type = "string")),
+                            examples = @ExampleObject(
+                                    value = "[\"https://s3.amazonaws.com/bucket/audio1.mp3\", \"https://s3.amazonaws.com/bucket/audio2.mp3\"]"))),
+            @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 기록 요청시",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}"))),
+            @ApiResponse(responseCode = "500", description = "api 요청시 서버 통신 에러",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"INVALID_SERVER_ERROR\", \"message\": \"Invalid Report type\"}")))
+    })
     @PostMapping("/audio")
     public ResponseEntity<List<String>> generateTts(@RequestBody List<Long> reportsId,
                                              @AuthenticationPrincipal CustomPrincipal customPrincipal) {
@@ -292,6 +325,17 @@ public class ReportController {
 
     //연도별 그룹 조회
     @GetMapping
+    @Operation(summary = "연도별 분석 레포트 조회", description = "회원이 선택한 연도별 분석 레포트 조회 요청.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = SummaryResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 기록 요청시",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
+    })
     public ResponseEntity getReportList(@Positive @RequestParam(value = "year", required = false) Integer year,  // year를 안보내도 기본값 처리 하도록 설정
                                         @AuthenticationPrincipal CustomPrincipal customPrincipal){
         //year 값이 설정되지 않았다면 올해 기준으로 정렬
@@ -305,6 +349,17 @@ public class ReportController {
 
     //Report - MonthlyTitle 상세 그룹 조회
     @GetMapping("/detail")
+    @Operation(summary = "특정 월 레포트 데이터 조회", description = "회원이 선택한 월 레포트가 포함하고있는 주 단위 레포트 데이터 조회 요청.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = ReportResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 기록 요청시",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
+    })
     public ResponseEntity getReports(@RequestParam("monthly-title") String monthlyTitle,
                                      @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
