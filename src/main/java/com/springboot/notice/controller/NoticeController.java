@@ -135,7 +135,7 @@ public class NoticeController {
                                      @RequestParam @Positive int size) {
         Page<Notice> noticePage = noticeService.findNotices(page, size);
         List<Notice> notices = noticePage.getContent();
-        return new ResponseEntity<>(new MultiResponseDto<>(mapper.noticesToNoticeResponses(noticeService.nonDeletedNoticeAndAuth(notices)), noticePage),
+        return new ResponseEntity<>(new MultiResponseDto<>(mapper.noticesToNoticeResponses(notices), noticePage),
                 HttpStatus.OK);
     }
 

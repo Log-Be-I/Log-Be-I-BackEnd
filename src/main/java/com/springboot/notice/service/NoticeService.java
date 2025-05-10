@@ -100,7 +100,7 @@ public class NoticeService {
         if (page < 1) {
             throw new IllegalArgumentException("페이지의 번호는 1 이상이어야 합니다.");
         }
-        return noticeRepository.findAll(
+        return noticeRepository.findAllByNoticeStatusNot(Notice.NoticeStatus.NOTICE_DELETED,
                 PageRequest.of(page - 1, size, Sort.by("createdAt").descending()));
     }
 
@@ -150,15 +150,12 @@ public class NoticeService {
         return notice;
     }
 
-    //전체 조회 시, 삭제 상태의 공지는 제외
-    public List<Notice> nonDeletedNoticeAndAuth (List<Notice> notices) {
-        return notices.stream().filter(notice -> notice.getNoticeStatus() != Notice.NoticeStatus.NOTICE_DELETED)
-                .peek(notice ->
-                        // 관리자 or owner 가 아니라면 예외 처리
-                        AuthorizationUtils.verifyAdmin()
-                ).collect(Collectors.toList());
-
-    }
+//    //전체 조회 시, 삭제 상태의 공지는 제외
+//    public List<Notice> nonDeletedNoticeAndAuth (List<Notice> notices) {
+//        return notices.stream().filter(notice -> notice.getNoticeStatus() != Notice.NoticeStatus.NOTICE_DELETED)
+//                .collect(Collectors.toList());
+//
+//    }
 
     //S3 이미지 URL에서 key(=파일경로) 추출
     public String extractKeyFromUrl(String url) {
