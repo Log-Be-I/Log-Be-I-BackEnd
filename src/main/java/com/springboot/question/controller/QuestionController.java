@@ -47,19 +47,6 @@ public class QuestionController {
 
     //swagger API - 등록
    @PostMapping
-//    @Operation(summary = "문의 글 등록", description = "회원이 새로운 문의 글을 등록합니다.",
-//            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-//                    description = "문의 글 등록 요청", required = true,
-//                    content = @Content(
-//                            schema = @Schema(implementation = QuestionDto.Post.class),
-//                                examples = @ExampleObject(
-//                            value = "{ \"title\": \"로그인 문의\", \"content\" : \"자동로그인 해주세요\", \"image\": \"uri\", \"memberId\": \"23\" }"))),
-//        @ApiResponses(value = {
-//            @ApiResponse(responseCode = "201", description = "새로운 문의 글 등록"),
-//            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
-//                    content = @Content(mediaType = "application/json",
-//                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}")))
-//    })
    @Operation(summary = "문의 글 등록", description = "회원이 새로운 문의 글을 등록합니다.",
            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                    description = "문의 글 등록 요청", required = true,
@@ -102,8 +89,6 @@ public class QuestionController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
     })
-
-
     @PatchMapping("/{question-id}")
     public ResponseEntity patchQuestion(
             @PathVariable("question-id") @Positive long questionId,
@@ -118,30 +103,6 @@ public class QuestionController {
     }
 
     //swagger API - 관리자의 전체 조회
-//    @Operation(summary = "관리자의 문의 글 전체 조회", description = "등록된 문의 글 목록을 조회합니다.")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "전체 문의 글 목록 조회",
-//                    content = @Content(mediaType = "application/json",
-//                            schema = @Schema(implementation = QuestionDto.Response.class))),
-//            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
-//                    content = @Content(mediaType = "application/json",
-//                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
-//            @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
-//                    content = @Content(mediaType = "application/json",
-//                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}")))
-//    })
-//    @Operation(summary = "관리자의 문의 글 전체 조회", description = "관리자가 등록된 모든 문의 글을 페이징하여 조회합니다.")
-//    @Parameters({
-//            @Parameter(name = "page", description = "페이지 번호", in = ParameterIn.QUERY),
-//            @Parameter(name = "size", description = "페이지당 요소 수", in = ParameterIn.QUERY),
-//            @Parameter(name = "sortType", description = "정렬 방식 (예: newest, oldest)", in = ParameterIn.QUERY)
-//    })
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "전체 문의 글 목록 조회",
-//                    content = @Content(schema = @Schema(implementation = MultiResponseDto.class))),
-//            @ApiResponse(responseCode = "403", description = "관리자 권한 없음")
-//    })
-
     //관리자용 전체조회
     //Spring Security에서 제공, 관리자만 접근하도록 설정
     @PreAuthorize("hasRole('ADMIN')")
@@ -181,9 +142,14 @@ public class QuestionController {
     }
 
     //swagger API - 회원의 문의글 전체 조회
-    @Operation(summary = "문의 글 목록 조회", description = "등록된 문의 글을 상세 조회합니다.")
+    @Operation(summary = "문의 글 목록 조회", description = "등록된 문의 글을 전체 조회합니다.")
+    @Parameters({
+            @Parameter(name = "page", description = "페이지 번호 (1부터 시작)", example = "1", in = ParameterIn.QUERY),
+            @Parameter(name = "size", description = "페이지당 조회 수", example = "10", in = ParameterIn.QUERY),
+            @Parameter(name = "sortType", description = "정렬 기준 (newest 또는 oldest)", example = "newest", in = ParameterIn.QUERY)
+    })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "문의 글 상세 조회",
+            @ApiResponse(responseCode = "200", description = "문의 글 전체 조회",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = QuestionResponseDto.class))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
@@ -193,7 +159,6 @@ public class QuestionController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}")))
     })
-
     //회원용 질문 목록 조회
     @GetMapping("/my")
     public ResponseEntity getMyQuestions(@Positive @RequestParam int page, @Positive @RequestParam int size,
@@ -243,7 +208,6 @@ public class QuestionController {
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
     })
-
     //문의글 삭제
     @DeleteMapping("/{question-id}")
     public ResponseEntity deleteQuestion(@PathVariable("question-id") long questionId,
