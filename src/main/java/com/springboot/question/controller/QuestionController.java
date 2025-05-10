@@ -202,7 +202,7 @@ public class QuestionController {
 
         Page<Question> questionPage = questionService.findMyQuestions(page, size, customPrincipal.getMemberId(), orderBy);
         return new ResponseEntity<>(new MultiResponseDto<>
-                (questionMapper.questionsToQuestionResponses(questionService.nonDeletedQuestionAndAuth(questionPage.getContent(), customPrincipal.getMemberId())), questionPage), HttpStatus.OK);
+                (questionMapper.questionsToQuestionResponses(questionPage.getContent()), questionPage), HttpStatus.OK);
     }
 
   //swagger API - 상세 조회

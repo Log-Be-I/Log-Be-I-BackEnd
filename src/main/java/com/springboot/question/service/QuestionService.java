@@ -146,14 +146,14 @@ public class QuestionService {
         return  question;
     }
 
-    public List<Question> nonDeletedQuestionAndAuth (List<Question> questions, Long memberId) {
-        return questions.stream().filter(question -> question.getQuestionStatus() != Question.QuestionStatus.QUESTION_DELETED)
-                .peek(question ->
-                        // 관리자 or owner 가 아니라면 예외 처리
-                        AuthorizationUtils.isAdminOrOwner(question.getMember().getMemberId(), memberId)
-                ).collect(Collectors.toList());
-
-    }
+//    public List<Question> nonDeletedQuestionAndAuth (List<Question> questions, Long memberId) {
+//        return questions.stream().filter(question -> question.getQuestionStatus() != Question.QuestionStatus.QUESTION_DELETED)
+//                .peek(question ->
+//                        // 관리자 or owner 가 아니라면 예외 처리
+//                        AuthorizationUtils.isAdminOrOwner(question.getMember().getMemberId(), memberId)
+//                ).collect(Collectors.toList());
+//
+//    }
 
     // 정렬조건 설정
     private Sort getSortType(String sortType){
@@ -175,7 +175,12 @@ public class QuestionService {
     }
 
     public List<UnansweredQuestion> findUnansweredQuestions() {
-        List<Question> questions = questionRepository.findAllByQuestionAnswerStatus(Question.QuestionAnswerStatus.NONE_ANSWER);
+        //DB에서 꺼내온 데이터중 QuestionStatus가 Deleted가 아닌 것들은 filter
+        List<Question> questions = questionRepository.findAllByQuestionAnswerStatus(Question.QuestionAnswerStatus.NONE_ANSWER)
+                .stream()
+                .filter(question -> question.getQuestionStatus() != Question.QuestionStatus.QUESTION_DELETED)
+                .collect(Collectors.toList());
+
         return  questions.stream().map(question -> new UnansweredQuestion(question.getTitle()))
                         .collect(Collectors.toList());
     }

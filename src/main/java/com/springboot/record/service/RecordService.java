@@ -169,12 +169,13 @@ public class RecordService {
         }
 
         Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.ASC, "recordDateTime"));
-
+        //deleted 상태만 제외한 Status 생성
+        List<Record.RecordStatus> validStatuses = List.of(Record.RecordStatus.RECORD_REGISTERED, Record.RecordStatus.RECORD_UPDATED);
         //DB에서 조회 후, controller 에서 삭제 상태 검증
         if(category.getCategoryId() == 0){
-            return recordRepository.findAllByMember_MemberIdAndRecordDateTimeBetween(memberId, startDate, endDate, pageable);
+            return recordRepository.findAllByMember_MemberIdAndRecordStatusInAndRecordDateTimeBetween(memberId, validStatuses, startDate, endDate, pageable);
         } else {
-            return recordRepository.findAllByMember_MemberIdAndCategory_CategoryIdAndRecordDateTimeBetween(memberId, categoryId, startDate, endDate, pageable);
+            return recordRepository.findAllByMember_MemberIdAndCategory_CategoryIdAndRecordStatusInAndRecordDateTimeBetween(memberId, categoryId, validStatuses, startDate, endDate, pageable);
         }
     }
 
@@ -210,15 +211,15 @@ public class RecordService {
         return recordRepository.findRegisteredRecordsWithMemberBetween(start, end, Record.RecordStatus.RECORD_REGISTERED);
     }
 
-    //삭제상태가 아닌 List<Record> 반환 + 작성자 본인 or 관리자인지 검증
-    public List<Record> nonDeletedRecordAndAuth (List<Record> records, Long memberId) {
-        return records.stream().filter(record -> record.getRecordStatus() != Record.RecordStatus.RECORD_DELETED)
-                .peek(record ->
-                        // 관리자 or owner 가 아니라면 예외 처리
-                AuthorizationUtils.isAdminOrOwner(record.getMember().getMemberId(), memberId)
-                ).collect(Collectors.toList());
-
-    }
+//    //삭제상태가 아닌 List<Record> 반환 + 작성자 본인 or 관리자인지 검증
+//    public List<Record> nonDeletedRecordAndAuth (List<Record> records, Long memberId) {
+//        return records.stream().filter(record -> record.getRecordStatus() != Record.RecordStatus.RECORD_DELETED)
+//                .peek(record ->
+//                        // 관리자 or owner 가 아니라면 예외 처리
+//                AuthorizationUtils.isAdminOrOwner(record.getMember().getMemberId(), memberId)
+//                ).collect(Collectors.toList());
+//
+//    }
 
 //    // 타입이 뭐든 일단 받아서 분기 처리
 //    public void handleResponse(Object response) {

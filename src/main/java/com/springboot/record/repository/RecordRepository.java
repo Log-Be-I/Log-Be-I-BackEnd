@@ -34,17 +34,19 @@ List<Record> findRegisteredRecordsWithMemberBetween(@Param("start") LocalDateTim
 //    Page<Record> findAllByMember_MemberIdAndCategory_CategoryId(Long memberId, Long categoryId, Pageable pageable);
 
     // memberId, 날짜 범위, categoryId 받아서 데이터 탐색
-    Page<Record> findAllByMember_MemberIdAndCategory_CategoryIdAndRecordDateTimeBetween(
+    Page<Record> findAllByMember_MemberIdAndCategory_CategoryIdAndRecordStatusInAndRecordDateTimeBetween(
             Long memberId,
             Long categoryId,
+            List<Record.RecordStatus> recordStatus,
             LocalDateTime startDate,
             LocalDateTime endDate,
             Pageable pageable
     );
 
     // Category 전체 선택일 경우 memberId, 날짜 범위로만 탐색
-    Page<Record> findAllByMember_MemberIdAndRecordDateTimeBetween(
+    Page<Record> findAllByMember_MemberIdAndRecordStatusInAndRecordDateTimeBetween(
             Long memberId,
+            List<Record.RecordStatus> recordStatus,
             LocalDateTime startDate,
             LocalDateTime endDate,
             Pageable pageable

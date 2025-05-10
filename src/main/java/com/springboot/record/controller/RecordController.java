@@ -116,8 +116,7 @@ public class RecordController {
         List<Record> records = recordPage.getContent();
         return new ResponseEntity<>( new MultiResponseDto<>(
                 // 삭제상태가 아닌 record 만 필터링, 관리자 및 본인만 접근 가능
-                recordMapper.recordsToRecordResponses(recordService.nonDeletedRecordAndAuth(records, customPrincipal.getMemberId())),
-                recordPage), HttpStatus.OK);
+                recordMapper.recordsToRecordResponses(records), recordPage), HttpStatus.OK);
     }
 
     @DeleteMapping("/records/{record-id}")
