@@ -163,7 +163,6 @@ public class MemberController {
                                         @Valid @PathVariable("member-id") long memberId,
                                     @Parameter(hidden = true)
                                     @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Member member = memberService.findMember(memberId, customPrincipal.getMemberId());
         return new ResponseEntity<>(
                 new SingleResponseDto<>(memberMapper.memberToMemberResponseDto(member)), HttpStatus.OK
@@ -236,7 +235,6 @@ public class MemberController {
                                        @Parameter(hidden = true)
                                        @AuthenticationPrincipal CustomPrincipal customPrincipal,
                                        @RequestBody String request) {
-//        memberService.deleteMember(memberId, customPrincipal.getEmail(), request);
         memberService.deleteMember(customPrincipal.getEmail(), request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
