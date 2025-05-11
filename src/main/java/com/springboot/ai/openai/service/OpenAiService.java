@@ -120,14 +120,17 @@ public class OpenAiService {
         ZoneId seoulZone = ZoneId.of("Asia/Seoul");
         LocalDateTime nowKST = LocalDateTime.now(seoulZone);  // ← 이렇게 해야 정확히 KST
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> map = mapper.readValue(text, new TypeReference<>() {
-        });
+        Map<String, String> map = mapper.readValue(text, new TypeReference<>() {});
+        // --- Move and update: extract value and prompt, and call emptyVoice before try ---
+        String value = new ObjectMapper().readValue(text, new TypeReference<Map<String, String>>() {}).get("text");
+        String prompt = chatWithScheduleAndRecord(value, nowKST.toString());
+        emptyVoice(prompt); // early termination if needed
         try {
-            String value = map.get("text");
+            // String value = map.get("text");
             // 사용자 입력 text -> JSON 으로 변경
-            String prompt = chatWithScheduleAndRecord(value, nowKST.toString());
+            // String prompt = chatWithScheduleAndRecord(value, nowKST.toString());
             // 빈문자열이면 예외 처리
-            emptyVoice(prompt);
+            // emptyVoice(prompt);
             // GPT 요청 객체 생성
             OpenAiRequest chatRequest = buildChatRequest(prompt);
             // 실제 GPT 서버에 요청 보내고 응답 받기
@@ -140,8 +143,6 @@ public class OpenAiService {
         }
         catch (IOException e) {
             logStorageService.logAndStoreWithError("createRecordOrSchedule Failed - reason: {}", logNameRecord, e.getMessage(), e);
-
-//            logStorageService.logAndStoreWithError("GPT_audio_record Failed", "GPT", e.getMessage());
             throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED); // 너가 따로 정의한 예외 던짐
         }
     }
