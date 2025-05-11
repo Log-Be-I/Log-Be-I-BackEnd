@@ -8,6 +8,12 @@ import com.springboot.member.mapper.MemberMapper;
 import com.springboot.member.service.MemberService;
 import com.springboot.oauth.GoogleInfoDto;
 import com.springboot.oauth.OAuthService;
+import com.springboot.swagger.SwaggerErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +39,32 @@ public class GoogleAuthController {
         this.memberMapper = memberMapper;
     }
 
+    @io.swagger.v3.oas.annotations.Operation(
+        summary = "구글 로그인 코드로 토큰 요청",
+        description = "Google OAuth 인증 코드(code)를 받아 accessToken과 유저 정보를 반환합니다.",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = Map.class),
+                examples = @ExampleObject(
+                    name = "구글 인증 코드 예시",
+                    value = "{ \"code\": \"4/0AY0e-g7xxx_example_code\" }"
+                )
+            )
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "성공적으로 로그인 처리됨"),
+            @ApiResponse(responseCode = "400", description = "code 값이 없거나 비어있음"),
+            @ApiResponse(responseCode = "500", description = "서버 오류"),
+                @ApiResponse(responseCode = "500", description = "서버 오류",
+                        content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                                examples = @ExampleObject(value = "{\"error\": \"INVALID_SERVER_ERROR\", \"message\": \"INVALID_SERVER_ERROR\"}"))),
+                @ApiResponse(responseCode = "400", description = "code 값이 없거나 비어있음",
+                        content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                                examples = @ExampleObject(value = "{\"error\": \"BAD_REQUEST\", \"message\": \"잘못된 요청 형태 접근\"}"))),
+        }
+    )
     @PostMapping("/google/code")
     public ResponseEntity<?> loginWithGoogleCode(@RequestBody Map<String, String> body) {
         String code = body.get("code");
