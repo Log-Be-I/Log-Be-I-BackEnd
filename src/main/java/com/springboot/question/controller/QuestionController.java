@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -152,8 +153,7 @@ public class QuestionController {
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "문의 글 전체 조회",
-                    content = @Content(schema = @Schema(implementation = QuestionResponseDto.class))),
-
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = QuestionResponseDto.class)))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),

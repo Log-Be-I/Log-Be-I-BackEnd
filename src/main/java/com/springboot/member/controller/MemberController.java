@@ -15,6 +15,7 @@ import com.springboot.schedule.dto.ScheduleResponseDto;
 import com.springboot.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -173,8 +174,7 @@ public class MemberController {
     @Operation(summary = "회원 전체 조회", description = "회원정보 전체 조회")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 정보 반환",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = MemberResponseDto.class))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = MemberResponseDto.class)))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다.",
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),

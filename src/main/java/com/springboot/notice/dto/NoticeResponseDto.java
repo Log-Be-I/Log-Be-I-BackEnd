@@ -18,9 +18,7 @@ public class NoticeResponseDto {
     @Schema(description = "공지사항 내용", example = "이번 여름 이벤트는 기로기랑 수영장파티 입니다.")
     private String content;
 
-    @Schema(description = "공지사항 첨부파일 리스트",
-            example = "[\"https://s3.ap-northeast-2.amazonaws.com/logbe-i/notice1.png\"," +
-                    " \"https://s3.ap-northeast-2.amazonaws.com/logbe-i/notice2.jpg\"]")
+    @Schema(description = "수정할 첨부 이미지 URL 리스트", example = "[\"https://...\", \"https://...\"]")
     private List<String> fileUrls;
 
     @Schema(description = "회원 ID", example = "1")

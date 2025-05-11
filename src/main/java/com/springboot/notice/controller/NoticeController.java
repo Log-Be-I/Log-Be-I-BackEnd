@@ -15,6 +15,7 @@ import com.springboot.swagger.SwaggerErrorResponse;
 import com.springboot.utils.UriCreator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -111,7 +112,6 @@ public class NoticeController {
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
     })
-
     @GetMapping("/{notice-id}")
     public ResponseEntity getNotice(@Parameter(description = "notice-id", example = "1")
                                         @PathVariable("notice-id") @Positive long noticeId) {
@@ -122,11 +122,11 @@ public class NoticeController {
         );
     }
 
-    //swagger API - 상세 조회
+    //swagger API - 전체 조회
     @Operation(summary = "공지사항 전체 목록 조회", description = "등록된 공지 목록을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "공지 글 전체 조회",
-                    content = @Content(schema = @Schema(implementation = NoticeResponseDto.class))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = NoticeResponseDto.class)))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다.",
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
@@ -134,7 +134,6 @@ public class NoticeController {
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
     })
-
     @GetMapping
     public ResponseEntity getNotices(@Parameter(description = "page", example = "1")
                                          @RequestParam @Positive int page,
@@ -157,7 +156,6 @@ public class NoticeController {
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
     })
-
     @DeleteMapping("/{notice-id}")
     public ResponseEntity deleteNotice(@PathVariable("notice-id") @Positive long noticeId,
                                        @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal){

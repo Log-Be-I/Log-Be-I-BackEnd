@@ -22,7 +22,12 @@ public class NoticePostDto {
     @Schema(description = "공지사항 내용", example = "LOG BE I 이용 방법")
     private String content;
 
+    @Schema(description = "회원 ID", example = "1")
     private Long memberId;
+
+    @Schema(description = "공지사항 종류", example = "EVENT")
     private Notice.NoticeType noticeType;
+
+    @Schema(description = "공지사항 고정 유무", example = "PINNED")
     private Notice.IsPinned isPinned;
 }
