@@ -4,7 +4,7 @@ spring:
       host: 172.31.41.9
       port: 6379
   application:
-    name:  log-be-i
+    name: log-be-i
   h2:
     console:
       enabled: true
@@ -13,9 +13,9 @@ spring:
     time-zone: Asia/Seoul
   datasource:
     url: jdbc:mysql://database-1.c10a226u86g0.ap-northeast-2.rds.amazonaws.com:3306/logbe_i_DB?serverTimezone=Asia/Seoul
-   username: ${RDS_USERNAME}
-   password: ${RDS_PASSWORD}
-   driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update  # (1) 스키마 자동 생성
