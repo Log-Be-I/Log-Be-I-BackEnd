@@ -23,5 +23,6 @@ public class CategoryPatchDto {
     @NotBlank
     private String image;
 
+    @Schema(name = "회원 ID", example = "1")
     private Long memberId;
 }

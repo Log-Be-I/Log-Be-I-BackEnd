@@ -24,14 +24,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 @RestController
@@ -153,14 +149,15 @@ public class ScheduleController {
     // 일정 삭제
     @Operation(summary = "일정 삭제", description = "특정 ID의 일정을 삭제합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "No Contents",
-                    content = @Content(schema = @Schema(implementation = ScheduleResponseDto.class))),
+            @ApiResponse(responseCode = "204", description = "삭제 성공",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\": \"NO_CONTENT\", \"Message\": \"DELETED_DONE\"}"))),
             @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 기록 삭제 요청시",
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"Message\": \"\"}")))
+                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"Message\": \"Schedule Not Found\"}")))
     })
     @DeleteMapping("/schedules/{schedule-id}")
     public ResponseEntity deleteSchedule(@PathVariable("schedule-id") @Positive long scheduleId,

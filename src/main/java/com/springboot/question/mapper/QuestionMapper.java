@@ -18,7 +18,6 @@ public interface QuestionMapper {
     Question questionPostToQuestion(QuestionPostDto questionPostDto);
     @Mapping(target = "member.memberId", source = "memberId")
     Question questionPatchToQuestion(QuestionPatchDto patchDto);
-    AnswerResponseDto answerToAnswerResponse(Answer answer);
     @Mapping(target = "answer", source = "answer")
     @Mapping(target = "memberId", source = "member.memberId")
     default QuestionResponseDto questionToQuestionResponse(Question question) {
@@ -42,7 +41,6 @@ public interface QuestionMapper {
                         question.getTitle(),
                         question.getContent(),
                         question.getQuestionStatus(),
-                        question.getImage(),
                         question.getMember().getMemberId(),
                         question.getMember().getEmail(),
                         answerResponseDto,

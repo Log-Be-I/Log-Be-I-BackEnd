@@ -5,15 +5,28 @@ import com.springboot.ai.openai.service.OpenAiService;
 import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.notice.dto.NoticeResponseDto;
 import com.springboot.record.dto.RecordPatchDto;
 import com.springboot.record.dto.RecordPostDto;
+import com.springboot.record.dto.RecordResponseDto;
 import com.springboot.record.entity.Record;
 import com.springboot.record.mapper.RecordMapper;
 import com.springboot.record.service.RecordService;
 import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
+import com.springboot.schedule.dto.ScheduleResponseDto;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.mapper.ScheduleMapper;
+import com.springboot.swagger.SwaggerErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,6 +52,7 @@ import java.util.Map;
 @RequestMapping
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "기록 API", description = "기록 등록, 조회, 수정, 삭제 관련 API")
 public class RecordController {
 //    private final static String RECORD_DEFAULT_URL = "/records";
     private final RecordService recordService;
@@ -48,9 +62,20 @@ public class RecordController {
     private final ScheduleMapper scheduleMapper;
 
 
+    @Operation(summary = "기록 등록 (음성)", description = "음성 기반 기록 정보를 등록합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "기록 등록 성공",
+                    content = @Content(schema = @Schema(implementation = RecordResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
+            @ApiResponse(responseCode = "500", description = "api 서버 에러",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"GPT_FAILED\", \"message\": \"Gpt analysis error\"}")))
+    })
     @PostMapping("/audio-records")
     public ResponseEntity processVoiceInput(@RequestParam("audio") MultipartFile audioFile,
-                                             @AuthenticationPrincipal CustomPrincipal customPrincipal) throws IOException {
+                                            @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) throws IOException {
 
         //사용자 입력 음성 -> text -> Map<String, String> 타입 변환
         Map<String, String> result = openAiService.createRecordOrSchedule( clovaSpeechService.voiceToText(audioFile) );
@@ -71,19 +96,35 @@ public class RecordController {
         }
     }
 
+    @Operation(summary = "기록 등록 (텍스트)", description = "텍스트 기반 기록 정보를 등록합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "기록 등록 성공",
+                    content = @Content(schema = @Schema(implementation = RecordResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
+    })
     @PostMapping("/text-records")
     public ResponseEntity postRecord(@Valid @RequestBody RecordPostDto post,
-                                     @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                     @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         Record record =recordService.createRecord(recordMapper.recordPostDtoToRecord(post), customPrincipal.getMemberId());
 
         return new ResponseEntity<>(new SingleResponseDto<>(recordMapper.recordToRecordResponse(record)), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "기록 수정", description = "기록을 수정합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "기록 수정 성공",
+                    content = @Content(schema = @Schema(implementation = RecordResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
+    })
     @PatchMapping("/records/{record-id}")
     public ResponseEntity patchRecord(@Positive @PathVariable("record-id") long recordId,
                                       @Valid @RequestBody RecordPatchDto patch,
-                                      @AuthenticationPrincipal CustomPrincipal customPrincipal){
+                                      @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal){
         patch.setRecordId(recordId);
         patch.setMemberId(customPrincipal.getMemberId());
         //recordTime이 null이 아닐 때 변환
@@ -95,22 +136,43 @@ public class RecordController {
         return new ResponseEntity<>( new SingleResponseDto<>(recordMapper.recordToRecordResponse(record)), HttpStatus.OK);
     }
 
+    @Operation(summary = "기록 조회", description = "단일 기록 조회를 위해 요청")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "기록 조회 성공",
+                    content = @Content(schema = @Schema(implementation = RecordResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
+    })
     @GetMapping("/records/{record-id}")
     public ResponseEntity getRecord(@Positive @PathVariable("record-id") long recordId,
-                                    @AuthenticationPrincipal CustomPrincipal customPrincipal){
+                                    @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal){
         Record record = recordService.findRecord(recordId, customPrincipal.getMemberId());
 
         return new ResponseEntity<>( new SingleResponseDto<>(
                 recordMapper.recordToRecordResponse(record)), HttpStatus.OK);
     }
 
+    @Operation(summary = "기록 전체 조회", description = "기록 전체를 조회합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "기록 전체 조회 요청",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = RecordResponseDto.class)))),
+            @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
+    })
     @GetMapping("/records")
-    public ResponseEntity getRecords(@Positive @RequestParam("page") int page,
+    public ResponseEntity getRecords(@Parameter(description = "page", example = "1")
+                                         @Positive @RequestParam("page") int page,
+                                     @Parameter(description = "size", example = "1")
                                      @Positive @RequestParam("size") int size,
+                                     @Parameter(description = "카테고리 ID", example = "1")
                                      @RequestParam("categoryId") Long categoryId,
+                                     @Parameter(description = "시작 날짜", example = "2025-04-11T11:30")
                                      @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+                                     @Parameter(description = "종료 날짜", example = "2025-04-11T11:30")
                                      @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-                                     @AuthenticationPrincipal CustomPrincipal customPrincipal){
+                                     @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal){
         Page<Record> recordPage = recordService.findRecords(page, size, customPrincipal.getMemberId(), categoryId, startDate, endDate);
 
         List<Record> records = recordPage.getContent();
@@ -119,9 +181,18 @@ public class RecordController {
                 recordMapper.recordsToRecordResponses(records), recordPage), HttpStatus.OK);
     }
 
+    @Operation(summary = "특정 기록 삭제", description = "특정 기록을 삭제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "기록 삭제 요청",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\": \"NO_CONTENT\", \"message\": \"DELETED_DONE\"}"))),
+            @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
+    })
     @DeleteMapping("/records/{record-id}")
     public ResponseEntity deleteRecord(@Positive @PathVariable("record-id") long recordId,
-                                       @AuthenticationPrincipal CustomPrincipal customPrincipal){
+                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal){
         recordService.deleteRecord(recordId, customPrincipal.getMemberId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

@@ -17,7 +17,7 @@ public class CategoryPostDto {
     @NotBlank(message = "카테고리 이름을 지정해 주세요.")
     private String name;
 
-    @Schema(name = "카테고리 아이콘", example = "일상.uri")
     @NotBlank
+    @Schema(name = "카테고리 아이콘", example = "일상.uri")
     private String image;
 }

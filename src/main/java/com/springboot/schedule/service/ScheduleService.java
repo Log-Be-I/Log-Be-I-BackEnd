@@ -1,18 +1,9 @@
 package com.springboot.schedule.service;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.Event;
-import com.springboot.ai.clova.ClovaSpeechService;
-import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
-import com.springboot.record.repository.RecordRepository;
-import com.springboot.redis.RedisService;
 import com.springboot.schedule.entity.HistoricalSchedule;
 import com.springboot.schedule.entity.Schedule;
 import com.springboot.schedule.repository.HistoricalScheduleRepository;
@@ -22,11 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.File;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
