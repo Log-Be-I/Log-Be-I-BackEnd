@@ -9,6 +9,7 @@ import com.springboot.member.service.MemberService;
 import com.springboot.oauth.GoogleInfoDto;
 import com.springboot.oauth.OAuthService;
 import com.springboot.swagger.SwaggerErrorResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -118,6 +119,7 @@ public class GoogleAuthController {
     }
 
     //test용 controller method
+    @Hidden
     @PostMapping("/test")
     public ResponseEntity<?> testLogin() {
         GoogleInfoDto testUser = new GoogleInfoDto("taekho1225@gmail.com", "남택호");

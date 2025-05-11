@@ -3,6 +3,14 @@ package com.springboot.redis;
 import com.springboot.auth.jwt.JwtTokenizer;
 import com.springboot.auth.utils.MemberDetailService;
 import com.springboot.member.entity.Member;
+import com.springboot.schedule.dto.ScheduleResponseDto;
+import com.springboot.swagger.SwaggerErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -31,6 +39,11 @@ public class RedisController {
     private final RedisService redisService;
     private final MemberDetailService memberDetailService;
 
+
+    @Operation(summary = "로그아웃", description = "현재 로그인된 사용자를 로그아웃 처리하고 RefreshToken 쿠키를 만료시킵니다.")
+    @ApiResponse(responseCode = "200", description = "로그아웃 성공", content = @Content())
+    @ApiResponse(responseCode = "401", description = "로그아웃 실패( 토큰 아웃 처리하고 RefreshToken 쿠키를 만료시킨다.",
+            content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     @PostMapping("/logout")
     public ResponseEntity postLogout(Authentication authentication, HttpServletResponse response) {
         String username = authentication.getName(); // 현재 인증된 사용자의 사용자명을 가져옵니다.
@@ -53,7 +66,31 @@ public class RedisController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
-    // ✅ 🔹 RefreshToken을 이용해 새로운 AccessToken & RefreshToken 발급
+    @Operation(
+        summary = "AccessToken 재발급",
+        description = "RefreshToken 쿠키를 이용해 새로운 AccessToken과 RefreshToken을 발급합니다.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = Map.class),
+                examples = @ExampleObject(
+                    name = "빈 요청 예시",
+                    value = "{}"))),
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "AccessToken 재발급 성공",
+                content = @Content(
+                    schema = @Schema(example = "{\"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI...\"}"))),
+            @ApiResponse(
+                responseCode = "401",
+                description = "RefreshToken이 존재하지 않거나 유효하지 않음",
+                content = @Content(
+                    schema = @Schema(implementation = String.class),
+                    examples = @ExampleObject(
+                        name = "리프레시 토큰 없음 또는 오류",
+                        value = "RefreshToken이 존재하지 않습니다.")))})
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         log.info("🔄 RefreshToken 검증 및 AccessToken 재발급 요청");
@@ -125,4 +162,3 @@ public class RedisController {
         return null;
     }
 }
-
