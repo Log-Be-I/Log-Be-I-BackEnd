@@ -1,13 +1,11 @@
 package com.springboot.question.service;
 
-import com.springboot.auth.utils.CustomPrincipal;
 import com.springboot.dashboard.dto.UnansweredQuestion;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.service.MemberService;
 import com.springboot.question.entity.Question;
 import com.springboot.question.repository.QuestionRepository;
-import com.springboot.record.entity.Record;
 import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;

@@ -230,7 +230,7 @@ public class RecordService {
 //    }
     //삭제상태가 아닌 record 반환
     public Record getNotDeletedRecord(Record record){
-        if(record.getRecordStatus() != Record.RecordStatus.RECORD_DELETED) {
+        if(record.getRecordStatus() == Record.RecordStatus.RECORD_DELETED) {
            //삭제상태일 경우 예외처리
             throw new BusinessLogicException(ExceptionCode.RECORD_NOT_FOUND);
         }

@@ -72,6 +72,9 @@ dependencies {
 
 	// MySQL
 	implementation 'mysql:mysql-connector-java:8.0.33'
+
+	//Mockito
+	testImplementation 'org.mockito:mockito-inline:5.2.0'
 }
 
 tasks.named('test') {
