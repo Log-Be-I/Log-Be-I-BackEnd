@@ -15,9 +15,9 @@ public class AnswerPostDto {
     @NotBlank(message = "답변 내용은 필수입니다.")
     private String content;
 
-    @Schema(description = "문의 글 번호", example = "3")
+    @Schema(description = "문의 글 번호", example = "1")
     private Long questionId;
 
-    @Schema(description = "작성자 번호", example = "23")
+    @Schema(description = "작성자 번호", example = "4")
     private Long memberId;
 }
