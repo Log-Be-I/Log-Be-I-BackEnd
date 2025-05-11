@@ -1,7 +1,7 @@
 spring:
   data:
     redis:
-      host: 127.0.0.1
+      host: 172.31.41.9
       port: 6379
   application:
     name:  log-be-i
@@ -12,10 +12,10 @@ spring:
   jackson:
     time-zone: Asia/Seoul
   datasource:
-    url: jdbc:h2:mem:test
-#    username: ${RDS_USERNAME}
-#    password: ${RDS_PASSWORD}
-#    driver-class-name: com.h2.cj.jdbc.Driver
+    url: jdbc:mysql://database-1.c10a226u86g0.ap-northeast-2.rds.amazonaws.com:3306/logbe_i_DB?serverTimezone=Asia/Seoul
+   username: ${RDS_USERNAME}
+   password: ${RDS_PASSWORD}
+   driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update  # (1) 스키마 자동 생성
@@ -108,7 +108,7 @@ cloud:
     s3:
       bucket:
         logs: logbe-i-log
-        image: logbe-i-image
+        images: logbe-i-image
 management:
   endpoints:
     web:
