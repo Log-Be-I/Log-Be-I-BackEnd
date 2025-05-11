@@ -53,7 +53,6 @@ public class SecurityConfiguration {
     private final MemberRepository memberRepository;
 
 
-
     public SecurityConfiguration(JwtTokenizer jwtTokenizer, CustomAuthorityUtils authorityUtils,
                                  MemberDetailService memberDetailService, RedisTemplate<String, Object> redisTemplate, MemberRepository memberRepository) {
         this.jwtTokenizer = jwtTokenizer;
@@ -110,14 +109,14 @@ public class SecurityConfiguration {
                         .antMatchers(HttpMethod.POST, "/*/**/answers").hasRole("ADMIN")
 
                         // 정보 수정 요청은 USER 권한만 가능하다
-                        .antMatchers(HttpMethod.PATCH,"/*/members/**").hasRole("USER")
+                        .antMatchers(HttpMethod.PATCH, "/*/members/**").hasRole("USER")
                         .antMatchers(HttpMethod.PATCH, "/*/questions/**").hasRole("USER")
                         .antMatchers(HttpMethod.PATCH, "/*/answers/**").hasRole("ADMIN")
                         // 회원 전체 조회 요청은 ADMIN 만 가능하다
                         .antMatchers(HttpMethod.GET, "/*/members").hasRole("ADMIN")
                         .antMatchers(HttpMethod.GET, "/*/questions").hasAnyRole("USER", "ADMIN")
                         // 회원 단일 조회 요청은 USER ADMIN 만 가능
-                        .antMatchers(HttpMethod.GET,"/*/members/**").hasAnyRole("USER", "ADMIN")
+                        .antMatchers(HttpMethod.GET, "/*/members/**").hasAnyRole("USER", "ADMIN")
                         .antMatchers(HttpMethod.GET, "/*/questions/**").permitAll()
                         // 회원 삭제 요청은 USER 만 가능
                         .antMatchers(HttpMethod.DELETE, "/*/members/**").hasRole("USER")
@@ -126,11 +125,11 @@ public class SecurityConfiguration {
                         .antMatchers("/api/auth/google").permitAll()
                         .antMatchers("/api/auth/google/code").permitAll()
                         .antMatchers(
-                            "/swagger-ui/**",
-                            "/swagger-ui.html",
-                            "/v3/api-docs/**",
-                            "/swagger-resources/**",
-                            "/webjars/**"
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/swagger-ui.html",
+                                "/webjars/**"
                         ).permitAll()
                         .anyRequest().permitAll()
                 )
@@ -147,20 +146,21 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-//    @Bean
+    //    @Bean
 //    // 비밀번호 암호화 역할을 하는 bean 을 생성하는 메서드
 //    public PasswordEncoder passwordEncoder() {
 //        // 자동으로 적절한 암호화 알고리즘을 선택하는 PasswordEncoder 생성
 //        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
 //    }
-@Bean
-public PasswordEncoder passwordEncoder() {
-    DelegatingPasswordEncoder delegatingPasswordEncoder =
-            (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    delegatingPasswordEncoder.setDefaultPasswordEncoderForMatches(new BCryptPasswordEncoder());
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        DelegatingPasswordEncoder delegatingPasswordEncoder =
+                (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        delegatingPasswordEncoder.setDefaultPasswordEncoderForMatches(new BCryptPasswordEncoder());
 
-    return delegatingPasswordEncoder;
-}
+        return delegatingPasswordEncoder;
+    }
+
     @Bean
         // 구체적인 CORS 정책을 설정
     CorsConfigurationSource corsConfigurationSource() {
@@ -178,7 +178,7 @@ public PasswordEncoder passwordEncoder() {
                 "http://web.logbe-i.com",
                 "http://localhost:5173"
         ));
-        
+
         // 파라미터로 지정한 HTTP Method 에 대한 HTTP 통신을 허용
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
