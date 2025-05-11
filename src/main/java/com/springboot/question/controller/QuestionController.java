@@ -10,6 +10,8 @@ import com.springboot.question.service.QuestionService;
 import com.springboot.response.ErrorResponse;
 import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
+import com.springboot.schedule.dto.ScheduleResponseDto;
+import com.springboot.swagger.SwaggerErrorResponse;
 import com.springboot.utils.UriCreator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -150,8 +152,8 @@ public class QuestionController {
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "문의 글 전체 조회",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = QuestionResponseDto.class))),
+                    content = @Content(schema = @Schema(implementation = QuestionResponseDto.class))),
+
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
@@ -177,14 +179,14 @@ public class QuestionController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = QuestionResponseDto.class))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"FORBIDDEN\", \"message\": \"작성 권한이 없습니다.\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 문의 글",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"QUESTION_NOT_FOUND.\"}"))),
     })
     @Parameter(name = "question-id", description = "조회할 문의 글 ID", required = true, example = "1", in = ParameterIn.PATH)
     //질문 글 상세조회
@@ -202,15 +204,12 @@ public class QuestionController {
     @Operation(summary = "문의 글 삭제", description = "등록된 문의 글을 삭제 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "문의 글 삭제"),
-//            @ApiResponse(responseCode = "204", description = "문의 글 삭제",
-//                    content = @Content(mediaType = "application/json",
-//                            examples = @ExampleObject(value = "{\"status\": \"NO_CONTENT\", \"message\": \"삭제 완료.\"}"))),
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"FORBIDDEN\", \"message\": \"작성 권한이 없습니다.\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 문의 글",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"QUESTION_NOT_FOUND.\"}")))
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"QUESTION_NOT_FOUND.\"}"))),
     })
     @Parameter(name = "question-id", description = "삭제할 문의 글 ID", required = true, example = "1", in = ParameterIn.PATH)
     //문의글 삭제
