@@ -116,6 +116,11 @@ public class OpenAiService {
     //audio-Record 최종
     // 문장을 우리가 원하는 key value 형태로 변환
     public Map<String, String> createRecordOrSchedule(String text) throws IOException {
+        // Guard clause: 입력값이 null 또는 빈 문자열이면 예외 처리
+        if (text == null || text.trim().isEmpty()) {
+            log.warn("입력된 text가 null 또는 빈 문자열입니다.");
+            throw new BusinessLogicException(ExceptionCode.GPT_FAILED);
+        }
         // 한국 시간대 기준으로 현재 시간 가져오기
         ZoneId seoulZone = ZoneId.of("Asia/Seoul");
         LocalDateTime nowKST = LocalDateTime.now(seoulZone);  // ← 이렇게 해야 정확히 KST
@@ -126,11 +131,6 @@ public class OpenAiService {
         String prompt = chatWithScheduleAndRecord(value, nowKST.toString());
         emptyVoice(prompt); // early termination if needed
         try {
-            // String value = map.get("text");
-            // 사용자 입력 text -> JSON 으로 변경
-            // String prompt = chatWithScheduleAndRecord(value, nowKST.toString());
-            // 빈문자열이면 예외 처리
-            // emptyVoice(prompt);
             // GPT 요청 객체 생성
             OpenAiRequest chatRequest = buildChatRequest(prompt);
             // 실제 GPT 서버에 요청 보내고 응답 받기
