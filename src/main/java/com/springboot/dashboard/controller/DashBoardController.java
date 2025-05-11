@@ -2,7 +2,6 @@ package com.springboot.dashboard.controller;
 
 import com.springboot.dashboard.dto.DashBoardResponseDto;
 import com.springboot.dashboard.service.DashBoardService;
-import com.springboot.member.dto.MemberResponseDto;
 import com.springboot.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

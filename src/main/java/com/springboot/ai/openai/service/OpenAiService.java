@@ -126,6 +126,8 @@ public class OpenAiService {
             String value = map.get("text");
             // 사용자 입력 text -> JSON 으로 변경
             String prompt = chatWithScheduleAndRecord(value, nowKST.toString());
+            // 빈문자열이면 예외 처리
+            emptyVoice(prompt);
             // GPT 요청 객체 생성
             OpenAiRequest chatRequest = buildChatRequest(prompt);
             // 실제 GPT 서버에 요청 보내고 응답 받기
@@ -328,6 +330,8 @@ public class OpenAiService {
     // schedule or record 생성 Prompt
     public String chatWithScheduleAndRecord(String clovaJson, String time) {
         return "- 너는 다양한 사람들의 일기, 생활 기록, 메모 등을 분석하여 그 내용을 정확히 분류하는 **빅데이터 전문가야**\n" +
+                "- " + clovaJson + "이 만약 정상적인 언어 또는 문장으로 인식 가능한 문자열이 아니거나 아무 데이터도 없는 빈 문자열이라면 아래의 모든 조건을 무시하고 빈문자열을 반환해야한다.\n" +
+                "      해당 명령은 언제나 항상 1순위로 적용되어야하며 절대 다른 설명, JSON, 메시지를 출력하지 말아야한다. 문제가 있을시 무조건  \"\"만 출력해야한다.\n" +
                 "- " + clovaJson + "을 읽고 분석하여 1차 분류 이후, 분류된 항목에 맞는 2차 분류 기준에 따라 최종 분류하여 값을  3차 반환 기준이 안내하는 형태에 맞춰 최종 데이터를 반환한다.\n" +
                 "- base 기준은 모든 분류 기준 및 3차 반환에 적용되며 가장 우선적으로 적용되어야한다.\n" +
                 "- 모든 시간 관련 기록들은 KST 를 기준으로 작성하되 +09:00은 빼고 출력한다.이외에 모든 시간 관련된 데이터를 분석 및 출력하기전에 시간 데이터 분류 기준을 1순위로 참고하여 작성한다.\n" +
@@ -552,6 +556,11 @@ public class OpenAiService {
         throw new BusinessLogicException(ExceptionCode.REPORT_GENERATION_FAILED); // 이론상 도달하지 않음
     }
 
+    public void emptyVoice(String prompt) {
+        if (prompt == null || prompt.isEmpty()) {
+            throw new BusinessLogicException(ExceptionCode.GPT_FAILED);
+        }
+    }
 
     //aiResponse - content 파싱 (-> Map<K,V>)
     public String extractContent(OpenAiResponse response) {
