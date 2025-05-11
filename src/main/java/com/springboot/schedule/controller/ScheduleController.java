@@ -99,7 +99,6 @@ public class ScheduleController {
         return new ResponseEntity<>(new SingleResponseDto<>(scheduleMapper.scheduleToscheduleResponseDto(schedule)), HttpStatus.OK);
     }
 
-
     // 일정 전체 조회 (월 기준 조회)
     @Operation(summary = "월별 일정 전체 조회", description = "사용자의 특정 연도/월에 해당하는 모든 일정을 조회합니다.")
     @ApiResponses(value = {
