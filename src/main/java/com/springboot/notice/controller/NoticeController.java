@@ -149,6 +149,9 @@ public class NoticeController {
     @Operation(summary = "공지사항 삭제", description = "등록된 공지 글을 삭제 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "공지 글 삭제 성공"),
+            @ApiResponse(responseCode = "204", description = "공지 글 삭제 성공",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\": \"NO_CONTENT\", \"message\": \"DELETED_DONE\"}"))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다.",
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),

@@ -15,6 +15,7 @@ import com.springboot.schedule.dto.ScheduleResponseDto;
 import com.springboot.swagger.SwaggerErrorResponse;
 import com.springboot.utils.ReportUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -316,7 +317,7 @@ public class ReportController {
     })
     @PostMapping("/audio")
     public ResponseEntity<List<String>> generateTts(@RequestBody List<Long> reportsId,
-                                             @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                                    @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         List<String> audioReports =  reportService.reportToGoogleAudio(reportsId, customPrincipal.getMemberId());
 
@@ -361,7 +362,7 @@ public class ReportController {
                             examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
     })
     public ResponseEntity getReports(@RequestParam("monthly-title") String monthlyTitle,
-                                     @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+                                     @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
 
         List<Report> reports = reportService.findMonthlyTitleWithReports(monthlyTitle, customPrincipal.getMemberId());
 

@@ -203,7 +203,9 @@ public class QuestionController {
     //swagger API - 삭제
     @Operation(summary = "문의 글 삭제", description = "등록된 문의 글을 삭제 합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "문의 글 삭제"),
+            @ApiResponse(responseCode = "204", description = "문의 글 삭제",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\": \"NO_CONTENT\", \"message\": \"DELETED_DONE\"}"))),
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"FORBIDDEN\", \"message\": \"작성 권한이 없습니다.\"}"))),

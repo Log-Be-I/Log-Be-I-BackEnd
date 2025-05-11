@@ -137,7 +137,9 @@ public class CategoryController {
     //swagger API - 삭제
     @Operation(summary = "카테고리 삭제", description = "회원이 카테고리 하나를 삭제합니다")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "카테고리 삭제"),
+            @ApiResponse(responseCode = "204", description = "카테고리 삭제",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\": \"NO_CONTENT\", \"message\": \"DELETED_DONE\"}"))),
             @ApiResponse(responseCode = "400", description = "기본 카테고리 삭제 불가",
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"Bad Request\", \"message\": \"본 카테고리는 수정할 수 없습니다.\"}"))),

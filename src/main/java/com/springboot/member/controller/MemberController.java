@@ -219,7 +219,9 @@ public class MemberController {
     //swagger API - 삭제
     @Operation(summary = "회원 삭제", description = "회원 삭제")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "삭제되었습니다"),
+            @ApiResponse(responseCode = "204", description = "삭제되었습니다",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\": \"NO_CONTENT\", \"message\": \"DELETED_DONE\"}"))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다.",
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
