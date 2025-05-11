@@ -42,7 +42,9 @@ public class MemberResponseDto {
     @Schema(description = "회원의 마지막 로그인 시간", example = "2025-04-17 12:39:22")
     private LocalDateTime lastLoginAt;
 
+    @Schema(description = "생성일", example = "2025-04-11T11:30")
     private LocalDateTime createdAt;
+    @Schema(description = "수정일", example = "2025-04-11T11:30")
     private LocalDateTime modifiedAt;
 
 }

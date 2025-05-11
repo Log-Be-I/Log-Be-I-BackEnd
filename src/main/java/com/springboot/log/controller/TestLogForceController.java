@@ -3,6 +3,7 @@ package com.springboot.log.controller;
 import com.springboot.log.LogReset;
 import com.springboot.log.TestLogForceUploader;
 import com.springboot.log.service.LogStorageService;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @Slf4j
-
+@Hidden
 @RestController
 @RequestMapping("/log")
 @RequiredArgsConstructor
