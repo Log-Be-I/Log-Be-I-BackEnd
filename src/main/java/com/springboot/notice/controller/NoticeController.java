@@ -10,8 +10,11 @@ import com.springboot.notice.mapper.NoticeMapper;
 import com.springboot.notice.service.S3Service;
 import com.springboot.responsedto.MultiResponseDto;
 import com.springboot.responsedto.SingleResponseDto;
+import com.springboot.schedule.dto.ScheduleResponseDto;
+import com.springboot.swagger.SwaggerErrorResponse;
 import com.springboot.utils.UriCreator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,17 +50,21 @@ public class NoticeController {
     //swagger API - 등록
     @Operation(summary = "공지사항 등록", description = "공지사항을 새로 등록합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "새로운 공지 등록"),
+            @ApiResponse(responseCode = "201", description = "새로운 공지 등록",
+                    content = @Content(schema = @Schema(implementation = NoticeResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다.",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}")))
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"FORBIDDEN\", \"message\": \"작성 권한이 없습니다.\"}")))
     })
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity postNotice(@RequestPart("noticePostDto") NoticePostDto noticePostDto,
         // @Valid @RequestBody NoticePostDto noticePostDto,
                                      @RequestPart(value = "images", required = false) List<MultipartFile> images,
-                                     @AuthenticationPrincipal CustomPrincipal customPrincipal){
+                                     @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal){
 
         noticePostDto.setMemberId(customPrincipal.getMemberId());
         Notice createdNotice = noticeService.createNotice(mapper.noticePostToNotice(noticePostDto), customPrincipal.getMemberId(), images);
@@ -70,14 +77,13 @@ public class NoticeController {
     @Operation(summary = "공지사항 수정", description = "기존에 등록된 공지 글을 수정합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "기존에 등록된 공지 글 수정 성공",
-                    content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation =  NoticeResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
+                    content = @Content(schema = @Schema(implementation = NoticeResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다.",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
     })
 
     @PatchMapping(value = "/{notice-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -97,18 +103,18 @@ public class NoticeController {
     @Operation(summary = "공지사항 상세 조회", description = "등록된 공지 글을 상세 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "공지 글 상세 조회",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation =  NoticeResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
+                    content = @Content(schema = @Schema(implementation = NoticeResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다.",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
     })
 
     @GetMapping("/{notice-id}")
-    public ResponseEntity getNotice(@PathVariable("notice-id") @Positive long noticeId) {
+    public ResponseEntity getNotice(@Parameter(description = "notice-id", example = "1")
+                                        @PathVariable("notice-id") @Positive long noticeId) {
 
         Notice notice = noticeService.findNotice(noticeId);
         return new ResponseEntity<>(new SingleResponseDto<>(
@@ -120,18 +126,19 @@ public class NoticeController {
     @Operation(summary = "공지사항 전체 목록 조회", description = "등록된 공지 목록을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "공지 글 전체 조회",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation =  NoticeResponseDto.class))),
-            @ApiResponse(responseCode = "401", description =  "유효한 인증 자격 증명이 없습니다",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),
+                    content = @Content(schema = @Schema(implementation = NoticeResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다.",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
     })
 
     @GetMapping
-    public ResponseEntity getNotices(@RequestParam @Positive int page,
+    public ResponseEntity getNotices(@Parameter(description = "page", example = "1")
+                                         @RequestParam @Positive int page,
+                                     @Parameter(description = "size", example = "10")
                                      @RequestParam @Positive int size) {
         Page<Notice> noticePage = noticeService.findNotices(page, size);
         List<Notice> notices = noticePage.getContent();
@@ -143,17 +150,17 @@ public class NoticeController {
     @Operation(summary = "공지사항 삭제", description = "등록된 공지 글을 삭제 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "공지 글 삭제 성공"),
-            @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"삭제 권한이 없습니다.\"}"))),
+            @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다.",
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"UNAUTHORIZED\", \"message\": \"Unauthorized\"}"))),
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 공지",
-                    content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{\"error\": \"Not Found\", \"message\": \"NOTICE_NOT_FOUND.\"}")))
+                    content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"error\": \"NOT_FOUND\", \"message\": \"Not Found\"}")))
     })
 
     @DeleteMapping("/{notice-id}")
     public ResponseEntity deleteNotice(@PathVariable("notice-id") @Positive long noticeId,
-                                       @AuthenticationPrincipal CustomPrincipal customPrincipal){
+                                       @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal){
 
         noticeService.deleteNotice(noticeId, customPrincipal.getMemberId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
