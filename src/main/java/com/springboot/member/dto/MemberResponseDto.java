@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Setter
 public class MemberResponseDto {
+    @Schema(description = "회원 ID", example = "1")
     private Long memberId;
 
     @Schema(description = "회원 이름", example = "기로기")
