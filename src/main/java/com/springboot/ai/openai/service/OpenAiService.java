@@ -156,6 +156,10 @@ public class OpenAiService {
 
     // JSON 을 역직렬화 (JSON -> 객체)
     public Map<String, String> jsonToMap(String json) throws IOException{
+        if (json == null || json.trim().isEmpty() || json.trim().equals("\"\"")) {
+            log.warn("GPT 응답이 비어 있음 또는 잘못된 형식입니다: {}", json);
+            return Map.of(); // 또는 Collections.emptyMap()
+        }
         // 마크다운 코드 블럭 제거
         if (json.startsWith("```")) {
             json = json.replaceAll("```json", "").replaceAll("```", "").trim();
