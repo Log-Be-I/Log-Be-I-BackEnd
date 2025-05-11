@@ -79,6 +79,10 @@ public class RecordController {
 
         //사용자 입력 음성 -> text -> Map<String, String> 타입 변환
         Map<String, String> result = openAiService.createRecordOrSchedule( clovaSpeechService.voiceToText(audioFile) );
+        if (result == null || result.isEmpty()) {
+            log.warn("GPT 분석 결과가 비어 있음. 요청 무시.");
+            throw new BusinessLogicException(ExceptionCode.GPT_FAILED); // 또는 204 반환 등
+        }
         Object response = recordService.saveByType(result, customPrincipal.getMemberId());
 
         // response 타입이 Schedule 이라면
