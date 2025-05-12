@@ -37,7 +37,7 @@ public class PushTokenService {
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
 
         // 기존 토큰 있으면 비활성화
-        pushTokenRepository.findByToken(token)
+        pushTokenRepository.findByTokenAndIsActive(token, true)
                 .ifPresent(existingToken -> {
                     log.info("기존 토큰 비활성화 - 토큰: {}", token);
                     existingToken.setActive(false);
@@ -57,7 +57,7 @@ public class PushTokenService {
     @Transactional
     public void deleteToken(String token) {
         log.info("푸시 토큰 삭제 시작 - 토큰: {}", token);
-        pushTokenRepository.findByToken(token)
+        pushTokenRepository.findByTokenAndIsActive(token, true)
                 .ifPresent(pushToken -> {
                     pushToken.setActive(false);
                     pushTokenRepository.save(pushToken);

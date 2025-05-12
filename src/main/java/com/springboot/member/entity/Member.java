@@ -79,7 +79,7 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     private List<Question> questions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "member", cascade = {CascadeType.PERSIST, CascadeType.REMOVE} )
     private List<Keyword> keywords = new ArrayList<>();
 
 

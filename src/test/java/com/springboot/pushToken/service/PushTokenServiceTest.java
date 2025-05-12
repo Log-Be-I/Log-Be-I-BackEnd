@@ -42,7 +42,7 @@ class PushTokenServiceTest {
 
         when(memberRepository.findById(memberId))
                 .thenReturn(Optional.of(member));
-        when(pushTokenRepository.findByToken(token))
+        when(pushTokenRepository.findByTokenAndIsActive(token, true))
                 .thenReturn(Optional.empty());
 
         // when
@@ -61,7 +61,7 @@ class PushTokenServiceTest {
         pushToken.setToken(token);
         pushToken.setActive(true);
 
-        when(pushTokenRepository.findByToken(token))
+        when(pushTokenRepository.findByTokenAndIsActive(token, true))
                 .thenReturn(Optional.of(pushToken));
 
         // when

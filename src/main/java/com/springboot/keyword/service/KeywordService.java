@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -24,6 +23,9 @@ public class KeywordService {
         Member member = memberService.findVerifiedExistsMember(memberId);
         // 1. 기존 키워드 전부 삭제
         List<Keyword> existingKeywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
+        for (Keyword keyword : existingKeywords) {
+            keyword.setMember(null); // 연관관계 끊기
+        }
         keywordRepository.deleteAll(existingKeywords);
 
         // 2. 새로운 키워드에 member 설정 후 저장

@@ -18,8 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -243,6 +248,60 @@ class RecordServiceTest {
         assertThrows(BusinessLogicException.class, () -> {
             recordService.deleteRecord(recordId, memberId);
         });
+    }
+
+    @Test
+    void findRecords_returnsRecordPage_whenValidInputsProvided() {
+        // given
+        int page = 1;
+        int size = 10;
+        long memberId = 1L;
+        long categoryId = 2L;
+
+        LocalDateTime start = LocalDateTime.now().minusDays(7);
+        LocalDateTime end = LocalDateTime.now();
+
+        Member mockMember = new Member();
+        Category mockCategory = new Category();
+        mockCategory.setCategoryId(categoryId);
+
+        List<Record> mockRecordList = List.of(new Record(), new Record());
+        Page<Record> mockPage = new PageImpl<>(mockRecordList);
+
+        when(memberService.findVerifiedExistsMember(memberId)).thenReturn(mockMember);
+        when(categoryService.findVerifiedExistsCategory(categoryId)).thenReturn(mockCategory);
+
+        when(recordRepository.findAllByMember_MemberIdAndCategory_CategoryIdAndRecordStatusInAndRecordDateTimeBetween(
+                eq(memberId),
+                eq(categoryId),
+                anyList(),
+                eq(start),
+                eq(end),
+                any(Pageable.class)
+        )).thenReturn(mockPage);
+
+        // when
+        Page<Record> result = recordService.findRecords(page, size, memberId, categoryId, start, end);
+
+        // then
+        assertEquals(2, result.getContent().size());
+        verify(memberService).findVerifiedExistsMember(memberId);
+        verify(categoryService).findVerifiedExistsCategory(categoryId);
+        verify(recordRepository).findAllByMember_MemberIdAndCategory_CategoryIdAndRecordStatusInAndRecordDateTimeBetween(
+                eq(memberId), eq(categoryId), anyList(), eq(start), eq(end), any(Pageable.class)
+        );
+    }
+
+    @Test
+    void findRecords_throwsException_whenPageIsInvalid() {
+        // given
+        int invalidPage = 0;
+
+        // when & then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                recordService.findRecords(invalidPage, 10, 1L, 1L, LocalDateTime.now(), LocalDateTime.now())
+        );
+        assertEquals("페이지의 번호는 1 이상이어야 합니다.", exception.getMessage());
     }
 
 }

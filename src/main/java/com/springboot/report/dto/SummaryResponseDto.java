@@ -3,9 +3,10 @@ package com.springboot.report.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
-
+@NoArgsConstructor
 @Getter
 @AllArgsConstructor
 @Schema(description = "분석 기록 확인용 DTO")
