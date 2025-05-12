@@ -5,14 +5,20 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class swaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
+        Server server = new Server();
+        server.setUrl("https://logbe-i.com");
+
         Info info = new Info()
                 .version("v1.0.0") // API 버전 정보
                 .title("Log Be I") // API 제목
@@ -34,6 +40,7 @@ public class swaggerConfig {
                 // 위에서 설정한 securityScheme 를 Swagger 문서에 추가
                 // .addSecuritySchemes => Swagger 에서 모든 api 요청 헤더에 토큰을 붙여주는 전역 설정
                 .components(new Components().addSecuritySchemes("BearerAuth", securityScheme))
+                .servers(List.of(server))
                 .addSecurityItem(securityRequirement); // 모든 API에 보안 설정 적용
     }
 }
