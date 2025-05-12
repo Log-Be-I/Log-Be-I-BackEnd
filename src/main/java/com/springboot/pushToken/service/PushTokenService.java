@@ -57,7 +57,7 @@ public class PushTokenService {
 
     // 특정 회원의 활성화된 토큰 조회
     public List<String> getActiveTokensByMemberId(Long memberId) {
-        return pushTokenRepository.findByMemberIdAndIsActiveTrue(memberId).stream()
+        return pushTokenRepository.findByMember_MemberIdAndIsActiveTrue(memberId).stream()
                 .map(pushToken -> pushToken.getToken())
                 .collect(Collectors.toList());
     }
