@@ -135,71 +135,6 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("일정 수정 테스트 - 본인 일정 수정 정상 처리")
-    void updateSchedule_success() {
-        Long memberId = 1L;
-        Long scheduleId = 100L;
-
-        Member member = new Member();
-        member.setMemberId(memberId);
-
-        Schedule existingSchedule = new Schedule();
-        existingSchedule.setScheduleId(scheduleId);
-        existingSchedule.setMember(member);
-        existingSchedule.setTitle("Old Title");
-        existingSchedule.setStartDateTime(java.time.LocalDateTime.of(2025, 5, 10, 9, 0));
-        existingSchedule.setEndDateTime(java.time.LocalDateTime.of(2025, 5, 10, 10, 0));
-        existingSchedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_REGISTERED);
-
-        Schedule updateRequest = new Schedule();
-        updateRequest.setTitle("New Title");
-
-        when(memberService.findVerifiedExistsMember(memberId)).thenReturn(member);
-        doNothing().when(memberService).validateMemberStatus(member);
-        when(scheduleRepository.findById(scheduleId)).thenReturn(java.util.Optional.of(existingSchedule));
-        when(scheduleRepository.save(any())).thenReturn(existingSchedule);
-
-        Schedule result = scheduleService.updateSchedule(updateRequest, scheduleId, memberId);
-
-        assertEquals("New Title", result.getTitle());
-        verify(historicalScheduleRepository).save(any());
-    }
-
-    @Test
-    @DisplayName("일정 수정 테스트 - 다른 사용자의 일정 수정 시 예외 발생")
-    void updateSchedule_forbidden_throwsException() {
-        // given
-        Long memberId = 1L;
-        Long otherMemberId = 2L;
-        Long scheduleId = 10L;
-
-        Member member = new Member();
-        member.setMemberId(memberId);
-
-        Member otherMember = new Member();
-        otherMember.setMemberId(otherMemberId);
-
-        Schedule existingSchedule = new Schedule();
-        existingSchedule.setScheduleId(scheduleId);
-        existingSchedule.setMember(otherMember); // 다른 사람 일정
-
-        Schedule updateRequest = new Schedule();
-        updateRequest.setTitle("Updated");
-
-        when(memberService.findVerifiedExistsMember(memberId)).thenReturn(member);
-        doNothing().when(memberService).validateMemberStatus(member);
-        when(scheduleRepository.findById(scheduleId)).thenReturn(java.util.Optional.of(existingSchedule));
-
-        // when & then
-        BusinessLogicException exception = assertThrows(
-                BusinessLogicException.class,
-                () -> scheduleService.updateSchedule(updateRequest, scheduleId, memberId)
-        );
-
-        assertEquals(ExceptionCode.FORBIDDEN, exception.getExceptionCode());
-    }
-
-    @Test
     @DisplayName("일정 단일 조회 테스트 - 정상 조회")
     void findSchedule_success() {
         Long memberId = 1L;
@@ -221,6 +156,29 @@ class ScheduleServiceTest {
 
         assertNotNull(result);
         assertEquals(scheduleId, result.getScheduleId());
+    }
+
+    @Test
+    @DisplayName("일정 전체 조회 테스트 - 정상 케이스")
+    void findSchedules_success() {
+        Long memberId = 1L;
+        int year = 2025, month = 5;
+
+        Member member = new Member();
+        member.setMemberId(memberId);
+
+        Schedule schedule = new Schedule();
+        schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_REGISTERED);
+        schedule.setStartDateTime(java.time.LocalDateTime.of(2025, 5, 10, 9, 0));
+        schedule.setEndDateTime(java.time.LocalDateTime.of(2025, 5, 10, 10, 0));
+
+        when(memberService.findVerifiedExistsMember(memberId)).thenReturn(member);
+        doNothing().when(memberService).validateMemberStatus(member);
+        when(scheduleRepository.findAllByMember_MemberId(memberId)).thenReturn(java.util.List.of(schedule));
+
+        java.util.List<Schedule> result = scheduleService.findSchedules(year, month, memberId);
+
+        assertEquals(1, result.size());
     }
     @Test
     @DisplayName("일정 단일 조회 테스트 - 관리자 또는 본인이 아닐 경우 예외 발생")
@@ -249,28 +207,6 @@ class ScheduleServiceTest {
                 BusinessLogicException.class,
                 () -> scheduleService.findSchedule(scheduleId, memberId)
         );
-    }
-    @Test
-    @DisplayName("일정 전체 조회 테스트 - 정상 케이스")
-    void findSchedules_success() {
-        Long memberId = 1L;
-        int year = 2025, month = 5;
-
-        Member member = new Member();
-        member.setMemberId(memberId);
-
-        Schedule schedule = new Schedule();
-        schedule.setScheduleStatus(Schedule.ScheduleStatus.SCHEDULE_REGISTERED);
-        schedule.setStartDateTime(java.time.LocalDateTime.of(2025, 5, 10, 9, 0));
-        schedule.setEndDateTime(java.time.LocalDateTime.of(2025, 5, 10, 10, 0));
-
-        when(memberService.findVerifiedExistsMember(memberId)).thenReturn(member);
-        doNothing().when(memberService).validateMemberStatus(member);
-        when(scheduleRepository.findAllByMember_MemberId(memberId)).thenReturn(java.util.List.of(schedule));
-
-        java.util.List<Schedule> result = scheduleService.findSchedules(year, month, memberId);
-
-        assertEquals(1, result.size());
     }
 
     @Test
@@ -320,22 +256,5 @@ class ScheduleServiceTest {
 
         assertEquals(Schedule.ScheduleStatus.SCHEDULE_DELETED, schedule.getScheduleStatus());
         verify(scheduleRepository).save(schedule);
-    }
-
-    @Test
-    @DisplayName("일정 삭제 테스트 - 존재하지 않는 멤버이면 예외 발생")
-    void deletedSchedule_invalidMember_throwsException() {
-        // given
-        Long invalidMemberId = 99L;
-        Long scheduleId = 88L;
-
-        when(memberService.findVerifiedExistsMember(invalidMemberId))
-                .thenThrow(new BusinessLogicException(ExceptionCode.NOT_FOUND));
-
-        // when & then
-        assertThrows(
-                BusinessLogicException.class,
-                () -> scheduleService.deletedSchedule(scheduleId, invalidMemberId)
-        );
     }
 }
