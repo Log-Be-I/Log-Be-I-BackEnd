@@ -117,12 +117,20 @@ public class Member extends BaseEntity {
 //    }
 
     // category 영속성
+//    public void setCategory(Category category){
+//        if(category.getMember() != this) {
+//            category.setMember(this);
+//        }
+////        if (!this.categories.contains(category)) {
+//            categories.add(category);
+////        }
+//    }
     public void setCategory(Category category){
-        if(category.getMember() != this) {
-            category.setMember(this);
+        if (category != null && category.getMember() != this) {
+            category.setMember(this); // 이건 유지해도 괜찮음 (재귀 방지됨)
         }
         if (!this.categories.contains(category)) {
-            categories.add(category);
+            this.categories.add(category);
         }
     }
 
@@ -146,13 +154,4 @@ public class Member extends BaseEntity {
         }
     }
 
-    // Report 영속성
-    public void setMonthlyReport(Report report) {
-        if(report.getMember() != this) {
-            report.setMember(this);
-        }
-        if(!this.reports.contains(report)) {
-            reports.add(report);
-        }
-    }
 }

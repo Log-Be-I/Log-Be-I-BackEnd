@@ -1,7 +1,5 @@
 package com.springboot.keyword.service;
 
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.auth.utils.MemberDetails;
 import com.springboot.keyword.entity.Keyword;
 import com.springboot.keyword.repository.KeywordRepository;
 import com.springboot.member.entity.Member;
@@ -11,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -27,22 +27,31 @@ public class KeywordService {
         Member member = memberService.findVerifiedExistsMember(memberId);
       
         // memberId 로 기존 키워드 리스트 찾기
-        List<Keyword> keywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
+        List<Keyword> existingKeywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
+        Map<String, Keyword> keywordMap = existingKeywords.stream()
+                .collect(Collectors.toMap(keyword -> keyword.getName(), keyword -> keyword ));
 
-        // 새로운 키워드 리스트가 비어있다면 (기존 데이터 삭제 상태로 변경해달라는거임)
-        // 기존 키워드 리스트에 값이 들어있다면 ( 기존 데이터 삭제 상태로 변경 )
-        if(keywordList.isEmpty() || !keywords.isEmpty()){
-            // 기존 키워드 상태 전부 "삭제 상태"로 변경
-            keywords.stream().forEach(keyword -> {
-                keywordRepository.delete(keyword);
-            });
-        }
+        //새로 등록한 키워드들의 이름 중복을 제거
+        Set<String> newKeywordNames = keywordList.stream()
+                .map(keyword -> keyword.getName())
+                .collect(Collectors.toSet());
 
-        keywordList.stream().forEach(keyword -> {
-            keyword.setMember(member);
-            keywordRepository.save(keyword);
-        });
-        return keywordList;
+        //삭제 대상 : 기존에는 있었는데 새 요청에는 없는 경우
+        List<Keyword> keywordsToDelete = existingKeywords.stream()
+                .filter(keyword -> !newKeywordNames.contains(keyword))
+                .collect(Collectors.toList());
+
+        keywordRepository.deleteAll(keywordsToDelete);
+
+        //추가 대상 : 새 요청에는 있는데 기존에는 없는 경우
+        List<Keyword> keywordToSave = keywordList.stream()
+                .filter(k -> !keywordMap.containsKey(k.getName()))
+                .peek(keyword -> keyword.setMember(member))
+                .collect(Collectors.toList());
+
+        keywordRepository.saveAll(keywordToSave);
+
+        return keywordRepository.findAllByMember_MemberId(member.getMemberId());
     }
 
     // keyword 조회

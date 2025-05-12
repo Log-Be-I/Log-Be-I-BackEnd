@@ -55,8 +55,8 @@ public class MemberService {
         List<String> categoryNames = List.of("일상", "소비", "건강", "할 일", "기타");
         List<Category> categoryList = categoryNames.stream()
                 .map(categoryName -> new Category(categoryName, "url", member, true))
+                .map(category -> categoryRepository.save(category))
                 .collect(Collectors.toList());
-        categoryList.stream().map(category -> categoryRepository.save(category));
 
         member.setCategories(categoryList);
         memberRepository.save(member);
@@ -278,7 +278,7 @@ public class MemberService {
     }
 
     // 탈퇴 회원 재가입 가능한지 검증
-    public Member validateRejoinableMember(String email) {
+    public void validateRejoinableMember(String email) {
 
         // 회원 id 로 탈퇴 내역있는지 조회
         Optional<DeletedMember> deletedMember = deletedMemberRepository.findByEmail(email);
@@ -289,7 +289,6 @@ public class MemberService {
                 throw new BusinessLogicException(ExceptionCode.CANCEL_MEMBERSHIP);
             }
         }
-        return findMemberByEmail(email);
     }
 
     public Member findMemberByEmail(String email) {

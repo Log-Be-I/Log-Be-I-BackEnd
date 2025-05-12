@@ -5,7 +5,7 @@ import com.springboot.exception.ExceptionCode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-;
+
 
 public class AuthorizationUtils {
 
@@ -15,9 +15,9 @@ public class AuthorizationUtils {
         //SecurityContextHolder를 통해 현재 사용자의 인증 정보를 가져온다.
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         //인증 객체에서 사용자의 권한 목록을 스트림으로 반환
-        //권한 중 "ROLE_ADMIN과 일치하는지 검사
-        return authentication.getAuthorities().stream()
+        //권한 중 "ROLE_ADMIN과 일치하는지 검사return authentication.getAuthorities().stream()
                 //ROLE_ADMIN 확인
+        return authentication.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
     }
 

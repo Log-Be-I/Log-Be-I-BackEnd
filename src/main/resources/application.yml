@@ -108,7 +108,7 @@ cloud:
     s3:
       bucket:
         logs: logbe-i-log
-        images: logbe-i-image
+        images: logbe-i-images
 management:
   endpoints:
     web:

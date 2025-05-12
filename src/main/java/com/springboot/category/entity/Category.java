@@ -40,9 +40,13 @@ public class Category extends BaseEntity {
     // member 영속성
     public void setMember(Member member) {
         this.member = member;
-        if(!member.getCategories().contains(this)) {
-            member.setCategory(this);
-        }
+//        if(!member.getCategories().contains(this)) {
+//            member.setCategory(this);
+//        }
+    if(member != null && !member.getCategories().contains(this)) {
+        member.getCategories().add(this);
+    }
+
     }
 
     public Category(String name, String image, Member member, boolean isDefault) {
