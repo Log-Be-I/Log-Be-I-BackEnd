@@ -88,7 +88,7 @@ class PushTokenServiceTest {
                 t1, t2
         );
 
-        when(pushTokenRepository.findByMemberIdAndIsActiveTrue(memberId))
+        when(pushTokenRepository.findByMember_MemberIdAndIsActiveTrue(memberId))
                 .thenReturn(tokens);
 
         // when
@@ -110,7 +110,7 @@ class PushTokenServiceTest {
         List<String> tokens = List.of("ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]");
         PushToken t1 = new PushToken();
         t1.setToken(tokens.get(0));
-        when(pushTokenRepository.findByMemberIdAndIsActiveTrue(memberId))
+        when(pushTokenRepository.findByMember_MemberIdAndIsActiveTrue(memberId))
                 .thenReturn(List.of(t1));
 
         // when
@@ -141,7 +141,7 @@ class PushTokenServiceTest {
         PushToken t1 = new PushToken();
         t1.setToken(tokens.get(0));
 
-        when(pushTokenRepository.findByMemberIdAndIsActiveTrue(memberId))
+        when(pushTokenRepository.findByMember_MemberIdAndIsActiveTrue(memberId))
                 .thenReturn(List.of(t1));
 
         // when

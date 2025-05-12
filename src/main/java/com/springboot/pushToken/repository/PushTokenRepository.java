@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface PushTokenRepository extends JpaRepository<PushToken, Long> {
     Optional<PushToken> findByToken(String token);
-    List<PushToken> findByMemberIdAndIsActiveTrue(Long memberId);
+    List<PushToken> findByMember_MemberIdAndIsActiveTrue(Long memberId);
     void deleteByToken(String token);
 }
