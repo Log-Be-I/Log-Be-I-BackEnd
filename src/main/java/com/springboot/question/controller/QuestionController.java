@@ -149,11 +149,14 @@ public class QuestionController {
     @Parameters({
             @Parameter(name = "page", description = "페이지 번호 (1부터 시작)", example = "1", in = ParameterIn.QUERY),
             @Parameter(name = "size", description = "페이지당 조회 수", example = "10", in = ParameterIn.QUERY),
-            @Parameter(name = "sortType", description = "정렬 기준 (newest 또는 oldest)", example = "newest", in = ParameterIn.QUERY)
+            @Parameter(name = "orderBy", description = "내림/오름차순 (DESC 또는 ASC)", example = "DESC", in = ParameterIn.QUERY)
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "문의 글 전체 조회",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = QuestionResponseDto.class)))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = "{\"error\": \"BAD_REQUEST\", \"message\": \"BAD_REQUEST\"}"))),
             @ApiResponse(responseCode = "401", description = "유효한 인증 자격 증명이 없습니다",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"Your session has expired. Please log in again to continue.\"}"))),

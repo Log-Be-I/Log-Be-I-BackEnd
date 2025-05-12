@@ -86,18 +86,16 @@ public class QuestionService {
     public Page<Question> findMyQuestions(int page, int size, long memberId, String orderBy){
 
         memberService.findVerifiedExistsMember(memberId);
-
-        if(page < 1 && Objects.equals(orderBy, "DESC")){
-            //페이징 및 정렬 정보 생성
-            Pageable pageable = PageRequest.of(page -1, size, Sort.by("createdAt").descending());
-            //특정 회원이 작성한 질문글을 페이징 처리하여 조회
-            return questionRepository.findAllByMember_MemberId(memberId, pageable);
-        } else {
-            //페이징 및 정렬 정보 생성
-            Pageable pageable = PageRequest.of(page -1, size, Sort.by("createdAt"));
-            //특정 회원이 작성한 질문글을 페이징 처리하여 조회
-            return questionRepository.findAllByMember_MemberId(memberId, pageable);
+        // page 가 잘못된값이 들어오면 BAD_REQUEST 삭제
+        if(page <= 0) {
+            throw new BusinessLogicException(ExceptionCode.BAD_REQUEST);
         }
+        // 내림 차순
+        Pageable descPageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
+        // 오름 차순
+        Pageable ascPageable = PageRequest.of(page -1, size, Sort.by("createdAt"));
+        // orderBy에 따라 알맞는 pageable 설정
+        return questionRepository.findAllByMember_MemberId(memberId, Objects.equals(orderBy, "DESC") ? descPageable : ascPageable);
     }
 
     //질문글 상세 조회

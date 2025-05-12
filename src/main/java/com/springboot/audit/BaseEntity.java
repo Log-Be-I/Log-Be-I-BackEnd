@@ -34,4 +34,21 @@ public abstract class BaseEntity {
     public void preUpdate() {
         this.modifiedAt = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
     }
+
+    // Lombok으로 접근자 제공
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(LocalDateTime modifiedAt) {
+        this.modifiedAt = modifiedAt;
+    }
 }
