@@ -35,18 +35,18 @@ public class KeywordServiceTest {
     private MemberService memberService;
 
     @Test
-    void createKeyword_shouldDeleteOldAndSaveNew() {
+    void createKeyword_shouldReplaceAllKeywords() {
         // given
         Long memberId = 1L;
         Member member = TestDataFactory.createTestMember(memberId);
 
-        Keyword existingAI = TestDataFactory.createTestKeyword("AI", member);
-        Keyword existingTrip = TestDataFactory.createTestKeyword("여행", member);
-        List<Keyword> existingKeywords = List.of(existingAI, existingTrip);
+        Keyword old1 = TestDataFactory.createTestKeyword("AI", member);
+        Keyword old2 = TestDataFactory.createTestKeyword("웰빙", member);
+        List<Keyword> existingKeywords = List.of(old1, old2);
 
-        Keyword newAI = TestDataFactory.createTestKeyword("AI", null); // 중복
-        Keyword newHealth = TestDataFactory.createTestKeyword("건강", null); // 새로 추가
-        List<Keyword> newKeywords = List.of(newAI, newHealth);
+        Keyword new1 = TestDataFactory.createTestKeyword("여름", null);
+        Keyword new2 = TestDataFactory.createTestKeyword("휴가", null);
+        List<Keyword> newKeywords = List.of(new1, new2);
 
         given(memberService.findVerifiedExistsMember(memberId)).willReturn(member);
         given(keywordRepository.findAllByMember_MemberId(memberId)).willReturn(existingKeywords);
@@ -55,42 +55,21 @@ public class KeywordServiceTest {
         keywordService.createKeyword(newKeywords, memberId);
 
         // then
+        // 삭제 대상 확인
         ArgumentCaptor<List<Keyword>> deleteCaptor = ArgumentCaptor.forClass(List.class);
         verify(keywordRepository).deleteAll(deleteCaptor.capture());
         List<Keyword> deleted = deleteCaptor.getValue();
+        assertEquals(2, deleted.size());
 
-        assertEquals(1, deleted.size());
-        assertEquals("여행", deleted.get(0).getName());
-
+        // 저장 대상 확인
         ArgumentCaptor<List<Keyword>> saveCaptor = ArgumentCaptor.forClass(List.class);
         verify(keywordRepository).saveAll(saveCaptor.capture());
         List<Keyword> saved = saveCaptor.getValue();
-
-        assertEquals(1, saved.size());
-        assertEquals("건강", saved.get(0).getName());
+        assertEquals(2, saved.size());
+        assertEquals("여름", saved.get(0).getName());
         assertEquals(memberId, saved.get(0).getMember().getMemberId());
-
-        verify(keywordRepository, times(2)).findAllByMember_MemberId(memberId);
     }
 
-//    @Test
-//    void findKeywords_shouldReturnAllKeywordsOfMember() {
-//        Long memberId = 1L;
-//        Member member = TestDataFactory.createTestMember(memberId);
-//        Keyword keyword = new Keyword();
-//        keyword.setKeywordId(1L);
-//        keyword.setMember(member);
-//
-//        List<Keyword> keywords = List.of(keyword);
-//
-//        when(memberService.findVerifiedExistsMember(1L)).thenReturn(member);
-//        when(keywordRepository.findAllByMember_MemberId(1L)).thenReturn(keywords);
-//
-//        List<Keyword> result = keywordService.findKeywords(1L);
-//
-//        verify(keywordRepository).findAllByMember_MemberId(1L);
-//        assertEquals(1, result.size());
-//    }
     @Test
     void findKeywords_shouldReturnAllKeywordsOfMember() {
         // given

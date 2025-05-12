@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,33 +22,20 @@ public class KeywordService {
     @Transactional
     public List<Keyword> createKeyword(List<Keyword> keywordList, Long memberId) {
         Member member = memberService.findVerifiedExistsMember(memberId);
-
-        // 기존 키워드 이름만 추출
+        // 1. 기존 키워드 전부 삭제
         List<Keyword> existingKeywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
-        Set<String> existingNames = existingKeywords.stream()
-                .map(Keyword::getName)
-                .collect(Collectors.toSet());
+        keywordRepository.deleteAll(existingKeywords);
 
-        // 새 키워드 이름 중복 제거
-        Set<String> newKeywordNames = keywordList.stream()
-                .map(Keyword::getName)
-                .collect(Collectors.toSet());
-
-        // 삭제 대상
-        List<Keyword> keywordsToDelete = existingKeywords.stream()
-                .filter(keyword -> !newKeywordNames.contains(keyword.getName()))
+        // 2. 새로운 키워드에 member 설정 후 저장
+        List<Keyword> keywordsToSave = keywordList.stream()
+                .peek(keyword -> keyword.setMember(member)) //새로 등록할 키워드 member와 연결
                 .collect(Collectors.toList());
-        keywordRepository.deleteAll(keywordsToDelete);
-
-        // 추가 대상
-        List<Keyword> keywordToSave = keywordList.stream()
-                .filter(k -> !existingNames.contains(k.getName()))
-                .peek(k -> k.setMember(member))
-                .collect(Collectors.toList());
-        keywordRepository.saveAll(keywordToSave);
+        keywordRepository.saveAll(keywordsToSave);
 
         return keywordRepository.findAllByMember_MemberId(member.getMemberId());
+
     }
+
     // keyword 조회
     public List<Keyword> findKeywords (Long memberId) {
 
