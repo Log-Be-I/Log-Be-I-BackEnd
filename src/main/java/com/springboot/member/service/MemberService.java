@@ -135,6 +135,12 @@ public class MemberService {
         return members;
     }
 
+    // 공지 알림 전송을 위한 List<Member> 찾기
+    public List<Member> findMembersToList(Long memberId){
+//        AuthorizationUtils.isAdmin();
+        return memberRepository.findAll();
+    }
+
     // 조건에 맞춘 회원 검색 결과
     public List<Member> findFilterMembers (List<Member> members, Map<String, String> filters, String email, String name, String region ) {
         List<Member> filteredMember = new ArrayList<>(members);

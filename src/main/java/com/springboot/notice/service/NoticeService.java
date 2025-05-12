@@ -3,9 +3,11 @@ package com.springboot.notice.service;
 import com.springboot.dashboard.dto.RecentNotice;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.notice.entity.Notice;
 import com.springboot.notice.repository.NoticeRepository;
+import com.springboot.pushToken.service.PushTokenService;
 import com.springboot.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,7 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final MemberService memberService;
     private final S3Service s3Service;
+    private final PushTokenService pushTokenService;
 
     //notice 등록
     public Notice createNotice(Notice notice, Long adminId, List<MultipartFile> images) {
@@ -42,8 +45,19 @@ public class NoticeService {
         //작성자가 관리자인지 확인하고 아니면 예외
         AuthorizationUtils.verifyAuthorIsAdmin(notice.getMember().getMemberId(), adminId);
         notice.setFileUrls(fileUrls);
-        //notice 등록 후 반환
-        return noticeRepository.save(notice);
+        //notice 등록
+        Notice savedNotice = noticeRepository.save(notice);
+
+        // 모든 회원에게 알림 전송
+        List<Member> allMembers = memberService.findMembersToList(adminId);
+        for (Member member : allMembers){
+            pushTokenService.sendNoticeNotification(
+                    member.getMemberId(),
+                    savedNotice.getTitle(),
+                    savedNotice.getContent()
+            );
+        }
+        return savedNotice;
     }
 
     //notice 수정 -> 덮어씌워 저장

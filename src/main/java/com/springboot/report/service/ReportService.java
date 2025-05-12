@@ -3,6 +3,7 @@ package com.springboot.report.service;
 import com.springboot.ai.googleTTS.GoogleTextToSpeechService;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
+import com.springboot.pushToken.service.PushTokenService;
 import com.springboot.report.dto.ReportAnalysisRequest;
 
 import com.springboot.exception.BusinessLogicException;
@@ -26,6 +27,7 @@ public class ReportService {
     private final MemberService memberService;
     private final ReportRepository repository;
     private final GoogleTextToSpeechService googleTextToSpeechService;
+    private final PushTokenService pushTokenService;
 
     //ai가 분석한 content 타입변환 ReportAnalysisRequest -> ReportAnalysisResponse 변환
     public ReportAnalysisResponse aiRequestToResponse(ReportAnalysisRequest request, Map<String, String> contentMap) {
@@ -43,7 +45,7 @@ public class ReportService {
 
     //ReportAnalysisResponse -> Report 변환
     public Report analysisResponseToReport(ReportAnalysisResponse response) {
-       //NPE 방지
+        //NPE 방지
         Member member = new Member();
         member.setMemberId(response.getMemberId());
 
@@ -64,8 +66,26 @@ public class ReportService {
     // DB에 저장
     public List<Report> analysisResponseToReportList(List<Report> reports) {
         //생성된 List<Report> DB 저장
-            log.info("📦 DB 저장 직전 - reports size: {}, titles: {}", reports.size(), reports.stream().map(Report::getTitle).collect(Collectors.toList()));
-            return repository.saveAll(reports);
+        log.info("📦 DB 저장 직전 - reports size: {}, titles: {}", reports.size(), reports.stream().map(Report::getTitle).collect(Collectors.toList()));
+        List<Report> savedReports = repository.saveAll(reports);
+
+        // 저장된 각 레포트에 대해 알림 전송
+        savedReports.forEach(report -> {
+            String notificationTitle = report.getReportType() == Report.ReportType.REPORT_WEEKLY ?
+                    "주간 분석 리포트" : "월간 분석 리포트";
+            String notificationContent = String.format(
+                    "%s 분석이 완료되었습니다.",
+                    report.getTitle()
+            );
+
+            pushTokenService.sendAnalysisNotification(
+                    report.getMember().getMemberId(),
+                    notificationTitle,
+                    notificationContent
+            );
+        });
+
+        return savedReports;
     }
 
     // GET : 연도별 전체조회
@@ -81,7 +101,7 @@ public class ReportService {
     }
 
     //등록된 Report -> TTS : 음성 출력
-    public List<String> reportToGoogleAudio(List<Long> reportsId, long memberId){
+    public List<String> reportToGoogleAudio(List<Long> reportsId, long memberId) {
         // 유효한 회원인지 검증
         Member member = memberService.findVerifiedExistsMember(memberId);
         //활동중인 회원인지 확인
@@ -112,18 +132,18 @@ public class ReportService {
         } catch (Exception e) {
             log.error("Google TTS 오류 발생", e);
             // 에러 터졌을때는 빈배열 반환
-          throw new BusinessLogicException(ExceptionCode.INVALID_SERVER_ERROR);
+            throw new BusinessLogicException(ExceptionCode.INVALID_SERVER_ERROR);
         }
     }
 
     //report title 에서 주차별 월별 구분
-    public static int extractPeriodNumber(String title){
-       //주간 Report라면 -> title 이 "주차"로 끝나는 경우
-        if(title.endsWith("주차")) {
+    public static int extractPeriodNumber(String title) {
+        //주간 Report라면 -> title 이 "주차"로 끝나는 경우
+        if (title.endsWith("주차")) {
             // 2025년 04월 2주차 -> 2 : 공백으로 구분하여 "N주차" 추출
             String[] parts = title.split(" ");
             //N주차에서 "주차"를 제거하고 숫자만 추출
-            String  weekStr = parts[parts.length -1].replace("주차", "");
+            String weekStr = parts[parts.length - 1].replace("주차", "");
             //잘못된 title 타입을 받아 정상적인 추출을 하지 못했을 경우 예외처리
             try {
                 //문자열 숫자를 정수로 변환
@@ -132,8 +152,8 @@ public class ReportService {
                 throw new IllegalArgumentException("title에서 주차 숫자 추출 실패: " + title);
             }
 
-       //월간 Report 라면
-        } else  {
+            //월간 Report 라면
+        } else {
             return 0;
         }
     }
@@ -145,7 +165,7 @@ public class ReportService {
         return repository.countWeeklyReportsByTitle(
                 Report.ReportType.REPORT_WEEKLY, yearMonthPrefix + "%", "주차");
     }
-  
+
     // report 단건 조회
     public Report findVerifiedExistsReport(long reportId) {
         return repository.findById(reportId).orElseThrow(
