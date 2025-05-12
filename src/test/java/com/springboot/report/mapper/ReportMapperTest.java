@@ -12,7 +12,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ReportMapperUnitTest {
+class ReportMapperTest {
 
     private final ReportMapper mapper = new ReportMapperImpl(); // MapStruct mapper 구현체 사용
 
@@ -21,15 +21,15 @@ class ReportMapperUnitTest {
         // given
         Report report1 = new Report();
         report1.setReportId(1L);
-        report1.setMonthlyTitle("2024-01");
+        report1.setMonthlyTitle("2024년 01월");
 
         Report report2 = new Report();
         report2.setReportId(2L);
-        report2.setMonthlyTitle("2024-01");
+        report2.setMonthlyTitle("2024년 01월");
 
         Report report3 = new Report();
         report3.setReportId(3L);
-        report3.setMonthlyTitle("2024-02");
+        report3.setMonthlyTitle("2024년 02월");
 
         List<Report> input = List.of(report1, report2, report3);
 
@@ -40,11 +40,11 @@ class ReportMapperUnitTest {
         assertThat(result).hasSize(2);
 
         SummaryResponseDto jan = result.get(0);
-        assertThat(jan.getMonthlyTitle()).isEqualTo("2024-01");
+        assertThat(jan.getMonthlyTitle()).isEqualTo("2024년 01월");
         assertThat(jan.getReportIds()).containsExactlyInAnyOrder(1L, 2L);
 
         SummaryResponseDto feb = result.get(1);
-        assertThat(feb.getMonthlyTitle()).isEqualTo("2024-02");
+        assertThat(feb.getMonthlyTitle()).isEqualTo("2024년 02월");
         assertThat(feb.getReportIds()).containsExactly(3L);
     }
 

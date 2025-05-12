@@ -1,8 +1,6 @@
 package com.springboot.report.service;
 
-import com.springboot.ai.googleTTS.GoogleTextToSpeechService;
-import com.springboot.member.service.MemberService;
-import com.springboot.pushToken.service.PushTokenService;
+import com.springboot.exception.BusinessLogicException;
 import com.springboot.report.dto.ReportAnalysisRequest;
 import com.springboot.report.dto.ReportAnalysisResponse;
 import com.springboot.report.entity.Report;
@@ -16,24 +14,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReportServiceTest {
 
     @Mock
-    private MemberService memberService;
-
-    @Mock
     private ReportRepository reportRepository;
-
-    @Mock
-    private GoogleTextToSpeechService googleTextToSpeechService;
-
-    @Mock
-    private PushTokenService pushTokenService;
 
     @InjectMocks
     private ReportService reportService;
@@ -84,6 +75,103 @@ class ReportServiceTest {
         assertThat(report.getReportType()).isEqualTo(Report.ReportType.REPORT_WEEKLY);
         assertThat(report.getPeriodNumber()).isEqualTo(2);
         assertThat(report.getContent()).containsEntry("summary", "요약 내용");
+    }
+
+    @Test
+    @DisplayName("연도별 리포트 조회 - 2024년 기준")
+    void findMonthlyReports_returnsCorrectReportsForGivenYear() {
+        // given
+        long memberId = 1L;
+        int year = 2024;
+        String yearPrefix = "2024년";
+
+        Report report1 = new Report();
+        report1.setMonthlyTitle("2024년 01월");
+
+        Report report2 = new Report();
+        report2.setMonthlyTitle("2024년 02월");
+
+        List<Report> mockReports = List.of(report1, report2);
+
+        when(reportRepository.findByMember_MemberIdAndMonthlyTitleStartingWith(memberId, yearPrefix))
+                .thenReturn(mockReports);
+
+        // when
+        List<Report> result = reportService.findMonthlyReports(memberId, year);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(Report::getMonthlyTitle)
+                .containsExactlyInAnyOrder("2024년 01월", "2024년 02월");
+
+        verify(reportRepository, times(1))
+                .findByMember_MemberIdAndMonthlyTitleStartingWith(memberId, yearPrefix);
+    }
+
+    @Test
+    @DisplayName("월별 리포트 상세 조회 - 2024년 03월")
+    void findMonthlyTitleWithReports_returnsReportsByMonthlyTitle() {
+        // given
+        long memberId = 1L;
+        String monthlyTitle = "2024년 03월";
+
+        Report report1 = new Report();
+        report1.setReportId(1L);
+        report1.setMonthlyTitle(monthlyTitle);
+
+        Report report2 = new Report();
+        report2.setReportId(2L);
+        report2.setMonthlyTitle(monthlyTitle);
+
+        List<Report> mockReports = List.of(report1, report2);
+
+        when(reportRepository.findByMember_MemberIdAndMonthlyTitle(memberId, monthlyTitle))
+                .thenReturn(mockReports);
+
+        // when
+        List<Report> result = reportService.findMonthlyTitleWithReports(monthlyTitle, memberId);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(Report::getMonthlyTitle)
+                .containsOnly(monthlyTitle);
+
+        verify(reportRepository, times(1))
+                .findByMember_MemberIdAndMonthlyTitle(memberId, monthlyTitle);
+    }
+
+    @Test
+    @DisplayName("리포트 ID로 조회 성공")
+    void findVerifiedExistsReport_returnsReport() {
+        // given
+        long reportId = 1L;
+        Report mockReport = new Report();
+        mockReport.setReportId(reportId);
+
+        when(reportRepository.findById(reportId)).thenReturn(Optional.of(mockReport));
+
+        // when
+        Report result = reportService.findVerifiedExistsReport(reportId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getReportId()).isEqualTo(reportId);
+        verify(reportRepository).findById(reportId);
+    }
+
+    @Test
+    @DisplayName("리포트 ID로 조회 실패 시 예외 발생")
+    void findVerifiedExistsReport_throwsIfNotFound() {
+        // given
+        long reportId = 99L;
+        when(reportRepository.findById(reportId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(BusinessLogicException.class, () -> {
+            reportService.findVerifiedExistsReport(reportId);
+        });
+
+        verify(reportRepository).findById(reportId);
     }
 
     @Test

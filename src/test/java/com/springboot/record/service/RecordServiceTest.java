@@ -18,9 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -28,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -200,6 +199,76 @@ class RecordServiceTest {
 
         verify(historicalRecordRepository).save(any());
         verify(recordRepository).save(any());
+    }
+
+    @DisplayName("페이지 번호가 1 미만이면 IllegalArgumentException 발생")
+    @Test
+    void findRecords_throwsException_whenPageIsLessThanOne() {
+        // given
+        int invalidPage = 0;
+        int size = 10;
+        Long memberId = 1L;
+        Long categoryId = 1L;
+        LocalDateTime startDate = LocalDateTime.of(2025, 4, 1, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(2025, 4, 30, 23, 59);
+
+        when(memberService.findVerifiedExistsMember(memberId)).thenReturn(new Member());
+        when(categoryService.findVerifiedExistsCategory(categoryId)).thenReturn(new Category());
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () ->
+                recordService.findRecords(invalidPage, size, memberId, categoryId, startDate, endDate)
+        );
+    }
+
+    @Test
+    @DisplayName("categoryId가 0일 경우 - 전체 카테고리에서 기록을 조회")
+    void findRecords_whenCategoryIdIsZero_shouldCallCorrectRepoMethod() {
+        // given
+        long memberId = 1L;
+        Long categoryId = 0L;
+        LocalDateTime start = LocalDateTime.of(2025, 4, 1, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2025, 4, 30, 23, 59);
+        int page = 1;
+        int size = 5;
+
+        Member mockMember = new Member();
+        mockMember.setMemberId(memberId);
+        Category mockCategory = new Category();
+        mockCategory.setCategoryId(categoryId);
+
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.ASC, "recordDateTime"));
+        Page<Record> emptyPage = new PageImpl<>(List.of());
+
+        when(memberService.findVerifiedExistsMember(memberId)).thenReturn(mockMember);
+        when(categoryService.findVerifiedExistsCategory(categoryId)).thenReturn(mockCategory);
+        when(recordRepository.findAllByMember_MemberIdAndRecordStatusInAndRecordDateTimeBetween(
+                eq(memberId),
+                anyList(),
+                eq(start),
+                eq(end),
+                eq(pageable)
+        )).thenReturn(emptyPage);
+
+        // when
+        Page<Record> result = recordService.findRecords(page, size, memberId, categoryId, start, end);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEmpty();
+
+        verify(recordRepository, times(1))
+                .findAllByMember_MemberIdAndRecordStatusInAndRecordDateTimeBetween(
+                        eq(memberId),
+                        anyList(),
+                        eq(start),
+                        eq(end),
+                        eq(pageable)
+                );
+
+        verify(recordRepository, never())
+                .findAllByMember_MemberIdAndCategory_CategoryIdAndRecordStatusInAndRecordDateTimeBetween(
+                        anyLong(), anyLong(), anyList(), any(), any(), any());
     }
 
     @Test
