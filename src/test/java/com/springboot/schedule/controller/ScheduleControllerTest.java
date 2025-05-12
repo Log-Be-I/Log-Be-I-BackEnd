@@ -31,9 +31,11 @@ class ScheduleControllerTest {
     @Mock
     private ScheduleMapper scheduleMapper;
 
+
     private CustomPrincipal mockPrincipal;
 
     @BeforeEach
+    // CustomPrincipal 객체 자체를 Mockito 로 수동 생성
     void setUp() {
         MockitoAnnotations.openMocks(this);
         mockPrincipal = mock(CustomPrincipal.class);

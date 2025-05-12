@@ -39,10 +39,7 @@ class ScheduleServiceTest {
     public ScheduleServiceTest() {
         MockitoAnnotations.openMocks(this); // Mockito 초기화
     }
-
-    /**
-     * Utility to set a mock authenticated user with USER role in the security context.
-     */
+    // SecurityContextHolder 안에 “현재 로그인한 유저” 정보를 직접 설정해주는 코드.
     void setMockAuthenticatedUser() {
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(
@@ -52,6 +49,8 @@ class ScheduleServiceTest {
             );
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
+
+
 
     @BeforeEach
     void setupAuthentication() {

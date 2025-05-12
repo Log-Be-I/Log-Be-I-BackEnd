@@ -5,11 +5,14 @@ import com.springboot.question.entity.Question;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.checkerframework.checker.units.qual.N;
 
 import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class QuestionResponseDto {
     @Schema(description = "문의 글 ID", example = "1")
     private Long questionId;
