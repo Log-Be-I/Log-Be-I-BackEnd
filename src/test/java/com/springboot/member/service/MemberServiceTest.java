@@ -387,9 +387,9 @@ class MemberServiceTest {
         member.setQuestions(List.of(question));
 
         // 🛠️ adminEmail 설정
-        Field field = MemberService.class.getDeclaredField("adminEmail");
+        Field field = MemberService.class.getDeclaredField("adminEmails");
         field.setAccessible(true);
-        field.set(memberService, "admin@example.com");
+        field.set(memberService, List.of("admin@example.com", "admin2@example.com", "admin3@example.com"));
 
         given(memberRepository.findByEmail(member.getEmail()))
                 .willReturn(Optional.of(member));
