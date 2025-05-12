@@ -336,7 +336,7 @@ public class OpenAiService {
     // schedule or record 생성 Prompt
     public String chatWithScheduleAndRecord(String clovaJson, String time) {
         return "- 너는 다양한 사람들의 일기, 생활 기록, 메모 등을 분석하여 그 내용을 정확히 분류하는 **빅데이터 전문가야**\n" +
-                "- " + clovaJson + "이 만약 \"\"이라면 아래의 모든 조건을 무시하고 빈문자열을 반환해야한다.\n" +
+                "- " + clovaJson + "이 만약 비어있는 문자열이라면 아래의 모든 조건을 무시하고 빈문자열을 반환해야한다.\n" +
                 "      " + clovaJson + "이 정상적인 언어 또는 문장으로 인식 불가능한 문자열이라면 \"기타\"카테고리로 분류해야한다.\n" +
                 "      해당 명령은 언제나 항상 1순위로 적용되어야하며 절대 다른 설명, JSON, 메시지를 출력하지 말아야한다. 문제가 있을시 무조건  \"\"만 출력해야한다.\n" +
                 "- " + clovaJson + "을 읽고 분석하여 1차 분류 이후, 분류된 항목에 맞는 2차 분류 기준에 따라 최종 분류하여 값을  3차 반환 기준이 안내하는 형태에 맞춰 최종 데이터를 반환한다.\n" +
