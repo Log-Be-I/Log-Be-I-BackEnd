@@ -3,6 +3,7 @@ package com.springboot.notice.noticeService;
 import com.springboot.dashboard.dto.RecentNotice;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
+import com.springboot.member.TestDataFactory;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.notice.entity.Notice;
@@ -11,6 +12,7 @@ import com.springboot.notice.service.NoticeService;
 import com.springboot.notice.service.S3Service;
 import com.springboot.pushToken.service.PushTokenService;
 import com.springboot.utils.AuthorizationUtils;
+import org.mockito.MockedStatic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,10 +63,9 @@ class NoticeServiceTest {
     void createNotice_withImages_success() {
         // given
         // 테스트용 관리자 객체 생성 및 설정
-        Member admin = new Member();
-        admin.setEmail("admin1@gmail.com");
-        admin.setMemberId(1L);
-        admin.setRoles(List.of("ROLE_ADMIN"));
+        Member admin = TestDataFactory.createTestMember(1L);
+        admin.setRoles(List.of("USER", "ADMIN"));// 예: roles 포함된 admin 리턴
+
         // 새로운 공지 추가
         Notice input = new Notice();
         // notice 에 회원 셋팅
@@ -93,19 +94,24 @@ class NoticeServiceTest {
         when(memberService.findMembersToList(admin.getMemberId())).thenReturn(Collections.singletonList(admin));
 
         // when
-        // createNotice 를 사용해서 notice 객체 생성
-        Notice created = noticeService.createNotice(input, admin.getMemberId(), imgs);
+        // AuthorizationUtils.verifyAuthorIsAdmin 이 void 메서드이므로 doNothing() 처리
+        try (MockedStatic<AuthorizationUtils> utilities = mockStatic(AuthorizationUtils.class)) {
+            utilities.when(() -> AuthorizationUtils.verifyAuthorIsAdmin(anyLong(), anyLong()))
+                     .thenAnswer(invocation -> null); // do nothing
 
-        // then
-        // 생성된 공지의 Id 는 1L
-        assertEquals(2L, created.getNoticeId());
-        // 문자열 리스트로 받기
-        assertEquals(List.of("url1", "url2"), created.getFileUrls());
-        // s3에 notice - files 업로드 테스트
-        verify(s3Service).upload(file1, "notice-files");
-        verify(s3Service).upload(file2, "notice-files");
-        verify(pushTokenService, times(1))
-                .sendNoticeNotification(admin.getMemberId(), created.getTitle(), created.getContent());
+            Notice created = noticeService.createNotice(input, admin.getMemberId(), imgs);
+
+            // then
+            // 생성된 공지의 Id 는 1L
+            assertEquals(2L, created.getNoticeId());
+            // 문자열 리스트로 받기
+            assertEquals(List.of("url1", "url2"), created.getFileUrls());
+            // s3에 notice - files 업로드 테스트
+            verify(s3Service).upload(file1, "notice-files");
+            verify(s3Service).upload(file2, "notice-files");
+            verify(pushTokenService, times(1))
+                    .sendNoticeNotification(admin.getMemberId(), created.getTitle(), created.getContent());
+        }
     }
 
     // 관리자가 아닌 사용자가 공지사항 생성 시 예외 발생 케이스
@@ -158,12 +164,17 @@ class NoticeServiceTest {
         patch.setMember(writer);
 
         // when
-        Notice updated = noticeService.updateNotice(patch, admin.getMemberId(), newImgs);
+        try (MockedStatic<AuthorizationUtils> utilities = mockStatic(AuthorizationUtils.class)) {
+            utilities.when(() -> AuthorizationUtils.verifyAuthorIsAdmin(anyLong(), anyLong()))
+                     .thenAnswer(invocation -> null); // do nothing
 
-        // then
-        assertEquals("Updated", updated.getTitle());
-        assertEquals(Notice.NoticeStatus.NOTICE_UPDATED, updated.getNoticeStatus());
-        assertEquals(List.of("old1", "newUrl"), updated.getFileUrls());
+            Notice updated = noticeService.updateNotice(patch, admin.getMemberId(), newImgs);
+
+            // then
+            assertEquals("Updated", updated.getTitle());
+            assertEquals(Notice.NoticeStatus.NOTICE_UPDATED, updated.getNoticeStatus());
+            assertEquals(List.of("old1", "newUrl"), updated.getFileUrls());
+        }
     }
 
     // 삭제된 공지사항을 조회하려고 할 때 예외 발생
@@ -221,7 +232,12 @@ class NoticeServiceTest {
         when(noticeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         // when
-        noticeService.deleteNotice(1L, admin.getMemberId());
+        try (MockedStatic<AuthorizationUtils> utilities = mockStatic(AuthorizationUtils.class)) {
+            utilities.when(() -> AuthorizationUtils.verifyAuthorIsAdmin(anyLong(), anyLong()))
+                     .thenAnswer(invocation -> null); // do nothing
+
+            noticeService.deleteNotice(1L, admin.getMemberId());
+        }
 
         // then
         // key 추출 및 이동 호출 검증

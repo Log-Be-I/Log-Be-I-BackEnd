@@ -16,6 +16,7 @@ class ScheduleMapperTest {
 
     private final ScheduleMapper scheduleMapper = Mappers.getMapper(ScheduleMapper.class);
 
+    // SchedulePostDto -> Schedule 매핑이 정확히 되는지 테스트
     @Test
     void schedulePostDtoToSchedule_shouldMapCorrectly() {
         SchedulePostDto dto = new SchedulePostDto();
@@ -30,6 +31,7 @@ class ScheduleMapperTest {
         assertThat(schedule.getEndDateTime()).isEqualTo(LocalDateTime.of(2025, 5, 10, 11, 0));
     }
 
+    // SchedulePatchDto -> Schedule 매핑이 정확히 되는지 테스트
     @Test
     void schedulePatchDtoToSchedule_shouldMapCorrectly() {
         SchedulePatchDto dto = new SchedulePatchDto();
@@ -43,6 +45,7 @@ class ScheduleMapperTest {
         assertThat(schedule.getEndDateTime()).isEqualTo(LocalDateTime.of(2025, 5, 11, 10, 0));
     }
 
+    // Schedule -> ScheduleResponseDto 매핑이 정확히 되는지 테스트
     @Test
     void scheduleToScheduleResponseDto_shouldMapCorrectly() {
         Schedule schedule = new Schedule();
@@ -59,6 +62,7 @@ class ScheduleMapperTest {
         assertThat(responseDto.getTitle()).isEqualTo("Response Test");
     }
 
+    // Schedule 리스트 -> ScheduleResponseDto 리스트 매핑이 정확히 되는지 테스트
     @Test
     void schedulesToScheduleResponseDtos_shouldMapListCorrectly() {
         Schedule schedule = new Schedule();

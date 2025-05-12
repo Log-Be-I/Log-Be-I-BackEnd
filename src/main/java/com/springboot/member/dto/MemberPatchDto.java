@@ -10,13 +10,12 @@ import javax.validation.constraints.Pattern;
 
 @Getter
 @NoArgsConstructor
-@Schema(name = "memberPatchDto", description = "키워드 요청")
 public class MemberPatchDto {
 
-    private Long memberId;
+//    private Long memberId;
 
-    @Schema(description = "회원 이름", example = "기로기")
-    private String name;
+//    @Schema(description = "회원 이름", example = "기로기")
+//    private String name;
 
     @Schema(description = "닉네임", example = "방울이")
     @Pattern(regexp = "^[가-힣a-z]{2,8}$", message = "한글과 영어 소문자만 사용 가능합니다.")
