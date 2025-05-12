@@ -2,10 +2,7 @@ package com.springboot.keyword.entity;
 
 import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -14,6 +11,7 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "name", callSuper = false)  //name 값만 같으면 동일한 객체로 판단, 경고 방지
 public class Keyword extends BaseEntity {
 
     @Id

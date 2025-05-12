@@ -20,40 +20,36 @@ public class KeywordService {
     private final KeywordRepository keywordRepository;
     private final MemberService memberService;
 
-    // keyword 생성
     @Transactional
-    public List<Keyword> createKeyword (List<Keyword> keywordList, Long memberId) {
-        //member 찾기
+    public List<Keyword> createKeyword(List<Keyword> keywordList, Long memberId) {
         Member member = memberService.findVerifiedExistsMember(memberId);
-      
-        // memberId 로 기존 키워드 리스트 찾기
-        List<Keyword> existingKeywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
-        Map<String, Keyword> keywordMap = existingKeywords.stream()
-                .collect(Collectors.toMap(keyword -> keyword.getName(), keyword -> keyword ));
 
-        //새로 등록한 키워드들의 이름 중복을 제거
-        Set<String> newKeywordNames = keywordList.stream()
-                .map(keyword -> keyword.getName())
+        // 기존 키워드 이름만 추출
+        List<Keyword> existingKeywords = keywordRepository.findAllByMember_MemberId(member.getMemberId());
+        Set<String> existingNames = existingKeywords.stream()
+                .map(Keyword::getName)
                 .collect(Collectors.toSet());
 
-        //삭제 대상 : 기존에는 있었는데 새 요청에는 없는 경우
-        List<Keyword> keywordsToDelete = existingKeywords.stream()
-                .filter(keyword -> !newKeywordNames.contains(keyword))
-                .collect(Collectors.toList());
+        // 새 키워드 이름 중복 제거
+        Set<String> newKeywordNames = keywordList.stream()
+                .map(Keyword::getName)
+                .collect(Collectors.toSet());
 
+        // 삭제 대상
+        List<Keyword> keywordsToDelete = existingKeywords.stream()
+                .filter(keyword -> !newKeywordNames.contains(keyword.getName()))
+                .collect(Collectors.toList());
         keywordRepository.deleteAll(keywordsToDelete);
 
-        //추가 대상 : 새 요청에는 있는데 기존에는 없는 경우
+        // 추가 대상
         List<Keyword> keywordToSave = keywordList.stream()
-                .filter(k -> !keywordMap.containsKey(k.getName()))
-                .peek(keyword -> keyword.setMember(member))
+                .filter(k -> !existingNames.contains(k.getName()))
+                .peek(k -> k.setMember(member))
                 .collect(Collectors.toList());
-
         keywordRepository.saveAll(keywordToSave);
 
         return keywordRepository.findAllByMember_MemberId(member.getMemberId());
     }
-
     // keyword 조회
     public List<Keyword> findKeywords (Long memberId) {
 

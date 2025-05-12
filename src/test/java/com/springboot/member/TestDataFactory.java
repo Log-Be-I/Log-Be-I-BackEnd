@@ -1,6 +1,7 @@
 package com.springboot.member;
 
 import com.springboot.category.entity.Category;
+import com.springboot.keyword.entity.Keyword;
 import com.springboot.member.entity.Member;
 
 import java.util.ArrayList;
@@ -46,5 +47,13 @@ public class TestDataFactory {
         category.setImage("기본.png");
         category.setMember(member);
         return category;
+    }
+    public static Keyword createTestKeyword(String name, Member member) {
+        Keyword keyword = new Keyword();
+        keyword.setName(name);
+        if (member != null) {
+            keyword.setMember(member);
+        }
+        return keyword;
     }
 }
