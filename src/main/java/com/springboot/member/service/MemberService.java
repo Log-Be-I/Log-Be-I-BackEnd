@@ -40,8 +40,8 @@ public class MemberService {
     private final CategoryRepository categoryRepository;
     private final GoogleOAuthService googleOAuthService;
 
-    @Value("${mail.address.admin}")
-    private String adminEmail;
+    @Value("#{'${mail.address.admin}'.split(',')}")
+    private List<String> adminEmails;
 
     public Map<String, String> createMember(Member member) {
         // 탈퇴한 내역이 있는지 있다면 재가입 가능한지 검증
@@ -201,7 +201,9 @@ public class MemberService {
 //        // uri 에 있는 memberId 의 owner email 추출
 //        String isOwnerEmail = member.getEmail();
 
-        List<String> authentication = List.of(memberEmail, adminEmail);
+//        List<String> authentication = List.of(memberEmail, adminEmail);
+        List<String> authentication = new ArrayList<>(adminEmails);
+        authentication.add(memberEmail);
 
         // 만약 요청한 사용자의 이메일과 변경하고자하는 유저 정보의 owner 의 이메일이 동일하거나 admin 일 경우 변경 실행
         boolean value = authentication.stream().anyMatch(email -> Objects.equals(memberEmail, email));

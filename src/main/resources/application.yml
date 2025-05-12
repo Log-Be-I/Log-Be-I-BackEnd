@@ -45,10 +45,7 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
 mail:
   address:
-    admin:
-      - admin1@gmail.com
-      - admin2@gmail.com
-      - admin3@gmail.com
+    admin: admin1@gmail.com, admin2@gmail.com, admin3@gmail.com
   data:
     redis:
       host: 172.31.41.9  #Redis 서버 주소 지정
