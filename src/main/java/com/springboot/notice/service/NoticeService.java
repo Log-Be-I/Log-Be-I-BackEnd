@@ -50,13 +50,18 @@ public class NoticeService {
 
         // 모든 회원에게 알림 전송
         List<Member> allMembers = memberService.findMembersToList(adminId);
+        System.out.println("공지사항 등록 알림 시작");
         for (Member member : allMembers){
             pushTokenService.sendNoticeNotification(
                     member.getMemberId(),
                     savedNotice.getTitle(),
                     savedNotice.getContent()
             );
+            long no = 1L;
+            System.out.printf("공지사항 알림 전송 MemberId : %d번 ", no);
+            no++;
         }
+        System.out.println("공지사항 등록 알림 종료");
         return savedNotice;
     }
 
