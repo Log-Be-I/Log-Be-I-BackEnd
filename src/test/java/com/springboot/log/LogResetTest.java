@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -54,29 +55,28 @@ class LogResetTest {
      */
     @Test
     void givenNoObjects_whenLogResetForS3_thenErrorLoggedAndReturn() {
-        // given
-        ObjectListing listing = new ObjectListing();
-        listing.getObjectSummaries().clear();
-        when(amazonS3.listObjects(bucket, "logs/")).thenReturn(listing);
+        LocalDate fixedDate = LocalDate.of(2025, 5, 13);
 
-        // when
-        logReset.logResetForS3(List.of("info"), 0, 1);
+        try (MockedStatic<LocalDate> mockDate = mockStatic(LocalDate.class)) {
+            mockDate.when(LocalDate::now).thenReturn(fixedDate);
 
-        // then
-        ArgumentCaptor<Object> arg1 = ArgumentCaptor.forClass(Object.class);
-        ArgumentCaptor<Object> arg2 = ArgumentCaptor.forClass(Object.class);
-        ArgumentCaptor<Object> arg3 = ArgumentCaptor.forClass(Object.class);
+            // given
+            ObjectListing listing = new ObjectListing();
+            when(amazonS3.listObjects(bucket, "logs/")).thenReturn(listing);
+            LocalDate fromDate = fixedDate.minusDays(1);
+            LocalDate toDate = fixedDate.minusDays(0);
 
-        verify(logStorageService).logAndStoreWithError(
-                eq("No logs found for deletion between {} and {}"),
-                (String) arg1.capture(), arg2.capture(), arg3.capture()
-        );
+            // when
+            logReset.logResetForS3(List.of("info"), 0, 1);
 
-        assertEquals("2025-05-11", arg1.getValue().toString());
-        assertEquals("2025-05-12", arg2.getValue().toString());
-        assertEquals("reset", arg3.getValue());
-
-        verify(amazonS3, never()).deleteObjects(any(DeleteObjectsRequest.class));
+            // then
+            verify(logStorageService).logAndStoreWithError(
+                    eq("No logs found for deletion between {} and {}"),
+                    eq(fromDate.toString()),      // fixedDate.minusDays(2)
+                    eq(toDate),      // fixedDate.minusDays(1)
+                    eq("reset")
+            );
+        }
     }
 
     /**

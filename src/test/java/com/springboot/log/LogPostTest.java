@@ -2,119 +2,198 @@ package com.springboot.log;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.log.service.LogStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.ValueOperations;
+import org.mockito.MockitoAnnotations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class LogPostTest {
 
     @Mock
-    private RedisTemplate<String, String> redisTemplate; // Redis 연동을 위한 템플릿을 Mock 객체로 생성
+    private RedisTemplate<String, String> redisTemplate;
     @Mock
-    private ValueOperations<String, String> valueOperations; // Redis key-value 연산을 위한 Mock
+    private AmazonS3 amazonS3;
     @Mock
-    private AmazonS3 amazonS3; // AWS S3 클라이언트를 Mock으로 생성
+    private LogStorageService logStorageService;
     @Mock
-    private LogStorageService logStorageService; // 로그 저장 및 오류 처리 서비스 Mock
+    private ValueOperations<String, String> valueOperations;
 
     @InjectMocks
-    private LogPost logPost; // 위 Mock 객체들이 주입된 테스트 대상 클래스
+    private LogPost logPost;
+
+    private final String logName = "post";
 
     @BeforeEach
     void setUp() {
-        // No unnecessary stubbing here; add only if needed in specific tests
+        MockitoAnnotations.openMocks(this);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     /**
-     * Redis에서 조회된 키가 없을 때의 동작 테스트
-     * - keys() 호출 시 빈 Set 반환
-     * - 오류 메시지 기록(logAndStoreWithError) 확인
-     * - AWS S3 업로드는 호출되지 않아야 함
+     * Redis에 로그 키가 없을 때,
+     * logAndStoreWithError("No logs found...")가 호출되는지 검증
      */
     @Test
-    void givenNoKeys_whenLogPostForS3_thenErrorLoggedAndReturn() {
+    void givenEmptyRedisKeys_whenLogPostForS3_thenLogNoLogsFound() {
         // given
-        when(redisTemplate.keys("logs:*")).thenReturn(Collections.emptySet()); // 키 없음
-
-        // when
-        logPost.logPostForS3(Collections.singletonList("info"), 0, 1);
-
-        // then
-        verify(logStorageService, times(1))
-                .logAndStoreWithError(eq("No logs found for post between {} and {}"), anyString(), any(), eq("post")); // 오류 로그 확인
-        verifyNoInteractions(amazonS3); // S3 호출 없음
-    }
-
-    /**
-     * Redis에 로그 키가 있고, 정상적으로 S3 업로드 및 Redis 삭제가 되는지 테스트
-     * - 2일 전 키 생성
-     * - valueOperations.get()에 로그 내용 반환
-     * - putObject() 및 delete() 호출 확인
-     * - 성공 로그 기록 확인
-     */
-    @Test
-    void givenExistingLogKey_whenLogPostForS3_thenUploadAndDelete() {
-        // 날짜 계산 및 키 생성
+        when(redisTemplate.keys("logs:*")).thenReturn(Collections.emptySet());
+        int monthRange = 0;
+        int dayRange = 5;
         LocalDate today = LocalDate.now();
-        LocalDate twoDaysAgo = today.minusDays(2);
-        String redisKey = "logs:" + twoDaysAgo + ".info"; // 예: logs:2025-05-10.info
-        String s3Key = redisKey.replace("logs:", "logs/") + ".log"; // S3 경로: logs/2025-05-10.info.log
-
-        // given
-        when(redisTemplate.keys("logs:*")).thenReturn(Set.of(redisKey)); // 키 조회
-        when(valueOperations.get(redisKey)).thenReturn("log-content"); // 값 조회
+        LocalDate rangeDateAgo = today.minusDays(dayRange);
 
         // when
-        logPost.logPostForS3(Collections.singletonList("info"), 0, 1);
+        logPost.logPostForS3(Collections.singletonList(logName), monthRange, dayRange);
 
-        // then
-        verify(amazonS3, times(1))
-                .putObject(eq("logbe-i-log"), eq(s3Key), eq("log-content")); // S3 업로드 확인
-        verify(redisTemplate, times(1)).delete(eq(redisKey)); // Redis 삭제 확인
+        // then: No logs branch uses LocalDate today
+        verify(logStorageService).logAndStoreWithError(
+                eq("No logs found for post between {} and {}"),
+                eq(rangeDateAgo.toString()),
+                eq(today),
+                eq(logName)
+        );
+        verifyNoInteractions(amazonS3);
+    }
+
+    /**
+     * Redis에 키는 존재하지만 값이 null일 때,
+     * S3 업로드 호출 없이 건너뛰는지 검증
+     */
+    @Test
+    void givenRedisKeyWithNullValue_whenLogPostForS3_thenSkipUpload() {
+        // given
+        LocalDate fileDate = LocalDate.now().minusDays(2);
+        String key = "logs:" + fileDate + ".post";
+        Set<String> keys = new HashSet<>(Collections.singletonList(key));
+        when(redisTemplate.keys("logs:*")).thenReturn(keys);
+        when(valueOperations.get(key)).thenReturn(null);
+
+        // when
+        logPost.logPostForS3(Collections.singletonList(logName), 0, 2);
+
+        // then: skip upload when value is null
+        verify(valueOperations).get(key);
+        verifyNoInteractions(amazonS3);
+    }
+
+    /**
+     * Redis에서 유효한 값이 반환될 때,
+     * S3에 업로드 성공 후 Redis delete 및 성공 로그 호출을 검증
+     */
+    @Test
+    void givenValidRedisKey_whenUploadSuccess_thenDeleteKeyAndLogSuccess() {
+        // given
+        LocalDate fileDate = LocalDate.now().minusDays(2);
+        String key = "logs:" + fileDate + ".post";
+        String value = "log content";
+        when(redisTemplate.keys("logs:*")).thenReturn(Collections.singleton(key));
+        when(valueOperations.get(key)).thenReturn(value);
+        when(amazonS3.putObject(anyString(), anyString(), anyString()))
+                .thenReturn(new PutObjectResult());
+
+        // when
+        logPost.logPostForS3(Collections.singletonList(logName), 0, 2);
+
+        // then: upload invoked and key deleted
+        verify(amazonS3).putObject(
+                eq("logbe-i-log"),
+                eq(key.replace("logs:", "logs/") + ".log"),
+                eq(value)
+        );
+        verify(redisTemplate).delete(key);
+
+        // then: success log uses String today
+        LocalDate today = LocalDate.now();
+        LocalDate rangeDateAgo = today.minusDays(2);
         verify(logStorageService).logAndStoreWithError(
                 eq("Posted {} log files to S3 between {} and {}"),
-                eq("1"), eq("2025-05-11"), eq("2025-05-12"), eq("post")
+                eq("1"),
+                eq(rangeDateAgo.toString()),
+                eq(today.toString()),
+                eq(logName)
         );
     }
 
     /**
-     * S3 업로드 중 AmazonServiceException 발생 시
-     * - BusinessLogicException 던짐
-     * - 오류 로그(logAndStoreWithError) 최소 한 번 호출 확인
+     * S3 업로드 도중 예외가 발생하면,
+     * 재시도 후 성공하는지 (총 3회 호출, 두 번 재시도 로그) 검증
      */
     @Test
-    void givenAmazonServiceException_whenUpload_thenBusinessLogicException() {
-        LocalDate today = LocalDate.now();
-        LocalDate twoDaysAgo = today.minusDays(2);
-        String redisKey = "logs:" + twoDaysAgo + ".info";
-
+    void givenAmazonServiceException_thenRetryAndSucceed() {
         // given
-        when(redisTemplate.keys("logs:*")).thenReturn(Set.of(redisKey));
-        when(valueOperations.get(redisKey)).thenReturn("content");
-        doThrow(new AmazonServiceException("S3 failure"))
-                .when(amazonS3).putObject(anyString(), anyString(), anyString()); // 업로드 실패 시 예외 발생
+        LocalDate fileDate = LocalDate.now().minusDays(2);
+        String key = "logs:" + fileDate + ".post";
+        when(redisTemplate.keys("logs:*")).thenReturn(Collections.singleton(key));
+        when(valueOperations.get(key)).thenReturn("log data");
+        AmazonServiceException e1 = new AmazonServiceException("err1");
+        AmazonServiceException e2 = new AmazonServiceException("err2");
+        when(amazonS3.putObject(anyString(), anyString(), anyString()))
+                .thenThrow(e1)
+                .thenThrow(e2)
+                .thenReturn(new PutObjectResult());
 
-        // then
+        // when
+        logPost.logPostForS3(Collections.singletonList(logName), 0, 2);
+
+        // then: retried thrice
+        verify(amazonS3, times(3)).putObject(anyString(), anyString(), anyString());
+        // retry logs
+        verify(logStorageService, atLeast(2)).logAndStoreWithError(
+                startsWith("S3 업로드 실패 - 재시도"),
+                any(), any(), any()
+        );
+        // final success log
+        LocalDate today = LocalDate.now();
+        LocalDate rangeDateAgo = today.minusDays(2);
+        verify(logStorageService).logAndStoreWithError(
+                eq("Posted {} log files to S3 between {} and {}"),
+                eq("1"),
+                eq(rangeDateAgo.toString()),
+                eq(today.toString()),
+                eq(logName)
+        );
+    }
+
+    /**
+     * S3 업로드 실패가 3회 연속 발생하면,
+     * BusinessLogicException 발생 및 최종 실패 로그 호출을 검증
+     */
+    @Test
+    void givenPersistentAmazonServiceException_thenThrowBusinessLogicException() {
+        // given
+        LocalDate fileDate = LocalDate.now().minusDays(2);
+        String key = "logs:" + fileDate + ".post";
+        when(redisTemplate.keys("logs:*")).thenReturn(Collections.singleton(key));
+        when(valueOperations.get(key)).thenReturn("log data");
+        AmazonServiceException fatal = new AmazonServiceException("fatal error");
+        when(amazonS3.putObject(anyString(), anyString(), anyString()))
+                .thenThrow(fatal, fatal, fatal);
+
+        // when & then: should throw after 3 retries
         assertThrows(BusinessLogicException.class,
-                () -> logPost.logPostForS3(Collections.singletonList("info"), 0, 1)
-        ); // BusinessLogicException 발생 확인
-        verify(logStorageService, atLeastOnce())
-                .logAndStoreWithError(contains("S3 업로드 실패"), any(), any(), any()); // 오류 로그 기록 확인
+                () -> logPost.logPostForS3(Collections.singletonList(logName), 0, 2));
+        verify(amazonS3, times(3)).putObject(anyString(), anyString(), anyString());
+        // final failure log
+        verify(logStorageService).logAndStoreWithError(
+                eq("S3 업로드 최종 실패"),
+                eq(logName),
+                anyString(),
+                any(AmazonServiceException.class)
+        );
     }
 }
