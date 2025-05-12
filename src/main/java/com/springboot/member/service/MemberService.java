@@ -40,7 +40,7 @@ public class MemberService {
     private final CategoryRepository categoryRepository;
     private final GoogleOAuthService googleOAuthService;
 
-//    @Value("${mail.address.admin}")
+    @Value("${mail.address.admin}")
     private String adminEmail;
 
     public Map<String, String> createMember(Member member) {
