@@ -25,16 +25,12 @@ public class Keyword extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Transient // DB에는 저장 안됨
+    private Long memberId;
+
     public Keyword(String name, Member member) {
         this.name = name;
         this.member = member;
     }
 
-    // member 영속성
-    public void setMember(Member member) {
-        this.member = member;
-        if(!member.getKeywords().contains(this)) {
-            member.setKeyword(this);
-        }
-    }
 }

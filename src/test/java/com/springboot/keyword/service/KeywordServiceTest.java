@@ -6,6 +6,7 @@ import com.springboot.member.TestDataFactory;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -35,15 +37,18 @@ public class KeywordServiceTest {
     private MemberService memberService;
 
     @Test
+    @DisplayName("createKeyword - 기존 키워드 삭제 전 연관관계 끊고 새 키워드 등록")
     void createKeyword_shouldReplaceAllKeywords() {
         // given
         Long memberId = 1L;
         Member member = TestDataFactory.createTestMember(memberId);
 
+        // 기존 키워드 2개
         Keyword old1 = TestDataFactory.createTestKeyword("AI", member);
         Keyword old2 = TestDataFactory.createTestKeyword("웰빙", member);
         List<Keyword> existingKeywords = List.of(old1, old2);
 
+        // 새 키워드 2개
         Keyword new1 = TestDataFactory.createTestKeyword("여름", null);
         Keyword new2 = TestDataFactory.createTestKeyword("휴가", null);
         List<Keyword> newKeywords = List.of(new1, new2);
@@ -55,6 +60,10 @@ public class KeywordServiceTest {
         keywordService.createKeyword(newKeywords, memberId);
 
         // then
+        // 기존 키워드 연관관계 해제 확인
+        assertNull(old1.getMember());
+        assertNull(old2.getMember());
+
         // 삭제 대상 확인
         ArgumentCaptor<List<Keyword>> deleteCaptor = ArgumentCaptor.forClass(List.class);
         verify(keywordRepository).deleteAll(deleteCaptor.capture());
