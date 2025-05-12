@@ -144,15 +144,6 @@ public class QuestionService {
         return  question;
     }
 
-//    public List<Question> nonDeletedQuestionAndAuth (List<Question> questions, Long memberId) {
-//        return questions.stream().filter(question -> question.getQuestionStatus() != Question.QuestionStatus.QUESTION_DELETED)
-//                .peek(question ->
-//                        // 관리자 or owner 가 아니라면 예외 처리
-//                        AuthorizationUtils.isAdminOrOwner(question.getMember().getMemberId(), memberId)
-//                ).collect(Collectors.toList());
-//
-//    }
-
     // 정렬조건 설정
     private Sort getSortType(String sortType){
         switch (sortType.toUpperCase()){
