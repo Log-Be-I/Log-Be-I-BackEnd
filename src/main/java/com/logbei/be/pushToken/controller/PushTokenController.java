@@ -1,9 +1,9 @@
-package com.springboot.pushToken.controller;
+package com.logbei.be.pushToken.controller;
 
 import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.pushToken.dto.NotificationRequestDto;
-import com.springboot.pushToken.dto.PushTokenDto;
-import com.springboot.pushToken.service.PushTokenService;
+import com.logbei.be.pushToken.dto.NotificationRequestDto;
+import com.logbei.be.pushToken.dto.PushTokenDto;
+import com.logbei.be.pushToken.service.PushTokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,3 +1,5 @@
+package com.logbei.be.log.scheduler;
+
 <<<<<<<< HEAD:src/main/java/com/springboot/log/scheduler/LogClova.java
 package com.springboot.log.scheduler;
 ========

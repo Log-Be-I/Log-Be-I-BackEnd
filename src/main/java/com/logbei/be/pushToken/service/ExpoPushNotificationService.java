@@ -1,6 +1,6 @@
-package com.springboot.pushToken.service;
+package com.logbei.be.pushToken.service;
 
-import com.springboot.pushToken.dto.ExpoPushMessageDto;
+import com.logbei.be.pushToken.dto.ExpoPushMessageDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

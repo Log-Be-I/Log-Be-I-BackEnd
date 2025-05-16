@@ -1,4 +1,4 @@
-package com.springboot.pushToken.entity;
+package com.logbei.be.pushToken.entity;
 
 import com.springboot.audit.BaseEntity;
 import com.springboot.member.entity.Member;

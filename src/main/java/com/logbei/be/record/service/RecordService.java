@@ -1,36 +1,15 @@
 package com.logbei.be.record.service;
 
-<<<<<<< HEAD:src/main/java/com/springboot/record/service/RecordService.java
-import com.springboot.ai.openai.service.OpenAiService;
-import com.springboot.category.entity.Category;
-import com.springboot.category.service.CategoryService;
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.exception.ExceptionCode;
-=======
 import com.logbei.be.ai.openai.service.OpenAiService;
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.category.entity.Category;
 import com.logbei.be.category.service.CategoryService;
 import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.exception.ExceptionCode;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/record/service/RecordService.java
 
-import com.springboot.log.service.LogStorageService;
+import com.logbei.be.log.service.LogStorageService;
 
-<<<<<<< HEAD:src/main/java/com/springboot/record/service/RecordService.java
-import com.springboot.member.entity.Member;
-import com.springboot.member.service.MemberService;
-import com.springboot.record.entity.HistoricalRecord;
-import com.springboot.record.entity.Record;
-import com.springboot.record.repository.HistoricalRecordRepository;
-import com.springboot.record.repository.RecordRepository;
-import com.springboot.schedule.entity.Schedule;
-import com.springboot.schedule.repository.ScheduleRepository;
-import com.springboot.utils.AuthorizationUtils;
-import com.springboot.utils.DateUtil;
-=======
 
-import com.logbei.be.log.LogStorageService;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.record.entity.HistoricalRecord;
@@ -41,9 +20,9 @@ import com.logbei.be.schedule.entity.Schedule;
 import com.logbei.be.schedule.repository.ScheduleRepository;
 import com.logbei.be.utils.AuthorizationUtils;
 import com.logbei.be.utils.DateUtil;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/record/service/RecordService.java
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -65,7 +44,7 @@ public class RecordService {
     private final RecordRepository recordRepository;
     private final HistoricalRecordRepository historicalRecordRepository;
     private final MemberService memberService;
-//    private final GoogleCalendarService googleCalendarService;
+    //    private final GoogleCalendarService googleCalendarService;
     private final OpenAiService openAiService;
     private final ScheduleRepository scheduleRepository;
     private final CategoryService categoryService;
@@ -111,10 +90,10 @@ public class RecordService {
 
     public Record createRecord(Record record, long memberId){
 
-       Member member = memberService.findVerifiedExistsMember(memberId);
-       record.setMember(member);
+        Member member = memberService.findVerifiedExistsMember(memberId);
+        record.setMember(member);
 
-       return recordRepository.save(record);
+        return recordRepository.save(record);
     }
 
     //기록 수정 : content 수정 데이터는 이관한다.
@@ -127,9 +106,9 @@ public class RecordService {
         AuthorizationUtils.isOwner(findRecord.getMember().getMemberId(), memberId);
         findRecord.setMember(member);
         //content 변경 사항 확인
-            //Objects.equals(a,b) => a, b 둘 다 null (true), 하나만 null (false)
-                // 둘 다 null이 아니면  a.equals(b) 결과 반환
-                // NPE 없이 안전하게 비교 가능!
+        //Objects.equals(a,b) => a, b 둘 다 null (true), 하나만 null (false)
+        // 둘 다 null이 아니면  a.equals(b) 결과 반환
+        // NPE 없이 안전하게 비교 가능!
         boolean isContentChanged = !Objects.equals(findRecord.getContent(), record.getContent());
 
         //content 가 수정되면, 수정 전 데이터 이관
@@ -157,9 +136,9 @@ public class RecordService {
         Optional.ofNullable(record.getCategory())
                 .ifPresent(category -> findRecord.setCategory(category));
 
-       if(record.getCategory() == null) {
-           throw new BusinessLogicException(ExceptionCode.CATEGORY_NOT_FOUND);
-       }
+        if(record.getCategory() == null) {
+            throw new BusinessLogicException(ExceptionCode.CATEGORY_NOT_FOUND);
+        }
         Category category = categoryService.findVerifiedExistsCategory(record.getCategory().getCategoryId());
         findRecord.setCategory(category);
         //수정 데이터 저장
@@ -220,7 +199,7 @@ public class RecordService {
 
     // weekStart: 한 주의 기록
     public List<Record> getWeeklyRecords(LocalDateTime weekStart, LocalDateTime weekEnd) {
-       // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
+        // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
         List<Record> findRecords = recordRepository.findRegisteredRecordsWithMemberBetween(weekStart, weekEnd, Record.RecordStatus.RECORD_REGISTERED);
 
         return findRecords;
@@ -242,7 +221,7 @@ public class RecordService {
 //
 //    }
 
-//    // 타입이 뭐든 일단 받아서 분기 처리
+    //    // 타입이 뭐든 일단 받아서 분기 처리
 //    public void handleResponse(Object response) {
 //        // response 타입이 Schedule 이라면
 //        if (response instanceof Schedule) {
@@ -252,7 +231,7 @@ public class RecordService {
     //삭제상태가 아닌 record 반환
     public Record getNotDeletedRecord(Record record){
         if(record.getRecordStatus() == Record.RecordStatus.RECORD_DELETED) {
-           //삭제상태일 경우 예외처리
+            //삭제상태일 경우 예외처리
             throw new BusinessLogicException(ExceptionCode.RECORD_NOT_FOUND);
         }
         return record;

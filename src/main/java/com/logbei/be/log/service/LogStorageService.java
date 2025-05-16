@@ -1,3 +1,5 @@
+package com.logbei.be.log.service;
+
 <<<<<<<< HEAD:src/main/java/com/springboot/log/service/LogStorageService.java
 package com.springboot.log.service;
 ========

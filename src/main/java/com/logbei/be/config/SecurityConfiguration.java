@@ -4,7 +4,7 @@ import com.logbei.be.auth.filter.JwtAuthenticationFilter;
 import com.logbei.be.auth.filter.JwtVerificationFilter;
 import com.logbei.be.auth.handler.MemberAccessDeniedHandler;
 import com.logbei.be.auth.handler.MemberAuthenticationEntryPoint;
-import com.springboot.auth.handler.*;
+import com.logbei.be.auth.handler.*;
 import com.logbei.be.auth.jwt.JwtTokenizer;
 import com.logbei.be.auth.utils.CustomAuthenticationProvider;
 import com.logbei.be.auth.utils.CustomAuthorityUtils;

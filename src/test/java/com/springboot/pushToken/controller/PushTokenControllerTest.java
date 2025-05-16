@@ -1,21 +1,20 @@
 package com.springboot.pushToken.controller;
 
+import com.logbei.be.pushToken.controller.PushTokenController;
 import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.pushToken.dto.NotificationRequestDto;
-import com.springboot.pushToken.dto.PushTokenDto;
-import com.springboot.pushToken.service.PushTokenService;
+import com.logbei.be.pushToken.dto.NotificationRequestDto;
+import com.logbei.be.pushToken.dto.PushTokenDto;
+import com.logbei.be.pushToken.service.PushTokenService;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 

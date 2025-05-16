@@ -8,16 +8,9 @@ import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.notice.entity.Notice;
 import com.springboot.notice.repository.NoticeRepository;
-import com.springboot.pushToken.service.PushTokenService;
+import com.logbei.be.pushToken.service.PushTokenService;
 import com.springboot.utils.AuthorizationUtils;
 =======
-import com.logbei.be.dashboard.dto.DashBoardResponseDto;
-import com.logbei.be.exception.BusinessLogicException;
-import com.logbei.be.exception.ExceptionCode;
-import com.logbei.be.member.service.MemberService;
-import com.logbei.be.notice.entity.Notice;
-import com.logbei.be.notice.repository.NoticeRepository;
-import com.logbei.be.utils.AuthorizationUtils;
 >>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/notice/service/NoticeService.java
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

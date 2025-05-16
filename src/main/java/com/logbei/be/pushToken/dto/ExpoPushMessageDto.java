@@ -1,4 +1,4 @@
-package com.springboot.pushToken.dto;
+package com.logbei.be.pushToken.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

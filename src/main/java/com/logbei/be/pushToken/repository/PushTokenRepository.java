@@ -1,6 +1,6 @@
-package com.springboot.pushToken.repository;
+package com.logbei.be.pushToken.repository;
 
-import com.springboot.pushToken.entity.PushToken;
+import com.logbei.be.pushToken.entity.PushToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

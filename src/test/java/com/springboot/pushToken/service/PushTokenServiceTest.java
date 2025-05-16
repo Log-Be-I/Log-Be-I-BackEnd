@@ -1,9 +1,11 @@
 package com.springboot.pushToken.service;
 
+import com.logbei.be.pushToken.service.ExpoPushNotificationService;
+import com.logbei.be.pushToken.service.PushTokenService;
 import com.springboot.member.entity.Member;
 import com.springboot.member.repository.MemberRepository;
-import com.springboot.pushToken.entity.PushToken;
-import com.springboot.pushToken.repository.PushTokenRepository;
+import com.logbei.be.pushToken.entity.PushToken;
+import com.logbei.be.pushToken.repository.PushTokenRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

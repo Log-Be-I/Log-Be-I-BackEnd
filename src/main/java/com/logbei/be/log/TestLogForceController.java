@@ -2,6 +2,7 @@
 =======
 package com.logbei.be.log;
 
+import com.logbei.be.log.service.LogStorageService;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;

@@ -1,11 +1,11 @@
-package com.springboot.pushToken.service;
+package com.logbei.be.pushToken.service;
 
 import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
 import com.springboot.member.repository.MemberRepository;
-import com.springboot.pushToken.entity.PushToken;
-import com.springboot.pushToken.repository.PushTokenRepository;
+import com.logbei.be.pushToken.entity.PushToken;
+import com.logbei.be.pushToken.repository.PushTokenRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

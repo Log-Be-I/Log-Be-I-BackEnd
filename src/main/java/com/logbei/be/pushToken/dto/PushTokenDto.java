@@ -1,4 +1,4 @@
-package com.springboot.pushToken.dto;
+package com.logbei.be.pushToken.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,9 +7,8 @@ import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
-@Setter
 @AllArgsConstructor
-public class NotificationRequestDto {
-    private String title;
-    private String content;
+@Setter
+public class PushTokenDto {
+    private String token;
 }

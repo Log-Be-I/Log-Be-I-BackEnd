@@ -1,29 +1,19 @@
 package com.logbei.be.schedule.controller;
 
 
-<<<<<<< HEAD:src/main/java/com/springboot/schedule/controller/ScheduleController.java
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.swagger.SwaggerErrorResponse;
-import com.springboot.responsedto.ListResponseDto;
-import com.springboot.responsedto.SingleResponseDto;
-import com.springboot.schedule.dto.*;
-import com.springboot.schedule.entity.Schedule;
-import com.springboot.schedule.mapper.ScheduleMapper;
-import com.springboot.schedule.service.ScheduleService;
-import io.swagger.v3.oas.annotations.Operation;
-=======
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;
+import com.logbei.be.responsedto.SingleResponseDto;
 import com.logbei.be.schedule.dto.SchedulePatchDto;
 import com.logbei.be.schedule.dto.SchedulePostDto;
 import com.logbei.be.schedule.dto.ScheduleResponseDto;
-import com.springboot.schedule.dto.*;
+import com.logbei.be.schedule.dto.*;
 import com.logbei.be.schedule.entity.Schedule;
 import com.logbei.be.schedule.mapper.ScheduleMapper;
 import com.logbei.be.schedule.repository.ScheduleRepository;
 import com.logbei.be.schedule.service.ScheduleService;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/schedule/controller/ScheduleController.java
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -59,7 +49,7 @@ public class ScheduleController {
             content = @Content(schema = @Schema(implementation = ScheduleResponseDto.class)))
     @ApiResponse(responseCode = "401", description = "로그아웃 되었을 때",
             content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
-            examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"접근 권한이 없습니다.\"}")))
+                    examples = @ExampleObject(value = "{\"error\": \"Unauthorized\", \"message\": \"접근 권한이 없습니다.\"}")))
     @PostMapping("/text-schedules")
     public ResponseEntity postTextSchedule(@Valid @RequestBody SchedulePostDto schedulePostDto,
                                            @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
@@ -83,7 +73,7 @@ public class ScheduleController {
     })
     @PatchMapping("/schedules/{schedule-id}")
     public ResponseEntity patchSchedule(@Parameter(description = "수정할 일정의 ID", example = "1")
-                                            @PathVariable("schedule-id") @Positive long scheduleId,
+                                        @PathVariable("schedule-id") @Positive long scheduleId,
                                         @Valid @RequestBody SchedulePatchDto schedulePatchDto,
                                         @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         // 일정 수정 서비스 요청

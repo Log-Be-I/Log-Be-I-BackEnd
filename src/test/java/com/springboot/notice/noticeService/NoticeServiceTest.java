@@ -10,7 +10,7 @@ import com.springboot.notice.entity.Notice;
 import com.springboot.notice.repository.NoticeRepository;
 import com.springboot.notice.service.NoticeService;
 import com.springboot.notice.service.S3Service;
-import com.springboot.pushToken.service.PushTokenService;
+import com.logbei.be.pushToken.service.PushTokenService;
 import com.springboot.utils.AuthorizationUtils;
 import org.mockito.MockedStatic;
 import org.junit.jupiter.api.BeforeEach;
