@@ -15,6 +15,7 @@ import com.logbei.be.question.entity.Question;
 import com.logbei.be.record.entity.Record;
 import com.logbei.be.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

@@ -1,26 +1,16 @@
 package com.logbei.be.answer.controller;
 
-<<<<<<< HEAD:src/main/java/com/springboot/answer/controller/AnswerController.java
-import com.springboot.answer.dto.AnswerPatchDto;
-import com.springboot.answer.dto.AnswerPostDto;
-import com.springboot.answer.dto.AnswerResponseDto;
-import com.springboot.answer.entity.Answer;
-import com.springboot.answer.mapper.AnswerMapper;
-import com.springboot.answer.service.AnswerService;
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.question.dto.QuestionResponseDto;
-import com.springboot.responsedto.SingleResponseDto;
-import com.springboot.swagger.SwaggerErrorResponse;
-import com.springboot.utils.UriCreator;
-=======
 import com.logbei.be.answer.dto.AnswerDto;
+import com.logbei.be.answer.dto.AnswerPatchDto;
 import com.logbei.be.answer.entity.Answer;
 import com.logbei.be.answer.mapper.AnswerMapper;
 import com.logbei.be.answer.service.AnswerService;
 import com.logbei.be.auth.utils.CustomPrincipal;
+import com.logbei.be.question.dto.QuestionResponseDto;
+import com.logbei.be.question.entity.Question;
 import com.logbei.be.responsedto.SingleResponseDto;
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import com.logbei.be.utils.UriCreator;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/answer/controller/AnswerController.java
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -53,7 +43,7 @@ public class AnswerController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "관리자가 문의 글에 답변 등록 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = QuestionResponseDto.class))),
+                            schema = @Schema(implementation = Question.class))),
             @ApiResponse(responseCode = "403", description = "잘못된 권한 접근",
                     content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class),
                             examples = @ExampleObject(value = "{\"error\": \"Forbidden\", \"message\": \"작성 권한이 없습니다.\"}"))),
@@ -63,7 +53,7 @@ public class AnswerController {
     })
     @PostMapping
     public ResponseEntity postAnswer(@PathVariable("question-id") Long questionId,
-                                     @Valid @RequestBody AnswerPostDto answerPostDto,
+                                     @Valid @RequestBody com.springboot.answer.dto.AnswerPostDto answerPostDto,
                                      @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         answerPostDto.setQuestionId(questionId);
         Answer answer = answerService.createAnswer(answerMapper.answerPostToAnswer(answerPostDto), customPrincipal.getMemberId());

@@ -1,7 +1,7 @@
 package com.logbei.be.pushToken.entity;
 
-import com.springboot.audit.BaseEntity;
-import com.springboot.member.entity.Member;
+import com.logbei.be.audit.BaseEntity;
+import com.logbei.be.member.entity.Member;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

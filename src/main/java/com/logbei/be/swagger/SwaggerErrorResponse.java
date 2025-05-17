@@ -1,4 +1,4 @@
-package com.springboot.swagger;
+package com.logbei.be.swagger;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -1,16 +1,11 @@
 package com.logbei.be.advice;
 
 
-<<<<<<< HEAD:src/main/java/com/springboot/advice/GlobalExceptionAdvice.java
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.log.service.LogStorageService;
-import com.springboot.response.ErrorResponse;
+
 import io.swagger.v3.oas.annotations.Hidden;
-=======
 import com.logbei.be.exception.BusinessLogicException;
-import com.logbei.be.log.LogStorageService;
+import com.logbei.be.log.service.LogStorageService;
 import com.logbei.be.response.ErrorResponse;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/advice/GlobalExceptionAdvice.java
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

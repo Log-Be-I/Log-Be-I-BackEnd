@@ -1,7 +1,6 @@
 package com.logbei.be.schedule.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.springboot.audit.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

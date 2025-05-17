@@ -1,12 +1,8 @@
 package com.logbei.be.category.entity;
 
-<<<<<<< HEAD:src/main/java/com/springboot/category/entity/Category.java
-import com.springboot.audit.BaseEntity;
-import com.springboot.member.entity.Member;
-=======
+
 import com.logbei.be.audit.BaseEntity;
 import com.logbei.be.member.entity.Member;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/category/entity/Category.java
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

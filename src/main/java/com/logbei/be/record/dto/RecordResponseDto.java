@@ -1,6 +1,6 @@
-package com.springboot.record.dto;
+package com.logbei.be.record.dto;
 
-import com.springboot.record.entity.Record;
+import com.logbei.be.record.entity.Record;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

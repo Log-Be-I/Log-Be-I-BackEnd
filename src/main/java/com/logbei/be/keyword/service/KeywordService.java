@@ -1,22 +1,15 @@
 package com.logbei.be.keyword.service;
 
-<<<<<<< HEAD:src/main/java/com/springboot/keyword/service/KeywordService.java
-import com.springboot.keyword.entity.Keyword;
-import com.springboot.keyword.repository.KeywordRepository;
-import com.springboot.member.entity.Member;
-import com.springboot.member.service.MemberService;
-=======
-import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.keyword.entity.Keyword;
 import com.logbei.be.keyword.repository.KeywordRepository;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/keyword/service/KeywordService.java
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service

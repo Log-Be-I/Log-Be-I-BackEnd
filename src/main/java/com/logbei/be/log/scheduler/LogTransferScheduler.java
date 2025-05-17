@@ -1,14 +1,8 @@
 package com.logbei.be.log.scheduler;
 
-<<<<<<<< HEAD:src/main/java/com/springboot/log/scheduler/LogTransferScheduler.java
-package com.springboot.log.scheduler;
-========
-package com.logbei.be.log;
->>>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/log/LogTransferScheduler.java
-
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.springboot.log.service.LogStorageService;
+import com.logbei.be.log.service.LogStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

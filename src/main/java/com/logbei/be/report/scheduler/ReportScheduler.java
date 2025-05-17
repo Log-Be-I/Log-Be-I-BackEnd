@@ -1,14 +1,13 @@
-<<<<<<< HEAD
-package com.springboot.report.scheduler;
+package com.logbei.be.report.scheduler;
 
-import com.springboot.ai.openai.service.OpenAiService;
-import com.springboot.record.entity.Record;
-import com.springboot.record.service.RecordService;
-import com.springboot.report.dto.ReportAnalysisRequest;
-import com.springboot.report.entity.Report;
 
-import com.springboot.report.service.ReportService;
-import com.springboot.utils.ReportUtil;
+import com.logbei.be.ai.openai.service.OpenAiService;
+import com.logbei.be.record.entity.Record;
+import com.logbei.be.record.service.RecordService;
+import com.logbei.be.report.dto.ReportAnalysisRequest;
+import com.logbei.be.report.entity.Report;
+import com.logbei.be.report.service.ReportService;
+import com.logbei.be.utils.ReportUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -81,7 +80,6 @@ public class ReportScheduler {
     }
 
 }
-=======
 //package com.logbei.be.report.scheduler;
 //
 //import com.logbei.be.ai.openai.service.OpenAiService;
@@ -164,4 +162,3 @@ public class ReportScheduler {
 //    }
 //
 //}
->>>>>>> e308aea (패키지 Import 수정)

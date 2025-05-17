@@ -1,17 +1,14 @@
 package com.logbei.be.notice.service;
 
-<<<<<<< HEAD:src/main/java/com/springboot/notice/service/NoticeService.java
-import com.springboot.dashboard.dto.RecentNotice;
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.exception.ExceptionCode;
-import com.springboot.member.entity.Member;
-import com.springboot.member.service.MemberService;
-import com.springboot.notice.entity.Notice;
-import com.springboot.notice.repository.NoticeRepository;
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
+import com.logbei.be.member.entity.Member;
+import com.logbei.be.member.service.MemberService;
+import com.logbei.be.notice.entity.Notice;
+import com.logbei.be.notice.repository.NoticeRepository;
 import com.logbei.be.pushToken.service.PushTokenService;
-import com.springboot.utils.AuthorizationUtils;
-=======
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/notice/service/NoticeService.java
+import com.springboot.dashboard.dto.RecentNotice;
+import com.logbei.be.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+import com.springboot.notice.service.S3Service;
 @Service
 @RequiredArgsConstructor
 public class NoticeService {

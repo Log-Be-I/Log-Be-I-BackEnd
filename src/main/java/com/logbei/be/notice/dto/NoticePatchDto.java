@@ -1,6 +1,6 @@
-package com.springboot.notice.dto;
+package com.logbei.be.notice.dto;
 
-import com.springboot.notice.entity.Notice;
+import com.logbei.be.notice.entity.Notice;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

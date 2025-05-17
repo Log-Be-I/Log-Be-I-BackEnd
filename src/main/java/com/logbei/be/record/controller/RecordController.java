@@ -1,24 +1,8 @@
 package com.logbei.be.record.controller;
 
-<<<<<<< HEAD:src/main/java/com/springboot/record/controller/RecordController.java
-import com.springboot.ai.clova.ClovaSpeechService;
-import com.springboot.ai.openai.service.OpenAiService;
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.exception.ExceptionCode;
-import com.springboot.notice.dto.NoticeResponseDto;
 import com.springboot.record.dto.RecordPatchDto;
 import com.springboot.record.dto.RecordPostDto;
-import com.springboot.record.dto.RecordResponseDto;
-import com.springboot.record.entity.Record;
-import com.springboot.record.mapper.RecordMapper;
-import com.springboot.record.service.RecordService;
-import com.springboot.responsedto.MultiResponseDto;
-import com.springboot.responsedto.SingleResponseDto;
-import com.springboot.schedule.dto.ScheduleResponseDto;
-import com.springboot.schedule.entity.Schedule;
-import com.springboot.schedule.mapper.ScheduleMapper;
-import com.springboot.swagger.SwaggerErrorResponse;
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -28,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-=======
 import com.logbei.be.ai.clova.ClovaSpeechService;
 import com.logbei.be.ai.openai.service.OpenAiService;
 import com.logbei.be.auth.utils.CustomPrincipal;
@@ -42,7 +25,6 @@ import com.logbei.be.responsedto.MultiResponseDto;
 import com.logbei.be.responsedto.SingleResponseDto;
 import com.logbei.be.schedule.entity.Schedule;
 import com.logbei.be.schedule.mapper.ScheduleMapper;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/record/controller/RecordController.java
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -52,7 +34,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.logbei.be.record.dto.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;

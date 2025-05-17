@@ -1,22 +1,17 @@
 package com.logbei.be.record.mapper;
 
-<<<<<<< HEAD:src/main/java/com/springboot/record/mapper/RecordMapper.java
-import com.springboot.record.dto.RecordPatchDto;
-import com.springboot.record.dto.RecordPostDto;
-import com.springboot.record.dto.RecordResponseDto;
-import com.springboot.record.entity.Record;
-=======
+
 import com.logbei.be.record.dto.RecordDto;
+import com.logbei.be.record.dto.RecordResponseDto;
 import com.logbei.be.record.entity.Record;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/record/mapper/RecordMapper.java
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-
-
+import com.springboot.record.dto.RecordPatchDto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.springboot.record.dto.RecordPostDto;
 
 @Mapper(componentModel = "spring")
 public interface RecordMapper {

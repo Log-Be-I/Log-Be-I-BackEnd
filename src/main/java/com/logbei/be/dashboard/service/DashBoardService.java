@@ -1,23 +1,14 @@
 package com.logbei.be.dashboard.service;
 
-<<<<<<< HEAD:src/main/java/com/springboot/dashboard/service/DashBoardService.java
-import com.springboot.dashboard.dto.DashBoardResponseDto;
-import com.springboot.dashboard.dto.RecentNotice;
-import com.springboot.dashboard.dto.UnansweredQuestion;
-import com.springboot.member.service.MemberService;
-import com.springboot.notice.service.NoticeService;
-import com.springboot.question.service.QuestionService;
-=======
 import com.logbei.be.dashboard.dto.DashBoardResponseDto;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.notice.service.NoticeService;
 import com.logbei.be.question.service.QuestionService;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/dashboard/service/DashBoardService.java
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import com.springboot.dashboard.dto.UnansweredQuestion;
 import java.util.List;
-
+import com.springboot.dashboard.dto.RecentNotice;
 @Service
 @RequiredArgsConstructor
 public class DashBoardService {

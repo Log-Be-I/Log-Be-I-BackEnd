@@ -1,19 +1,8 @@
 package com.logbei.be.category.controller;
 
-<<<<<<< HEAD:src/main/java/com/springboot/category/controller/CategoryController.java
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.category.dto.CategoryPatchDto;
 import com.springboot.category.dto.CategoryPostDto;
+import com.springboot.category.dto.CategoryPatchDto;
 import com.springboot.category.dto.CategoryResponseDto;
-import com.springboot.category.entity.Category;
-import com.springboot.category.mapper.CategoryMapper;
-import com.springboot.category.service.CategoryService;
-import com.springboot.responsedto.ListResponseDto;
-import com.springboot.responsedto.SingleResponseDto;
-import com.springboot.schedule.dto.ScheduleResponseDto;
-import com.springboot.swagger.SwaggerErrorResponse;
-import com.springboot.utils.UriCreator;
-=======
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.category.dto.CategoryDto;
 import com.logbei.be.category.entity.Category;
@@ -21,8 +10,8 @@ import com.logbei.be.category.mapper.CategoryMapper;
 import com.logbei.be.category.service.CategoryService;
 import com.logbei.be.responsedto.ListResponseDto;
 import com.logbei.be.responsedto.SingleResponseDto;
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import com.logbei.be.utils.UriCreator;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/category/controller/CategoryController.java
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

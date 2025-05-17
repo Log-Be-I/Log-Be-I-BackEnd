@@ -1,18 +1,6 @@
 package com.logbei.be.keyword.controller;
 
 import com.google.gson.Gson;
-<<<<<<< HEAD:src/main/java/com/springboot/keyword/controller/KeywordController.java
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.keyword.API.NaverNewsApiService;
-import com.springboot.keyword.dto.KeywordPostDto;
-import com.springboot.keyword.dto.KeywordResponseDto;
-import com.springboot.keyword.entity.Keyword;
-import com.springboot.keyword.mapper.KeywordMapper;
-import com.springboot.keyword.service.KeywordService;
-import com.springboot.responsedto.ListResponseDto;
-import com.springboot.swagger.SwaggerErrorResponse;
-import com.springboot.utils.UriCreator;
-=======
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.keyword.API.NaverNewsApiService;
 import com.logbei.be.keyword.dto.KeywordPostDto;
@@ -21,7 +9,8 @@ import com.logbei.be.keyword.entity.Keyword;
 import com.logbei.be.keyword.mapper.KeywordMapper;
 import com.logbei.be.keyword.service.KeywordService;
 import com.logbei.be.responsedto.ListResponseDto;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/keyword/controller/KeywordController.java
+import com.logbei.be.swagger.SwaggerErrorResponse;
+import com.logbei.be.utils.UriCreator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

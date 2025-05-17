@@ -1,7 +1,7 @@
-package com.springboot.question.dto;
+package com.logbei.be.question.dto;
 
+import com.logbei.be.question.entity.Question;
 import com.springboot.answer.dto.AnswerResponseDto;
-import com.springboot.question.entity.Question;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

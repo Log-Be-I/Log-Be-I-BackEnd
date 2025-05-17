@@ -1,6 +1,6 @@
-package com.springboot.answer.dto;
+package com.logbei.be.answer.dto;
 
-import com.springboot.validator.NotSpace;
+import com.logbei.be.validator.NotSpace;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -4,14 +4,9 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-<<<<<<< HEAD:src/main/java/com/springboot/log/LogReset.java
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.exception.ExceptionCode;
-import com.springboot.log.service.LogStorageService;
-=======
 import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.exception.ExceptionCode;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/log/LogReset.java
+import com.logbei.be.log.service.LogStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

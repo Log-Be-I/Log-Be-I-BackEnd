@@ -1,20 +1,8 @@
 package com.logbei.be.report.controller;
 
-<<<<<<< HEAD:src/main/java/com/springboot/report/controller/ReportController.java
-import com.springboot.ai.openai.service.OpenAiService;
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.record.entity.Record;
-import com.springboot.record.service.RecordService;
-import com.springboot.report.dto.ReportAnalysisRequest;
-import com.springboot.report.dto.ReportResponseDto;
 import com.springboot.report.dto.SummaryResponseDto;
-import com.springboot.report.entity.Report;
-import com.springboot.report.mapper.ReportMapper;
-import com.springboot.report.service.ReportService;
-import com.springboot.responsedto.ListResponseDto;
-import com.springboot.schedule.dto.ScheduleResponseDto;
-import com.springboot.swagger.SwaggerErrorResponse;
-import com.springboot.utils.ReportUtil;
+import com.logbei.be.report.dto.ReportResponseDto;
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -24,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-=======
 import com.logbei.be.ai.openai.service.OpenAiService;
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.record.entity.Record;
@@ -35,7 +22,6 @@ import com.logbei.be.report.mapper.ReportMapper;
 import com.logbei.be.report.service.ReportService;
 import com.logbei.be.responsedto.ListResponseDto;
 import com.logbei.be.utils.ReportUtil;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/report/controller/ReportController.java
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.index.qual.Positive;

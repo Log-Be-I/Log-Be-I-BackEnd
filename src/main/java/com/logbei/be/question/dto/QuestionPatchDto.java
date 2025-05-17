@@ -1,7 +1,7 @@
-package com.springboot.question.dto;
+package com.logbei.be.question.dto;
 
-import com.springboot.question.entity.Question;
-import com.springboot.validator.NotSpace;
+import com.logbei.be.question.entity.Question;
+import com.logbei.be.validator.NotSpace;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

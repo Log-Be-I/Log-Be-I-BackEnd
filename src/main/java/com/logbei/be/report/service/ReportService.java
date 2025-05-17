@@ -1,17 +1,13 @@
 package com.logbei.be.report.service;
 
-<<<<<<< HEAD:src/main/java/com/springboot/report/service/ReportService.java
-import com.springboot.ai.googleTTS.GoogleTextToSpeechService;
-import com.springboot.member.entity.Member;
-import com.springboot.member.service.MemberService;
+import com.logbei.be.ai.googleTTS.GoogleTextToSpeechService;
+import com.logbei.be.member.entity.Member;
+import com.logbei.be.member.service.MemberService;
 import com.logbei.be.pushToken.service.PushTokenService;
-import com.springboot.report.dto.ReportAnalysisRequest;
-=======
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/report/service/ReportService.java
-
 import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.exception.ExceptionCode;
 
+import com.logbei.be.report.dto.ReportAnalysisRequest;
 import com.logbei.be.report.dto.ReportAnalysisResponse;
 import com.logbei.be.report.entity.Report;
 import com.logbei.be.report.repository.ReportRepository;

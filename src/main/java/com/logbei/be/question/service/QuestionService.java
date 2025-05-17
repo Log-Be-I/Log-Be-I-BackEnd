@@ -1,14 +1,5 @@
 package com.logbei.be.question.service;
 
-<<<<<<< HEAD:src/main/java/com/springboot/question/service/QuestionService.java
-import com.springboot.dashboard.dto.UnansweredQuestion;
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.exception.ExceptionCode;
-import com.springboot.member.service.MemberService;
-import com.springboot.question.entity.Question;
-import com.springboot.question.repository.QuestionRepository;
-import com.springboot.utils.AuthorizationUtils;
-=======
 import com.logbei.be.dashboard.dto.DashBoardResponseDto;
 import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.exception.ExceptionCode;
@@ -17,11 +8,10 @@ import com.logbei.be.member.service.MemberService;
 import com.logbei.be.question.entity.Question;
 import com.logbei.be.question.repository.QuestionRepository;
 import com.logbei.be.utils.AuthorizationUtils;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/question/service/QuestionService.java
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-
+import com.springboot.dashboard.dto.UnansweredQuestion;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

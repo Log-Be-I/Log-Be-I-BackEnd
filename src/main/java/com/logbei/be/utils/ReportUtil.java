@@ -1,18 +1,12 @@
 package com.logbei.be.utils;
 
-<<<<<<< HEAD:src/main/java/com/springboot/utils/ReportUtil.java
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.exception.ExceptionCode;
-import com.springboot.record.entity.Record;
-import com.springboot.report.dto.RecordForAnalysisDto;
-import com.springboot.report.dto.ReportAnalysisRequest;
-import com.springboot.report.entity.Report;
-=======
+
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
 import com.logbei.be.record.entity.Record;
 import com.logbei.be.report.dto.RecordForAnalysisDto;
 import com.logbei.be.report.dto.ReportAnalysisRequest;
 import com.logbei.be.report.entity.Report;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/utils/ReportUtil.java
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;

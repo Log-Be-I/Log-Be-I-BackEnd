@@ -1,11 +1,7 @@
 package com.logbei.be.keyword.API;
 
 import com.google.gson.*;
-<<<<<<< HEAD:src/main/java/com/springboot/keyword/API/NaverNewsApiService.java
-import com.springboot.log.service.LogStorageService;
-=======
-import com.logbei.be.log.LogStorageService;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/keyword/API/NaverNewsApiService.java
+import com.logbei.be.log.service.LogStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;

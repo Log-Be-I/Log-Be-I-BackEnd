@@ -1,12 +1,7 @@
 package com.logbei.be.report.dto;
 
-<<<<<<< HEAD:src/main/java/com/springboot/report/dto/ReportAnalysisRequest.java
-import com.springboot.record.entity.Record;
-import com.springboot.report.entity.Report;
 import io.swagger.v3.oas.annotations.media.Schema;
-=======
 import com.logbei.be.report.entity.Report;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/report/dto/ReportAnalysisRequest.java
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;

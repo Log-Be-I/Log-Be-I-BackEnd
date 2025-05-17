@@ -1,11 +1,5 @@
-<<<<<<<< HEAD:src/main/java/com/springboot/log/scheduler/LogGPT.java
-package com.springboot.log.scheduler;
-========
 package com.logbei.be.log;
->>>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/log/LogGPT.java
 
-import com.springboot.log.LogPost;
-import com.springboot.log.LogReset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 

@@ -1,6 +1,6 @@
 package com.logbei.be.pushToken.controller;
 
-import com.springboot.auth.utils.CustomPrincipal;
+import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.pushToken.dto.NotificationRequestDto;
 import com.logbei.be.pushToken.dto.PushTokenDto;
 import com.logbei.be.pushToken.service.PushTokenService;

@@ -1,22 +1,15 @@
 package com.logbei.be.redis;
 
-<<<<<<< HEAD:src/main/java/com/springboot/redis/RedisController.java
-import com.springboot.auth.jwt.JwtTokenizer;
-import com.springboot.auth.utils.MemberDetailService;
-import com.springboot.member.entity.Member;
-import com.springboot.schedule.dto.ScheduleResponseDto;
-import com.springboot.swagger.SwaggerErrorResponse;
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
-=======
 import com.logbei.be.auth.jwt.JwtTokenizer;
 import com.logbei.be.auth.utils.MemberDetailService;
 import com.logbei.be.member.entity.Member;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/redis/RedisController.java
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

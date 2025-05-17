@@ -1,13 +1,9 @@
 package com.logbei.be.answer.entity;
 
-<<<<<<< HEAD:src/main/java/com/springboot/answer/entity/Answer.java
-import com.springboot.audit.BaseEntity;
-import com.springboot.member.entity.Member;
-import com.springboot.question.entity.Question;
-=======
+
+import com.logbei.be.audit.BaseEntity;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.question.entity.Question;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/answer/entity/Answer.java
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

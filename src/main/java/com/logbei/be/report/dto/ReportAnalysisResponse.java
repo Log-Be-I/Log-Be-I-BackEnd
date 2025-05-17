@@ -1,6 +1,6 @@
 package com.logbei.be.report.dto;
 
-import com.springboot.report.entity.Report;
+import com.logbei.be.report.entity.Report;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 

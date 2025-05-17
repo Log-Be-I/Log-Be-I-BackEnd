@@ -1,15 +1,10 @@
 package com.logbei.be.notice.mapper;
 
-
-<<<<<<< HEAD:src/main/java/com/springboot/notice/mapper/NoticeMapper.java
-import com.springboot.notice.dto.NoticePatchDto;
-import com.springboot.notice.dto.NoticePostDto;
-import com.springboot.notice.dto.NoticeResponseDto;
-import com.springboot.notice.entity.Notice;
-=======
 import com.logbei.be.notice.dto.NoticeDto;
+import com.logbei.be.notice.dto.NoticePatchDto;
+import com.logbei.be.notice.dto.NoticePostDto;
+import com.logbei.be.notice.dto.NoticeResponseDto;
 import com.logbei.be.notice.entity.Notice;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/notice/mapper/NoticeMapper.java
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

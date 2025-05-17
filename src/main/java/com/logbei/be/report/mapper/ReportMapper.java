@@ -1,15 +1,10 @@
 package com.logbei.be.report.mapper;
 
-<<<<<<< HEAD:src/main/java/com/springboot/report/mapper/ReportMapper.java
-import com.springboot.report.dto.ReportResponseDto;
-import com.springboot.report.dto.SummaryResponseDto;
-import com.springboot.report.entity.Report;
-=======
 import com.logbei.be.report.dto.ReportDto;
 import com.logbei.be.report.entity.Report;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/report/mapper/ReportMapper.java
 import org.mapstruct.Mapper;
-
+import com.springboot.report.dto.SummaryResponseDto;
+import com.logbei.be.report.dto.ReportResponseDto;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;

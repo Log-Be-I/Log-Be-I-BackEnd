@@ -1,22 +1,13 @@
 package com.logbei.be.auth.controller;
 
-<<<<<<< HEAD:src/main/java/com/springboot/auth/controller/GoogleAuthController.java
-import com.springboot.auth.dto.GoogleTokenResponse;
-import com.springboot.auth.service.GoogleOAuthService;
-import com.springboot.member.dto.MemberResponseDto;
-import com.springboot.member.entity.Member;
-import com.springboot.member.mapper.MemberMapper;
-import com.springboot.member.service.MemberService;
-import com.springboot.oauth.GoogleInfoDto;
-import com.springboot.oauth.OAuthService;
-import com.springboot.swagger.SwaggerErrorResponse;
+
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-=======
 import com.logbei.be.auth.service.GoogleOAuthService;
 import com.logbei.be.member.dto.MemberResponseDto;
 import com.logbei.be.member.entity.Member;
@@ -24,7 +15,6 @@ import com.logbei.be.member.mapper.MemberMapper;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.oauth.GoogleInfoDto;
 import com.logbei.be.oauth.OAuthService;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/auth/controller/GoogleAuthController.java
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

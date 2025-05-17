@@ -1,9 +1,6 @@
 package com.logbei.be.ai.clova;
 
-<<<<<<< HEAD:src/main/java/com/springboot/ai/clova/ClovaSpeechService.java
-=======
-import com.logbei.be.log.LogStorageService;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/ai/clova/ClovaSpeechService.java
+import com.logbei.be.log.service.LogStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

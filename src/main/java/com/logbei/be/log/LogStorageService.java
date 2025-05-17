@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:src/main/java/com/springboot/log/service/LogStorageService.java
-package com.springboot.log.service;
-========
 package com.logbei.be.log;
->>>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/log/LogStorageService.java
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

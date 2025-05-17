@@ -1,31 +1,18 @@
 package com.logbei.be.question.controller;
 
-<<<<<<< HEAD:src/main/java/com/springboot/question/controller/QuestionController.java
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.question.dto.QuestionPatchDto;
-import com.springboot.question.dto.QuestionPostDto;
-import com.springboot.question.dto.QuestionResponseDto;
-import com.springboot.question.entity.Question;
-import com.springboot.question.mapper.QuestionMapper;
-import com.springboot.question.service.QuestionService;
-import com.springboot.response.ErrorResponse;
-import com.springboot.responsedto.MultiResponseDto;
-import com.springboot.responsedto.SingleResponseDto;
-import com.springboot.schedule.dto.ScheduleResponseDto;
-import com.springboot.swagger.SwaggerErrorResponse;
-import com.springboot.utils.UriCreator;
-=======
-
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.question.dto.QuestionDto;
+import com.logbei.be.question.dto.QuestionPatchDto;
+import com.logbei.be.question.dto.QuestionResponseDto;
 import com.logbei.be.question.entity.Question;
 import com.logbei.be.question.mapper.QuestionMapper;
 import com.logbei.be.question.service.QuestionService;
+import com.logbei.be.response.ErrorResponse;
 import com.logbei.be.responsedto.MultiResponseDto;
 import com.logbei.be.responsedto.SingleResponseDto;
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import com.logbei.be.utils.UriCreator;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/question/controller/QuestionController.java
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -45,7 +32,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
+import com.springboot.question.dto.QuestionPostDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.net.URI;

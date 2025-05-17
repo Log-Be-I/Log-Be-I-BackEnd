@@ -1,17 +1,12 @@
 package com.logbei.be.keyword.entity;
 
-<<<<<<< HEAD:src/main/java/com/springboot/keyword/entity/Keyword.java
-import com.springboot.audit.BaseEntity;
-import com.springboot.member.entity.Member;
 import lombok.*;
-=======
 import com.logbei.be.audit.BaseEntity;
 import com.logbei.be.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/keyword/entity/Keyword.java
 
 import javax.persistence.*;
 

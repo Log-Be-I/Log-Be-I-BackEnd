@@ -1,29 +1,17 @@
 package com.logbei.be.notice.controller;
 
-<<<<<<< HEAD:src/main/java/com/springboot/notice/controller/NoticeController.java
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.notice.dto.NoticePatchDto;
-import com.springboot.notice.dto.NoticePostDto;
-import com.springboot.notice.dto.NoticeResponseDto;
-import com.springboot.notice.service.NoticeService;
-import com.springboot.notice.entity.Notice;
-import com.springboot.notice.mapper.NoticeMapper;
-import com.springboot.notice.service.S3Service;
-import com.springboot.responsedto.MultiResponseDto;
-import com.springboot.responsedto.SingleResponseDto;
-import com.springboot.schedule.dto.ScheduleResponseDto;
-import com.springboot.swagger.SwaggerErrorResponse;
-import com.springboot.utils.UriCreator;
-=======
 import com.logbei.be.auth.utils.CustomPrincipal;
+import com.logbei.be.notice.dto.NoticePatchDto;
+import com.logbei.be.notice.dto.NoticePostDto;
+import com.logbei.be.notice.dto.NoticeResponseDto;
 import com.logbei.be.notice.service.NoticeService;
 import com.logbei.be.notice.dto.NoticeDto;
 import com.logbei.be.notice.entity.Notice;
 import com.logbei.be.notice.mapper.NoticeMapper;
 import com.logbei.be.responsedto.MultiResponseDto;
 import com.logbei.be.responsedto.SingleResponseDto;
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import com.logbei.be.utils.UriCreator;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/notice/controller/NoticeController.java
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;

@@ -1,20 +1,5 @@
 package com.logbei.be.member.controller;
 
-<<<<<<< HEAD:src/main/java/com/springboot/member/controller/MemberController.java
-import com.springboot.auth.utils.CustomPrincipal;
-import com.springboot.auth.utils.MemberDetails;
-import com.springboot.member.dto.AdminPostDto;
-import com.springboot.member.dto.MemberPatchDto;
-import com.springboot.member.dto.MemberPostDto;
-import com.springboot.member.dto.MemberResponseDto;
-import com.springboot.member.entity.Member;
-import com.springboot.member.mapper.MemberMapper;
-import com.springboot.member.service.MemberService;
-import com.springboot.responsedto.MultiResponseDto;
-import com.springboot.responsedto.SingleResponseDto;
-import com.springboot.schedule.dto.ScheduleResponseDto;
-import com.springboot.swagger.SwaggerErrorResponse;
-=======
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.member.dto.MemberPatchDto;
 import com.logbei.be.member.dto.MemberPostDto;
@@ -24,7 +9,7 @@ import com.logbei.be.member.mapper.MemberMapper;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.responsedto.MultiResponseDto;
 import com.logbei.be.responsedto.SingleResponseDto;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/member/controller/MemberController.java
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;

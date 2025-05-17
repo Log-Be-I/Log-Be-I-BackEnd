@@ -1,21 +1,8 @@
 package com.logbei.be.schedule.service;
 
-<<<<<<< HEAD:src/main/java/com/springboot/schedule/service/ScheduleService.java
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.exception.ExceptionCode;
-import com.springboot.member.entity.Member;
-import com.springboot.member.service.MemberService;
-import com.springboot.schedule.entity.HistoricalSchedule;
-import com.springboot.schedule.entity.Schedule;
-import com.springboot.schedule.repository.HistoricalScheduleRepository;
-import com.springboot.schedule.repository.ScheduleRepository;
-import com.springboot.utils.AuthorizationUtils;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.*;
-=======
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.exception.ExceptionCode;
@@ -25,6 +12,7 @@ import com.logbei.be.schedule.entity.HistoricalSchedule;
 import com.logbei.be.schedule.entity.Schedule;
 import com.logbei.be.schedule.repository.HistoricalScheduleRepository;
 import com.logbei.be.schedule.repository.ScheduleRepository;
+import com.logbei.be.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +20,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/schedule/service/ScheduleService.java
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

@@ -1,10 +1,6 @@
 package com.logbei.be.ai.googleTTS;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-<<<<<<< HEAD:src/main/java/com/springboot/ai/googleTTS/GoogleTextToSpeechService.java
-=======
-import com.logbei.be.log.LogStorageService;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/ai/googleTTS/GoogleTextToSpeechService.java
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

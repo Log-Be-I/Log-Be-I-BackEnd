@@ -6,35 +6,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
-<<<<<<< HEAD:src/main/java/com/springboot/ai/openai/service/OpenAiService.java
-import com.springboot.ai.openai.OpenAiProperties;
-import com.springboot.ai.openai.dto.OpenAiMessage;
-import com.springboot.ai.openai.dto.OpenAiRequest;
-import com.springboot.ai.openai.dto.OpenAiResponse;
-import com.springboot.exception.BusinessLogicException;
-import com.springboot.exception.ExceptionCode;
-import com.springboot.log.service.LogStorageService;
-import com.springboot.report.dto.RecordForAnalysisDto;
-import com.springboot.report.dto.ReportAnalysisRequest;
-import com.springboot.report.dto.ReportAnalysisResponse;
-import com.springboot.report.entity.Report;
-import com.springboot.report.service.ReportService;
-import com.springboot.utils.ReportUtil;
-=======
+
 import com.logbei.be.ai.openai.OpenAiProperties;
 import com.logbei.be.ai.openai.dto.OpenAiMessage;
 import com.logbei.be.ai.openai.dto.OpenAiRequest;
 import com.logbei.be.ai.openai.dto.OpenAiResponse;
 import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.exception.ExceptionCode;
-import com.logbei.be.log.LogStorageService;
+import com.logbei.be.log.service.LogStorageService;
 import com.logbei.be.report.dto.RecordForAnalysisDto;
 import com.logbei.be.report.dto.ReportAnalysisRequest;
 import com.logbei.be.report.dto.ReportAnalysisResponse;
 import com.logbei.be.report.entity.Report;
 import com.logbei.be.report.service.ReportService;
 import com.logbei.be.utils.ReportUtil;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/ai/openai/service/OpenAiService.java
 import lombok.RequiredArgsConstructor;
 
 import java.nio.charset.StandardCharsets;

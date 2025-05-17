@@ -1,9 +1,6 @@
 package com.logbei.be.dashboard.controller;
 
-<<<<<<< HEAD:src/main/java/com/springboot/dashboard/controller/DashBoardController.java
-import com.springboot.dashboard.dto.DashBoardResponseDto;
-import com.springboot.dashboard.service.DashBoardService;
-import com.springboot.swagger.SwaggerErrorResponse;
+import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -11,11 +8,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-=======
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.dashboard.dto.DashBoardResponseDto;
 import com.logbei.be.dashboard.service.DashBoardService;
->>>>>>> 3cfffea (패키지명 변경):src/main/java/com/logbei/be/dashboard/controller/DashBoardController.java
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
