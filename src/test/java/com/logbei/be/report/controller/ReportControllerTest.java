@@ -5,7 +5,7 @@ import com.logbei.be.report.entity.Report;
 import com.logbei.be.report.mapper.ReportMapper;
 import com.logbei.be.report.service.ReportService;
 import com.logbei.be.responsedto.ListResponseDto;
-import com.springboot.report.dto.SummaryResponseDto;
+import com.logbei.be.report.dto.SummaryResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

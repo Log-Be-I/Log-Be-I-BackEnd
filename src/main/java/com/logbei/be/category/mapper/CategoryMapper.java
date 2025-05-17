@@ -6,9 +6,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import com.logbei.be.record.dto.*;
 import java.util.List;
-import com.springboot.category.dto.CategoryResponseDto;
-import com.springboot.category.dto.CategoryPatchDto;
-import com.springboot.category.dto.CategoryPostDto;
+import com.logbei.be.category.dto.CategoryResponseDto;
+import com.logbei.be.category.dto.CategoryPatchDto;
+import com.logbei.be.category.dto.CategoryPostDto;
 
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {

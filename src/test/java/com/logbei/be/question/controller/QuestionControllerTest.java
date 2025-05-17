@@ -9,7 +9,7 @@ import com.logbei.be.question.service.QuestionService;
 import com.logbei.be.responsedto.MultiResponseDto;
 import com.logbei.be.responsedto.SingleResponseDto;
 import com.logbei.be.utils.UriCreator;
-import com.springboot.question.dto.QuestionPostDto;
+import com.logbei.be.question.dto.QuestionPostDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

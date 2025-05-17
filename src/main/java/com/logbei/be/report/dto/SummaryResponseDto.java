@@ -1,4 +1,4 @@
-package com.springboot.report.dto;
+package com.logbei.be.report.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

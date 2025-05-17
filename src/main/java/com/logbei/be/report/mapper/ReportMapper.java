@@ -3,7 +3,7 @@ package com.logbei.be.report.mapper;
 import com.logbei.be.report.dto.ReportDto;
 import com.logbei.be.report.entity.Report;
 import org.mapstruct.Mapper;
-import com.springboot.report.dto.SummaryResponseDto;
+import com.logbei.be.report.dto.SummaryResponseDto;
 import com.logbei.be.report.dto.ReportResponseDto;
 import java.util.Comparator;
 import java.util.List;

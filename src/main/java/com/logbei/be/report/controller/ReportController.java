@@ -1,6 +1,6 @@
 package com.logbei.be.report.controller;
 
-import com.springboot.report.dto.SummaryResponseDto;
+import com.logbei.be.report.dto.SummaryResponseDto;
 import com.logbei.be.report.dto.ReportResponseDto;
 import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,14 +14,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.logbei.be.ai.openai.service.OpenAiService;
 import com.logbei.be.auth.utils.CustomPrincipal;
-import com.logbei.be.record.entity.Record;
 import com.logbei.be.record.service.RecordService;
-import com.logbei.be.report.dto.ReportAnalysisRequest;
 import com.logbei.be.report.entity.Report;
 import com.logbei.be.report.mapper.ReportMapper;
 import com.logbei.be.report.service.ReportService;
 import com.logbei.be.responsedto.ListResponseDto;
-import com.logbei.be.utils.ReportUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.index.qual.Positive;

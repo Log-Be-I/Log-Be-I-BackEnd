@@ -1,4 +1,4 @@
-package com.springboot.answer.dto;
+package com.logbei.be.answer.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

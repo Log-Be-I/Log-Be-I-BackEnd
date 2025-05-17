@@ -32,7 +32,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.springboot.question.dto.QuestionPostDto;
+import com.logbei.be.question.dto.QuestionPostDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.net.URI;

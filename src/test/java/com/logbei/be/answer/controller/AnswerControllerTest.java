@@ -1,13 +1,12 @@
 package com.logbei.be.answer.controller;
 
-import com.logbei.be.answer.controller.AnswerController;
 import com.logbei.be.answer.entity.Answer;
 import com.logbei.be.answer.mapper.AnswerMapper;
 import com.logbei.be.answer.service.AnswerService;
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.responsedto.SingleResponseDto;
-import com.springboot.answer.dto.AnswerPostDto;
-import com.springboot.answer.dto.AnswerResponseDto;
+import com.logbei.be.answer.dto.AnswerPostDto;
+import com.logbei.be.answer.dto.AnswerResponseDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

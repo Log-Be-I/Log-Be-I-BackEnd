@@ -2,7 +2,8 @@ package com.logbei.be.answer.mapper;
 
 
 
-import com.springboot.answer.dto.AnswerResponseDto;
+import com.logbei.be.answer.dto.AnswerPostDto;
+import com.logbei.be.answer.dto.AnswerResponseDto;
 import com.logbei.be.answer.dto.AnswerPatchDto;
 import com.logbei.be.answer.entity.Answer;
 import org.mapstruct.Mapper;
@@ -12,7 +13,9 @@ import org.mapstruct.Mapping;
 public interface AnswerMapper {
     @Mapping(target = "member.memberId", source = "memberId")
     @Mapping(target = "question.questionId", source = "questionId")
-    Answer answerPostToAnswer(com.springboot.answer.dto.AnswerPostDto postDto);
+
+    Answer answerPostToAnswer(AnswerPostDto postDto);
+
     Answer answerPatchToAnswer(AnswerPatchDto patchDto);
 
     default AnswerResponseDto answerToAnswerResponse(Answer answer) {
