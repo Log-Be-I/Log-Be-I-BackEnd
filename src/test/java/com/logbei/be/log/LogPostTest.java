@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-
+import com.logbei.be.log.service.LogStorageService;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
