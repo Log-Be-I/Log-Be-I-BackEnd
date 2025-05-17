@@ -1,20 +1,225 @@
-# 프로젝트 구성 요약
+## Log_Be_I
+<br>
+<img src="src/main/resources/assets/logo.png">
 
-이 프로젝트는 Spring Boot 2.7.0을 기반으로 하며, 다음과 같은 주요 의존성과 설정을 포함하고 있습니다:
+### 프로젝트 소개
+- React-Native 기반의 기록, 개인 비서 애플리케이션입니다.
+- Naver CLOVA API, OpenAI - ChatGPT, Google TTS을 활용하였습니다.
+- 개발 기간 : 2025.04.02 ~ 05.01
+- Repo : https://github.com/Log-Be-I
+  <br>
 
-## 주요 의존성
+### 백엔드 개발환경
+- 개발도구: Intellij IDEA
+- 언어: Java 11 Open JDK
+- 빌드도구: Gradle
+- 개발
+    - Spring Boot: 2.7.0
+    - Spring Data
+        - Spring Data JPA
+        - Spring Data Redis
+    - Spring Security
+    - JPA
+- 데이터베이스
+    - MySQL
+    - Redis
+- ERD
+    - DB Diagram
+- 프론트 개발 환경 및 언어
+    - 언어:
+        - HTML
+        - CSS
+        - JavaScript
+    - 라이브러리 및 프레임워크:
+        - React-Native
+- API
+    - Google OAuth 2.0
+    - Naver news
+    - Naver CLOVA CSR (STT)
+    - Google TTS
+    - OpenAi Chat GPT
+- 형상관리 및 이슈관리
+    - GitHub
+- AWS 인프라
+    - EC2
+    - S3
+    - RDS (MySQL)
+    - Docker
+- 기타
+    - Discord
 
-- **Spring Boot Data JPA**: 데이터 접근 및 관리를 위한 JPA(Java Persistence API) 지원.
-- **Spring Boot Validation**: 입력 데이터 유효성 검사를 위한 스프링의 지원.
-- **Spring Boot Web**: 웹 애플리케이션 개발을 위한 스프링 부트 모듈.
-- **Lombok**: 보일러플레이트 코드 감소를 위한 자바 라이브러리.
-- **H2 Database**: 인메모리 데이터베이스.
-- **MapStruct**: 객체 간 매핑을 위한 라이브러리.
+### 개발언어
+<span>
+<img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white">
+<img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"/>
+</span>
+  <br>
 
-## 추가 설정
+### 사용도구
 
-- **Java 버전**: Java 11.
-- **빌드 도구**: Gradle.
-- **코딩 및 문서 인코딩**: UTF-8.
-- **Javadoc 설정**: 프로젝트의 모든 Java 소스에 대한 Javadoc 생성 지원.
-- **의존성 관리**: Spring Dependency Management 플러그인을 통한 의존성 버전 관리.
+  <img src="https://img.shields.io/badge/spring boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">
+  <img src="https://img.shields.io/badge/spring security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white">
+  <img src="https://img.shields.io/badge/spring Data JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white"> <br>
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white">
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white">
+  <br>
+
+### Messaging
+
+<span>
+  <img src="https://img.shields.io/badge/WebSocket-4D4D4D?style=for-the-badge&logo=websocket&logoColor=white"/>
+  <img src="https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB">
+  </span>
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"/>
+  <br>
+  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white"/>
+
+
+### etc
+
+<span>
+  <img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white"/>
+  <img src="https://img.shields.io/badge/css3-1572B6?style=for-the-badge&logo=css3&logoColor=white"/>
+  <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=Gradle&logoColor=white"/>
+  <br>
+  <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Github-181717?style=for-the-badge&logo=github&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white"/>
+</span>
+<br>
+
+
+## [ERD] (https://dbdiagram.io/d/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-2%EC%B0%A8-Log-Be-I-67f2ab404f7afba18486fe21)
+ <img src="src/main/resources/assets/Logbe-i ERD.png">
+<br>
+<br>
+<br>
+
+## [Kanban Board]
+
+Github Kanban
+- Github의 Project 기능 중 Kanban 보드를 활용하여 프로젝트를 관리했습니다.
+- Todo, InProgress, Done 의 열로 작업을 구분해 현재 작업 상황을 실시간으로 확인할 수 있도록 했습니다.
+  <br>
+
+<img width="1713" alt="image" src="https://github.com/orgs/dice-talk/projects/1/views/1">
+
+<br>
+<br>
+
+
+## [서비스 구현 내용]
+
+### 주요 기능
+
+.
+.
+.
+.
+.
+
+
+<br>
+<br>
+
+## [구성원 별 담당 내용]
+
+팀의 모든 구성원은 프로젝트 초기부터 설계 작업에 적극적으로 참여했으며, 특히 사용자 요구사항 정의서, API 명세서, ERD 설계 등 핵심적인 아키텍처 설계를 함께 논의하고 결정함으로써 프로젝트의 기틀을 다졌습니다. 이를 통해 전체적인 개발 방향을 명확히 설정하고, 팀원 간의 협업을 원활하게 이끌 수 있는 기반을 마련했습니다.
+
+각자의 담당 영역에서 전문성을 발휘해 구현을 진행했으며, 설계 과정에서 나온 다양한 아이디어와 피드백을 반영하여 프로젝트의 완성도를 높이는 데 기여했습니다.
+
+## 남택호
+[문의, 채팅방 내 이벤트, 상품]
+
+> ### 문의[BE]
+- a
+
+> ### 채팅방 내 이벤트[BE]
+
+> ### 상품[BE]
+
+
+---
+<br/>
+
+## 강민지
+[문의, 채팅방 내 이벤트, 상품]
+
+> ### 문의[BE]
+- a
+
+> ### 채팅방 내 이벤트[BE]
+
+> ### 상품[BE]
+
+
+---
+<br/>
+
+## 구본석
+[문의, 채팅방 내 이벤트, 상품]
+
+> ### 문의[BE]
+- a
+
+> ### 채팅방 내 이벤트[BE]
+
+> ### 상품[BE]
+
+
+---
+<br/>
+
+## 여승아
+[문의, 채팅방 내 이벤트, 상품]
+
+> ### 문의[BE]
+- a
+
+> ### 채팅방 내 이벤트[BE]
+
+> ### 상품[BE]
+
+
+---
+<br>
+<br>
+<br>
+
+## 개발 문서
+
+### 요구사항 정의서
+[Log-Be-I 요구사항 정의서](https://docs.google.com/spreadsheets/d/1pdoUWNzMn6waiCOxjhQLpnKrTGWvYgWzCN_qHSBJ3sk/edit?usp=sharing)
+
+### API 명세서
+[Log-Be-I API 명세서](https://docs.google.com/spreadsheets/d/1KAARw5V2vwyyiGzZlrCtq8vsZAH0Me2bKTv13oM1eNE/edit?usp=sharing)
+
+### 발표자료
+[Log-Be-I 발표자료]()
+
+<br>
+<br>
+
+## 프로젝트 회고
+
+### 남택호
+> asdf
+
+<br>
+
+### 강민지
+> asdf
+
+<br>
+
+### 구본석
+> asdf
+
+<br>
+
+### 여승아
+> asdf
+
+<br>

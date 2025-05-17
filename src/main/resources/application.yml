@@ -1,11 +1,116 @@
 spring:
+  data:
+    redis:
+      host: 172.31.41.9
+      port: 6379
+  application:
+    name:  log-be-i
   h2:
     console:
       enabled: true
       path: /h2
+  jackson:
+    time-zone: Asia/Seoul
   datasource:
-    url: jdbc:h2:mem:test
+    url: jdbc:mysql://database-1.c10a226u86g0.ap-northeast-2.rds.amazonaws.com:3306/logbe_i_DB?serverTimezone=Asia/Seoul
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create  # (1) 스키마 자동 생성
+      ddl-auto: update  # (1) 스키마 자동 생성
     show-sql: true      # (2) SQL 쿼리 출력
+  web: # (1) 도커 리소스 활용
+    resources:
+      static-locations: file:/app/audio/
+      add-mappings: true
+  sql:
+    init:
+      data-locations: classpath*:db/h2/data.sql
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${REDIRECT_URI}
+            scope:
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+mail:
+  address:
+    admin: admin1@gmail.com, admin2@gmail.com, admin3@gmail.com
+  data:
+    redis:
+      host: 172.31.41.9  #Redis 서버 주소 지정
+      port: 6379        # Redis 서버 포트 지정
+server:
+  servlet:
+    multipart:      #파일 업로드 활성화
+      enabled: true
+      max-file-size: 10MB     #최대 파일 크기 설정
+      max-request-size: 10MB
+      file-size-threshold: 2KB    #임계값 설정
+jwt:
+  key: ${JWT_SECRET_KEY}
+  access-token-expiration-minutes: 480
+  refresh-token-expiration-minutes: 1440
+springdoc:
+  api-docs:
+    enabled: true
+    version: openapi_3_0 #사용하는 버전을 명시
+    packagesToScan: mokindang.jubging #api-docs 의 스캔 범위를 지정
+    path: /v3/api-docs #api 문서 확인 경로, localhost:8080/v3/api-docs 로 접근
+
+  default-consumes-media-type: application/json #기본으로 설정되는 미디어타입 지정
+  auto-tag-classes: true #오토 태그 기능 활성화
+  groups:
+    enabled: false #api 그룹 기능, default는 true 이나 당장 사용하지 않기에 false 로 지정
+  swagger-ui:
+    #    tryItOutEnabled: true
+    operationsSorter: method #method 기준으로 정렬, 그외 alpha 로 정렬 가능
+    path: /swagger-ui.html #swagger ui 의 api 문서 확인 경로 defalut 는 /swagger-ui.html 이다.
+logging:
+  level:
+    org.springframework.security: INFO
+clova:
+  api:
+    key: ${CLOVA_API_SECRET}
+    id: ${CLOVA_CLIENT_ID}
+google:
+  api:
+    key: ${GOOGLE_APPLICATION_CREDENTIALS}
+openai:
+  api-key: ${OPENAI_API_KEY}
+  base-url: https://api.openai.com/v1/chat/completions
+  model: gpt-4-turbo
+naver:
+  client-id: ${NAVER_CLIENT_ID}
+  secret-key: ${NAVER_CLIENT_SECRET}
+cloud:
+  aws:
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket:
+        logs: logbe-i-log
+        images: logbe-i-images
+management:
+  endpoints:
+    web:
+      exposure:
+        include: loggers
+  endpoint:
+    loggers:
+      enabled: true
