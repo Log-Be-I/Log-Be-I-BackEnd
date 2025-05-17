@@ -1,17 +1,16 @@
 package com.logbei.be.record.mapper;
 
 
-import com.logbei.be.record.dto.RecordDto;
 import com.logbei.be.record.dto.RecordResponseDto;
 import com.logbei.be.record.entity.Record;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import com.springboot.record.dto.RecordPatchDto;
+import com.logbei.be.record.dto.RecordPatchDto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.springboot.record.dto.RecordPostDto;
+import com.logbei.be.record.dto.RecordPostDto;
 
 @Mapper(componentModel = "spring")
 public interface RecordMapper {

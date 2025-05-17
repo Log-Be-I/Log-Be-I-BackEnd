@@ -8,10 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
-import com.springboot.dashboard.dto.UnansweredQuestion;
+import com.logbei.be.dashboard.dto.UnansweredQuestion;
 import java.time.LocalDateTime;
 import java.util.List;
-import com.springboot.dashboard.dto.RecentNotice;
+import com.logbei.be.dashboard.dto.RecentNotice;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

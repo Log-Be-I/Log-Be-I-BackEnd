@@ -1,8 +1,8 @@
 package com.logbei.be.category.controller;
 
-import com.springboot.category.dto.CategoryPostDto;
-import com.springboot.category.dto.CategoryPatchDto;
-import com.springboot.category.dto.CategoryResponseDto;
+import com.logbei.be.category.dto.CategoryPostDto;
+import com.logbei.be.category.dto.CategoryPatchDto;
+import com.logbei.be.category.dto.CategoryResponseDto;
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.category.dto.CategoryDto;
 import com.logbei.be.category.entity.Category;

@@ -5,10 +5,10 @@ import com.logbei.be.question.dto.QuestionResponseDto;
 import com.logbei.be.question.entity.Question;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import com.springboot.question.dto.QuestionPostDto;
+import com.logbei.be.question.dto.QuestionPostDto;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.springboot.answer.dto.AnswerResponseDto;
+import com.logbei.be.answer.dto.AnswerResponseDto;
 @Mapper(componentModel = "spring")
 public interface QuestionMapper {
     @Mapping(target = "member.memberId", source = "memberId")

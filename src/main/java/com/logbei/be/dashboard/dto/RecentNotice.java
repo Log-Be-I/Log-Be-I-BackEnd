@@ -1,4 +1,4 @@
-package com.springboot.dashboard.dto;
+package com.logbei.be.dashboard.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

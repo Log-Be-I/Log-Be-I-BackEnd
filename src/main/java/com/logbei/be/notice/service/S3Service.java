@@ -1,4 +1,4 @@
-package com.springboot.notice.service;
+package com.logbei.be.notice.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
