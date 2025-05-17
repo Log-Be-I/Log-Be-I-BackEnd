@@ -37,7 +37,7 @@ public class LogReset {
                 : LocalDate.now().minusDays(dayRange);
         // 오늘 날짜
         LocalDate today = LocalDate.now();
-            // S3 6개월치 데이터 삭제
+        // S3 6개월치 데이터 삭제
         // S3 안에 logs/ 밑에 있는 모든 파일 리스트 불러오기
         List<S3ObjectSummary> allObjects = amazonS3.listObjects(bucketName, "logs/")
                 .getObjectSummaries();
