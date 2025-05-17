@@ -1,4 +1,4 @@
-package com.springboot.config;
+package com.logbei.be.config;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

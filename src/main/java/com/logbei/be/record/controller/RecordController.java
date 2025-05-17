@@ -1,7 +1,7 @@
 package com.logbei.be.record.controller;
 
-import com.springboot.record.dto.RecordPatchDto;
-import com.springboot.record.dto.RecordPostDto;
+import com.logbei.be.record.dto.RecordPatchDto;
+import com.logbei.be.record.dto.RecordPostDto;
 import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,7 +17,6 @@ import com.logbei.be.ai.openai.service.OpenAiService;
 import com.logbei.be.auth.utils.CustomPrincipal;
 import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.exception.ExceptionCode;
-import com.logbei.be.record.dto.RecordDto;
 import com.logbei.be.record.entity.Record;
 import com.logbei.be.record.mapper.RecordMapper;
 import com.logbei.be.record.service.RecordService;

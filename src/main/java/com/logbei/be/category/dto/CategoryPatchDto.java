@@ -1,4 +1,4 @@
-package com.springboot.category.dto;
+package com.logbei.be.category.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

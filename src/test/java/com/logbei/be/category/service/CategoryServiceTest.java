@@ -1,4 +1,4 @@
-package com.logbei.be.category.service;//package com.springboot.category.service;
+package com.logbei.be.category.service;
 
 import com.logbei.be.category.entity.Category;
 import com.logbei.be.category.repository.CategoryRepository;

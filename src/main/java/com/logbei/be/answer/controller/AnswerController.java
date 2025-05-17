@@ -1,7 +1,7 @@
 package com.logbei.be.answer.controller;
 
-import com.logbei.be.answer.dto.AnswerDto;
 import com.logbei.be.answer.dto.AnswerPatchDto;
+import com.logbei.be.answer.dto.AnswerPostDto;
 import com.logbei.be.answer.entity.Answer;
 import com.logbei.be.answer.mapper.AnswerMapper;
 import com.logbei.be.answer.service.AnswerService;
@@ -53,7 +53,7 @@ public class AnswerController {
     })
     @PostMapping
     public ResponseEntity postAnswer(@PathVariable("question-id") Long questionId,
-                                     @Valid @RequestBody com.springboot.answer.dto.AnswerPostDto answerPostDto,
+                                     @Valid @RequestBody AnswerPostDto answerPostDto,
                                      @Parameter(hidden = true) @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         answerPostDto.setQuestionId(questionId);
         Answer answer = answerService.createAnswer(answerMapper.answerPostToAnswer(answerPostDto), customPrincipal.getMemberId());
