@@ -42,7 +42,8 @@ class ReportSchedulerTest {
     @Test
     void sendWeeklyRecordsToAi_shouldGenerateReport_whenRecordCountIsSufficient() throws IOException {
         // given
-        List<Record> dummyRecords = Collections.nCopies(10, new Record()); // 10개 이상
+        List<Record> dummyRecordsList = Collections.nCopies(10, new Record());
+        List<List<Record>> dummyRecords = List.of(dummyRecordsList);
         when(recordService.getWeeklyRecords(any(), any())).thenReturn(dummyRecords);
 
         List<ReportAnalysisRequest> mockRequests = List.of(mock(ReportAnalysisRequest.class));
@@ -73,15 +74,17 @@ class ReportSchedulerTest {
     @Test
     void sendMonthlyRecordsToAi_shouldGenerateReport_whenWeeklyCountSufficient() throws IOException {
         // given
-        when(reportService.getWeeklyReportCount(any())).thenReturn(2);
-        List<Record> dummyMonthly = Collections.nCopies(15, new Record());
-        when(recordService.getMonthlyRecords(any(), any())).thenReturn(dummyMonthly);
+        List<Long> memberIds = List.of(1L, 2L);
+        when(reportService.getMemberIdWithAtLeastTwoWeeklyReports(any(), any())).thenReturn(memberIds);
+
+        List<Record> memberRecords = Collections.nCopies(10, new Record());
+        List<List<Record>> dummyMonthlyRecords = List.of(memberRecords);
+        when(recordService.getMonthlyRecordsByMemberIds(any(), any(), any())).thenReturn(dummyMonthlyRecords);
 
         List<ReportAnalysisRequest> mockRequests = List.of(mock(ReportAnalysisRequest.class));
         try (MockedStatic<ReportUtil> utilities = mockStatic(ReportUtil.class)) {
-            utilities.when(() -> ReportUtil.toReportRequests(dummyMonthly, Report.ReportType.REPORT_MONTHLY))
+            utilities.when(() -> ReportUtil.toReportRequests(dummyMonthlyRecords, Report.ReportType.REPORT_MONTHLY))
                     .thenReturn(mockRequests);
-
             // when
             reportScheduler.sendMonthlyRecordsToAi();
 
@@ -93,13 +96,13 @@ class ReportSchedulerTest {
     @Test
     void sendMonthlyRecordsToAi_shouldNotGenerateReport_whenWeeklyCountInsufficient() throws IOException {
         // given
-        when(reportService.getWeeklyReportCount(any())).thenReturn(1);
+        when(reportService.getMemberIdWithAtLeastTwoWeeklyReports(any(), any())).thenReturn(Collections.emptyList());
 
         // when
         reportScheduler.sendMonthlyRecordsToAi();
 
         // then
-        verify(recordService, never()).getMonthlyRecords(any(), any());
+        verify(recordService, never()).getMonthlyRecordsByMemberIds(any(), any(), any());
         verify(openAiService, never()).createReportsFromAiInBatch(any());
     }
 }

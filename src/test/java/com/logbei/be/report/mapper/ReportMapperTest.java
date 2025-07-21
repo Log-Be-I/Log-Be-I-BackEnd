@@ -1,5 +1,6 @@
 package com.logbei.be.report.mapper;
 
+import com.logbei.be.member.entity.Member;
 import com.logbei.be.report.dto.ReportResponseDto;
 import com.logbei.be.report.entity.Report;
 import com.logbei.be.report.dto.SummaryResponseDto;
@@ -52,6 +53,9 @@ class ReportMapperTest {
     @Test
     void reportsToReportsResponseDtos_convertsReportListCorrectly() {
         // given
+        Member member = new Member();
+        member.setMemberId(10L);
+
         Report report1 = new Report();
         ReflectionTestUtils.setField(report1, "createdAt", LocalDateTime.of(2024, 3, 5, 12, 0));
         report1.setReportId(1L);
@@ -65,6 +69,7 @@ class ReportMapperTest {
         ));
         report1.setReportType(Report.ReportType.REPORT_WEEKLY);
         report1.setPeriodNumber(1);
+        report1.setMember(member);
 
         Report report2 = new Report();
         ReflectionTestUtils.setField(report2, "createdAt", LocalDateTime.of(2024, 3, 12, 8, 30));
@@ -79,6 +84,7 @@ class ReportMapperTest {
         ));
         report2.setReportType(Report.ReportType.REPORT_WEEKLY);
         report2.setPeriodNumber(2);
+        report2.setMember(member);
 
         List<Report> reports = List.of(report1, report2);
 
@@ -101,6 +107,7 @@ class ReportMapperTest {
         assertThat(dto1.getReportType()).isEqualTo(Report.ReportType.REPORT_WEEKLY);
         assertThat(dto1.getPeriodNumber()).isEqualTo(1);
         assertThat(dto1.getCreatedAt()).isEqualTo(LocalDateTime.of(2024, 3, 5, 12, 0));
+        assertThat(dto1.getMemberId()).isEqualTo(10L);
     }
 }
 
