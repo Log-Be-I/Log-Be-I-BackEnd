@@ -4,6 +4,7 @@ import com.springboot.ai.googleTTS.GoogleTextToSpeechService;
 import com.springboot.member.entity.Member;
 import com.springboot.member.service.MemberService;
 import com.springboot.pushToken.service.PushTokenService;
+import com.springboot.record.entity.Record;
 import com.springboot.report.dto.ReportAnalysisRequest;
 
 import com.springboot.exception.BusinessLogicException;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -159,12 +161,10 @@ public class ReportService {
     }
 
     //주간 분석 개수 반환 : 월간 분석 조건 - 주간분석 2개 이상 시 실행
-    public int getWeeklyReportCount(YearMonth lastMonth) {
-        String yearMonthPrefix = String.format("%d년 %02d월", lastMonth.getYear(), lastMonth.getMonthValue());
-        // 1. 해당 월의 주간 Report 개수 조회 (예: JPA 쿼리)
-        return repository.countWeeklyReportsByTitle(
-                Report.ReportType.REPORT_WEEKLY, yearMonthPrefix + "%", "주차");
+    public List<Long> getMemberIdWithAtLeastTwoWeeklyReports(LocalDateTime start, LocalDateTime end){
+        return repository.findMemberIdsWithAtLeastWeeklyReportsInMonth(Report.ReportType.REPORT_WEEKLY, start, end, 2);
     }
+
 
     // report 단건 조회
     public Report findVerifiedExistsReport(long reportId) {

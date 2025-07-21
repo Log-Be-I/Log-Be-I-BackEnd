@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -195,36 +192,34 @@ public class RecordService {
     }
 
     // weekStart: 한 주의 기록
-    public List<Record> getWeeklyRecords(LocalDateTime weekStart, LocalDateTime weekEnd) {
+    public List<List<Record>> getWeeklyRecords(LocalDateTime weekStart, LocalDateTime weekEnd) {
        // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
-        List<Record> findRecords = recordRepository.findRegisteredRecordsWithMemberBetween(weekStart, weekEnd, Record.RecordStatus.RECORD_REGISTERED);
+        List<Long> memberIds = recordRepository.findMemberIdsWithAtLeastTenRecords(weekStart, weekEnd);
+        List<List<Record>> weeklyRecordsByMember = new ArrayList<>();
 
-        return findRecords;
+        for (Long memberId : memberIds) {
+            //개별 회원 주간 기록 조회
+            List<Record> memberRecords = recordRepository.findByMemberIdAndCreatedAtBetween(memberId,weekStart,weekEnd, Record.RecordStatus.RECORD_REGISTERED);
+            weeklyRecordsByMember.add(memberRecords);
+        }
+        return weeklyRecordsByMember;
     }
 
-    // month : 월별 기록
-    public List<Record> getMonthlyRecords(LocalDateTime start, LocalDateTime end) {
-        // JPA 쿼리로 특정 회원의 weekStart~weekEnd 사이의 Record 조회
-        return recordRepository.findRegisteredRecordsWithMemberBetween(start, end, Record.RecordStatus.RECORD_REGISTERED);
+    //월간 record 조회
+    public  List<List<Record>> getMonthlyRecordsByMemberIds(List<Long> memberIds, LocalDateTime start, LocalDateTime end) {
+        List<List<Record>> monthlyRecordsByMember = new ArrayList<>();
+
+        for(Long memberId : memberIds) {
+            List<Record> records = recordRepository.findByMemberIdAndCreatedAtBetween(
+                    memberId, start, end, Record.RecordStatus.RECORD_REGISTERED
+            );
+            if (!records.isEmpty()) {
+                monthlyRecordsByMember.add(records);
+            }
+        }
+        return monthlyRecordsByMember;
     }
 
-//    //삭제상태가 아닌 List<Record> 반환 + 작성자 본인 or 관리자인지 검증
-//    public List<Record> nonDeletedRecordAndAuth (List<Record> records, Long memberId) {
-//        return records.stream().filter(record -> record.getRecordStatus() != Record.RecordStatus.RECORD_DELETED)
-//                .peek(record ->
-//                        // 관리자 or owner 가 아니라면 예외 처리
-//                AuthorizationUtils.isAdminOrOwner(record.getMember().getMemberId(), memberId)
-//                ).collect(Collectors.toList());
-//
-//    }
-
-//    // 타입이 뭐든 일단 받아서 분기 처리
-//    public void handleResponse(Object response) {
-//        // response 타입이 Schedule 이라면
-//        if (response instanceof Schedule) {
-//            Schedule schedule = (Schedule) response;
-//        }
-//    }
     //삭제상태가 아닌 record 반환
     public Record getNotDeletedRecord(Record record){
         if(record.getRecordStatus() == Record.RecordStatus.RECORD_DELETED) {

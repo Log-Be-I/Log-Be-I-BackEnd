@@ -56,34 +56,29 @@ public class ReportUtil {
 
 
     //List<Rcord> -> List<ReportAnalysisRequest>
-    public static List<ReportAnalysisRequest> toReportRequests(List<Record> records, Report.ReportType type) {
-        //Map : 필요한 정보만 뽑아오기 위한 중간다리 역할
-        Map<Long, List<Record>> grouped = records.stream()
-                .collect(Collectors.groupingBy(record -> record.getMember().getMemberId()));  // Map<K,V> 반환
-        //Key : memberId , value : List<Record>
-        return grouped.entrySet().stream().map(entry -> {
-            Long memberId = entry.getKey();
-            List<Record> memberRecords = entry.getValue();
-            //Record 의 content, recordDateTime, categoryName 옮겨서 List
-            List<RecordForAnalysisDto> dtos = memberRecords.stream()
-                    .map(record -> new RecordForAnalysisDto(record.getContent(), record.getRecordDateTime(), record.getCategory().getName()))
-                    .collect(Collectors.toList());
+    public static List<ReportAnalysisRequest> toReportRequests(List<List<Record>> recordsByMember, Report.ReportType type) {
 
+        return recordsByMember.stream().map(memberRecords -> {
+            Long memberId = memberRecords.get(0).getMember().getMemberId(); //한 회원의 기록 리스트, 첫번째에서 memberId 꺼내기
+            List<RecordForAnalysisDto> dtos = memberRecords.stream()
+                    .map(record -> new RecordForAnalysisDto(
+                            record.getContent(),
+                            record.getRecordDateTime(),
+                            record.getCategory().getName()
+                    ))
+                    .collect(Collectors.toList());
             LocalDateTime baseTime = memberRecords.get(0).getRecordDateTime();
 
-            if(type.equals(Report.ReportType.REPORT_WEEKLY)) {
-                //List<ReportAnalysisRequest>  생성 및 반환
+            if (type.equals(Report.ReportType.REPORT_WEEKLY)) {
                 return new ReportAnalysisRequest(
                         getWeeklyReportTitle(baseTime),
                         getMonthlyReportTitle(baseTime),
                         memberId,
                         Report.ReportType.REPORT_WEEKLY,
-                        dtos
-                );
-
+                        dtos);
             } else if (type.equals(Report.ReportType.REPORT_MONTHLY)) {
                 return new ReportAnalysisRequest(
-                        getMonthlyReportTitle(baseTime), // 또는 getMonthlyTitle
+                        getMonthlyReportTitle(baseTime),
                         getMonthlyReportTitle(baseTime),
                         memberId,
                         Report.ReportType.REPORT_MONTHLY,
@@ -95,34 +90,6 @@ public class ReportUtil {
         }).collect(Collectors.toList());
     }
 
-//    public static List<ReportAnalysisRequest> toMonthlyReportRequests(List<Record> records, Report.ReportType type) {
-//        //Map : 필요한 정보만 뽑아오기 위한 중간다리 역할
-//        Map<Long, List<Record>> grouped = records.stream()
-//                .collect(Collectors.groupingBy(record -> record.getMember().getMemberId()));  // Map<K,V> 반환
-//
-//        //Key : memberId , value : List<Record>
-//        return grouped.entrySet().stream().map(entry -> {
-//            Long memberId = entry.getKey();
-//            List<Record> memberRecords = entry.getValue();
-//
-//            //Record 의 content, recordDateTime, categoryName 옮겨서 List
-//            List<RecordForAnalysisDto> dtos = memberRecords.stream()
-//                    .map(record -> new RecordForAnalysisDto(record.getContent(), record.getRecordDateTime(), record.getCategory().getName()))
-//                    .collect(Collectors.toList());
-//
-//            LocalDateTime baseTime = memberRecords.get(0).getRecordDateTime();
-//
-//            //List<ReportAnalysisRequest>  생성 및 반환
-//            return new ReportAnalysisRequest(
-//                    getMonthlyReportTitle(baseTime), // 또는 getMonthlyTitle
-//                    getMonthlyReportTitle(baseTime),
-//                    memberId,
-//                    type,
-//                    dtos
-//            );
-//        }).collect(Collectors.toList());
-//    }
-
     // 요청 분할 유틸
     public static <T> List<List<T>> partitionList(List<T> list, int size) {
         List<List<T>> result = new ArrayList<>();
@@ -132,20 +99,6 @@ public class ReportUtil {
 
         return result;
     }
-
-    //List<Record> -> List<RecordForAnalysisDto>
-//    public static List<RecordForAnalysisDto> recordsToRecordsForAnalysisDto (List<Record> records) {
-//        return records.stream().map(
-//                record -> recordToRecordForAnalysisDto(record)).collect(Collectors.toList());
-//    }
-
-//    public static RecordForAnalysisDto recordToRecordForAnalysisDto(Record record) {
-//        return new RecordForAnalysisDto(
-//                record.getContent(),
-//                record.getRecordDateTime(),
-//                record.getCategory().getName()
-//        );
-//    }
 
 
 }

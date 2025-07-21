@@ -46,7 +46,8 @@ public interface ReportMapper {
                 report.getContent(),
                 report.getReportType(),
                 report.getPeriodNumber(),
-                report.getCreatedAt()
+                report.getCreatedAt(),
+                report.getMember().getMemberId()
         );
     }
 

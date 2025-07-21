@@ -34,4 +34,5 @@ public class ReportResponseDto {
     private int periodNumber;
     @Schema(description = "생성일", example = "2025-04-11T11:30")
     private LocalDateTime createdAt;
+    private long memberId;
 }
