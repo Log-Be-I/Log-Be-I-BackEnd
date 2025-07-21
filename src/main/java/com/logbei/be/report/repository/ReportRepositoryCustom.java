@@ -1,6 +1,6 @@
-package com.springboot.report.repository;
+package com.logbei.be.report.repository;
 
-import com.springboot.report.entity.Report;
+import com.logbei.be.report.entity.Report;
 
 import java.time.LocalDateTime;
 import java.util.List;

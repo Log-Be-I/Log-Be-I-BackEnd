@@ -3,11 +3,10 @@ package com.logbei.be.record.service;
 import com.logbei.be.ai.openai.service.OpenAiService;
 import com.logbei.be.category.entity.Category;
 import com.logbei.be.category.service.CategoryService;
-import com.logbei.be.exception.BusinessLogicException;
-import com.logbei.be.exception.ExceptionCode;
+import com.logbei.be.exception.exception.BusinessLogicException;
+import com.logbei.be.exception.exception.ExceptionCode;
 
 import com.logbei.be.log.service.LogStorageService;
-
 
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;
@@ -39,7 +38,7 @@ public class RecordService {
     private final RecordRepository recordRepository;
     private final HistoricalRecordRepository historicalRecordRepository;
     private final MemberService memberService;
-    //    private final GoogleCalendarService googleCalendarService;
+//    private final GoogleCalendarService googleCalendarService;
     private final OpenAiService openAiService;
     private final ScheduleRepository scheduleRepository;
     private final CategoryService categoryService;
@@ -131,9 +130,9 @@ public class RecordService {
         Optional.ofNullable(record.getCategory())
                 .ifPresent(category -> findRecord.setCategory(category));
 
-        if(record.getCategory() == null) {
-            throw new BusinessLogicException(ExceptionCode.CATEGORY_NOT_FOUND);
-        }
+       if(record.getCategory() == null) {
+           throw new BusinessLogicException(ExceptionCode.CATEGORY_NOT_FOUND);
+       }
         Category category = categoryService.findVerifiedExistsCategory(record.getCategory().getCategoryId());
         findRecord.setCategory(category);
         //수정 데이터 저장

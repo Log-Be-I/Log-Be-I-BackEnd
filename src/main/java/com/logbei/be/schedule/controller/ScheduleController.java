@@ -1,4 +1,4 @@
-package com.logbei.be.schedule.controller;
+package com.springboot.schedule.controller;
 
 
 import com.logbei.be.auth.utils.CustomPrincipal;

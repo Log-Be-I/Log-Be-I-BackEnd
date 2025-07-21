@@ -1,7 +1,20 @@
 package com.logbei.be.record.controller;
 
+import com.logbei.be.ai.clova.ClovaSpeechService;
+import com.logbei.be.ai.openai.service.OpenAiService;
+import com.logbei.be.auth.utils.CustomPrincipal;
+import com.logbei.be.exception.exception.BusinessLogicException;
+import com.logbei.be.exception.exception.ExceptionCode;
 import com.logbei.be.record.dto.RecordPatchDto;
 import com.logbei.be.record.dto.RecordPostDto;
+import com.logbei.be.record.dto.RecordResponseDto;
+import com.logbei.be.record.entity.Record;
+import com.logbei.be.record.mapper.RecordMapper;
+import com.logbei.be.record.service.RecordService;
+import com.logbei.be.responsedto.MultiResponseDto;
+import com.logbei.be.responsedto.SingleResponseDto;
+import com.logbei.be.schedule.entity.Schedule;
+import com.logbei.be.schedule.mapper.ScheduleMapper;
 import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,18 +25,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import com.logbei.be.ai.clova.ClovaSpeechService;
-import com.logbei.be.ai.openai.service.OpenAiService;
-import com.logbei.be.auth.utils.CustomPrincipal;
-import com.logbei.be.exception.BusinessLogicException;
-import com.logbei.be.exception.ExceptionCode;
-import com.logbei.be.record.entity.Record;
-import com.logbei.be.record.mapper.RecordMapper;
-import com.logbei.be.record.service.RecordService;
-import com.logbei.be.responsedto.MultiResponseDto;
-import com.logbei.be.responsedto.SingleResponseDto;
-import com.logbei.be.schedule.entity.Schedule;
-import com.logbei.be.schedule.mapper.ScheduleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.logbei.be.record.dto.*;
+
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;

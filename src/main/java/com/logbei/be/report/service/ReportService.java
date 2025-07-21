@@ -4,10 +4,11 @@ import com.logbei.be.ai.googleTTS.GoogleTextToSpeechService;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.pushToken.service.PushTokenService;
-import com.logbei.be.exception.BusinessLogicException;
-import com.logbei.be.exception.ExceptionCode;
-
 import com.logbei.be.report.dto.ReportAnalysisRequest;
+
+import com.logbei.be.exception.exception.BusinessLogicException;
+import com.logbei.be.exception.exception.ExceptionCode;
+
 import com.logbei.be.report.dto.ReportAnalysisResponse;
 import com.logbei.be.report.entity.Report;
 import com.logbei.be.report.repository.ReportRepository;
@@ -161,6 +162,7 @@ public class ReportService {
     public List<Long> getMemberIdWithAtLeastTwoWeeklyReports(LocalDateTime start, LocalDateTime end){
         return repository.findMemberIdsWithAtLeastWeeklyReportsInMonth(Report.ReportType.REPORT_WEEKLY, start, end, 2);
     }
+
 
     // report 단건 조회
     public Report findVerifiedExistsReport(long reportId) {

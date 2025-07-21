@@ -6,13 +6,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import com.logbei.be.ai.openai.OpenAiProperties;
 import com.logbei.be.ai.openai.dto.OpenAiMessage;
 import com.logbei.be.ai.openai.dto.OpenAiRequest;
 import com.logbei.be.ai.openai.dto.OpenAiResponse;
-import com.logbei.be.exception.BusinessLogicException;
-import com.logbei.be.exception.ExceptionCode;
+import com.logbei.be.exception.exception.BusinessLogicException;
+import com.logbei.be.exception.exception.ExceptionCode;
 import com.logbei.be.log.service.LogStorageService;
 import com.logbei.be.report.dto.RecordForAnalysisDto;
 import com.logbei.be.report.dto.ReportAnalysisRequest;
@@ -489,27 +488,6 @@ public class OpenAiService {
         return request;
 
     }
-
-    // GPT 서버에 요청을 보내고 응답 content를 반환하는 메서드 (aiRequest -> aiResponse)
-//    public OpenAiResponse sendToGpt(OpenAiRequest request) throws IOException {
-//        //GPT API에 보낼 POST 요청 생성
-//        HttpPost post = new HttpPost(properties.getBaseUrl());
-//        //요청 헤더 설정 : 인증토큰과 JSON 타입 명시
-//        post.setHeader("Authorization", "Bearer " + properties.getApiKey());
-//        post.setHeader("Content-Type", "application/json");
-//        //ChatRequest 객체를 JSON 문자열로 직렬화 -> 요청 본문에 담기
-//        post.setEntity(new StringEntity(objectMapper.writeValueAsString(request), StandardCharsets.UTF_8));
-//
-//        //HTTP  클라이언트로 요청 전송 및 응답 수신
-//        try (CloseableHttpClient client = HttpClients.createDefault();
-//             CloseableHttpResponse response = client.execute(post)) {
-//
-//            //응답 JSON 문자열 꺼냄
-//            String json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-//            //JSON 문자열을 ChatResponse 객체로 역직렬화
-//            return objectMapper.readValue(json, OpenAiResponse.class);
-//        }
-//    }
 
     // GPT 서버에 요청을 보내고 응답 content를 반환하는 메서드 (aiRequest -> aiResponse)
     //타임아웃 : 연결, 요청, 응답 각 60초로 제한 + 리트라이 : 최대 3번까지 재시도, 실패 시 예외 처리

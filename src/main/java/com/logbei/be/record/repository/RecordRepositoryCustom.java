@@ -1,6 +1,6 @@
-package com.springboot.record.repository;
+package com.logbei.be.record.repository;
 
-import com.springboot.record.entity.Record;
+import com.logbei.be.record.entity.Record;
 
 import java.time.LocalDateTime;
 import java.util.List;

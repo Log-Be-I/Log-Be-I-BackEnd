@@ -1,6 +1,6 @@
 package com.logbei.be.report.service;
 
-import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.exception.BusinessLogicException;
 import com.logbei.be.report.dto.ReportAnalysisRequest;
 import com.logbei.be.report.dto.ReportAnalysisResponse;
 import com.logbei.be.report.entity.Report;

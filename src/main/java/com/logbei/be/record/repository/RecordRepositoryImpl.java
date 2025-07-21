@@ -1,8 +1,8 @@
-package com.springboot.record.repository;
+package com.logbei.be.record.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.springboot.record.entity.QRecord;
-import com.springboot.record.entity.Record;
+import com.logbei.be.record.entity.QRecord;
+import com.logbei.be.record.entity.Record;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;

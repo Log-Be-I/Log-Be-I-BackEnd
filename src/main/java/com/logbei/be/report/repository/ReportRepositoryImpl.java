@@ -1,8 +1,8 @@
-package com.springboot.report.repository;
+package com.logbei.be.report.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.springboot.report.entity.QReport;
-import com.springboot.report.entity.Report;
+import com.logbei.be.report.entity.QReport;
+import com.logbei.be.report.entity.Report;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;

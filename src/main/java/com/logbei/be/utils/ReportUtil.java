@@ -1,8 +1,7 @@
 package com.logbei.be.utils;
 
-
-import com.logbei.be.exception.BusinessLogicException;
-import com.logbei.be.exception.ExceptionCode;
+import com.logbei.be.exception.exception.BusinessLogicException;
+import com.logbei.be.exception.exception.ExceptionCode;
 import com.logbei.be.record.entity.Record;
 import com.logbei.be.report.dto.RecordForAnalysisDto;
 import com.logbei.be.report.dto.ReportAnalysisRequest;

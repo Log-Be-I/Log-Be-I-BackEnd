@@ -2,8 +2,8 @@ package com.logbei.be.report.mapper;
 
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.report.dto.ReportResponseDto;
-import com.logbei.be.report.entity.Report;
 import com.logbei.be.report.dto.SummaryResponseDto;
+import com.logbei.be.report.entity.Report;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
