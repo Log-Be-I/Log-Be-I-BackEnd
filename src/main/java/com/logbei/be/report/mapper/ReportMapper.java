@@ -1,10 +1,10 @@
 package com.logbei.be.report.mapper;
 
-import com.logbei.be.report.dto.ReportDto;
+import com.logbei.be.report.dto.ReportResponseDto;
+import com.logbei.be.report.dto.SummaryResponseDto;
 import com.logbei.be.report.entity.Report;
 import org.mapstruct.Mapper;
-import com.logbei.be.report.dto.SummaryResponseDto;
-import com.logbei.be.report.dto.ReportResponseDto;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +46,8 @@ public interface ReportMapper {
                 report.getContent(),
                 report.getReportType(),
                 report.getPeriodNumber(),
-                report.getCreatedAt()
+                report.getCreatedAt(),
+                report.getMember().getMemberId()
         );
     }
 

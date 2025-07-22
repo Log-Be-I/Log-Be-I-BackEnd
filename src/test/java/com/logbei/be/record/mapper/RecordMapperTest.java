@@ -4,8 +4,6 @@ import com.logbei.be.category.entity.Category;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.record.dto.RecordResponseDto;
 import com.logbei.be.record.entity.Record;
-import com.logbei.be.record.mapper.RecordMapper;
-import com.logbei.be.record.mapper.RecordMapperImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;

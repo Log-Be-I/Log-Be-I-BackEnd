@@ -1,6 +1,5 @@
 package com.logbei.be.category.mapper;
 
-
 import com.logbei.be.category.entity.Category;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
