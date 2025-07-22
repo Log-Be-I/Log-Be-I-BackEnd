@@ -2,8 +2,8 @@ package com.logbei.be.report.controller;
 
 import com.logbei.be.ai.openai.service.OpenAiService;
 import com.logbei.be.auth.utils.CustomPrincipal;
-import com.logbei.be.exception.exception.BusinessLogicException;
-import com.logbei.be.exception.exception.ExceptionCode;
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
 import com.logbei.be.record.entity.Record;
 import com.logbei.be.record.service.RecordService;
 import com.logbei.be.report.dto.ReportAnalysisRequest;

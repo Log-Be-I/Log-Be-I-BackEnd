@@ -2,11 +2,8 @@ package com.logbei.be.dashboard.controller;
 
 import com.logbei.be.dashboard.dto.DashBoardResponseDto;
 import com.logbei.be.dashboard.service.DashBoardService;
-import com.logbei.be.dashboard.dashboard.controller.DashBoardController;
-import com.logbei.be.dashboard.dashboard.dto.DashBoardResponseDto;
-import com.logbei.be.dashboard.dashboard.dto.RecentNotice;
-import com.logbei.be.dashboard.dashboard.dto.UnansweredQuestion;
-import com.logbei.be.dashboard.dashboard.service.DashBoardService;
+import com.logbei.be.dashboard.dto.RecentNotice;
+import com.logbei.be.dashboard.dto.UnansweredQuestion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

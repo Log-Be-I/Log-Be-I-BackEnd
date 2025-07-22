@@ -6,8 +6,8 @@ import com.logbei.be.member.service.MemberService;
 import com.logbei.be.pushToken.service.PushTokenService;
 import com.logbei.be.report.dto.ReportAnalysisRequest;
 
-import com.logbei.be.exception.exception.BusinessLogicException;
-import com.logbei.be.exception.exception.ExceptionCode;
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
 
 import com.logbei.be.report.dto.ReportAnalysisResponse;
 import com.logbei.be.report.entity.Report;

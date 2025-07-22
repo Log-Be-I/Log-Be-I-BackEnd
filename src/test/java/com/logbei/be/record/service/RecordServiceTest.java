@@ -2,7 +2,7 @@ package com.logbei.be.record.service;
 
 import com.logbei.be.category.entity.Category;
 import com.logbei.be.category.service.CategoryService;
-import com.logbei.be.exception.exception.BusinessLogicException;
+import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.record.entity.Record;
