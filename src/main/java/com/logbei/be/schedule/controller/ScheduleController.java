@@ -1,18 +1,14 @@
-package com.springboot.schedule.controller;
+package com.logbei.be.schedule.controller;
 
 
 import com.logbei.be.auth.utils.CustomPrincipal;
-import com.logbei.be.member.entity.Member;
-import com.logbei.be.member.service.MemberService;
 import com.logbei.be.responsedto.ListResponseDto;
 import com.logbei.be.responsedto.SingleResponseDto;
 import com.logbei.be.schedule.dto.SchedulePatchDto;
 import com.logbei.be.schedule.dto.SchedulePostDto;
 import com.logbei.be.schedule.dto.*;
-import com.logbei.be.schedule.dto.*;
 import com.logbei.be.schedule.entity.Schedule;
 import com.logbei.be.schedule.mapper.ScheduleMapper;
-import com.logbei.be.schedule.repository.ScheduleRepository;
 import com.logbei.be.schedule.service.ScheduleService;
 import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +25,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.logbei.be.responsedto.SingleResponseDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.io.IOException;
