@@ -3,7 +3,6 @@ package com.logbei.be.record.controller;
 import com.logbei.be.ai.clova.ClovaSpeechService;
 import com.logbei.be.ai.openai.service.OpenAiService;
 import com.logbei.be.auth.utils.CustomPrincipal;
-import com.logbei.be.record.controller.RecordController;
 import com.logbei.be.record.dto.RecordResponseDto;
 import com.logbei.be.record.entity.Record;
 import com.logbei.be.record.mapper.RecordMapper;

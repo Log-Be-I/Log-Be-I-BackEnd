@@ -8,7 +8,6 @@ import com.logbei.be.member.service.MemberService;
 import com.logbei.be.record.entity.Record;
 import com.logbei.be.record.repository.HistoricalRecordRepository;
 import com.logbei.be.record.repository.RecordRepository;
-import com.logbei.be.record.service.RecordService;
 import com.logbei.be.schedule.entity.Schedule;
 import com.logbei.be.schedule.repository.ScheduleRepository;
 import com.logbei.be.utils.AuthorizationUtils;

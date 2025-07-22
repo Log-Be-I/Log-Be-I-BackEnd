@@ -1,6 +1,7 @@
 package com.logbei.be.record.mapper;
 
-
+import com.logbei.be.record.dto.RecordPatchDto;
+import com.logbei.be.record.dto.RecordPostDto;
 import com.logbei.be.record.dto.RecordResponseDto;
 import com.logbei.be.record.entity.Record;
 import org.mapstruct.Mapper;

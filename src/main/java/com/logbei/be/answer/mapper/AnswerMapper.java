@@ -13,9 +13,7 @@ import org.mapstruct.Mapping;
 public interface AnswerMapper {
     @Mapping(target = "member.memberId", source = "memberId")
     @Mapping(target = "question.questionId", source = "questionId")
-
     Answer answerPostToAnswer(AnswerPostDto postDto);
-
     Answer answerPatchToAnswer(AnswerPatchDto patchDto);
 
     default AnswerResponseDto answerToAnswerResponse(Answer answer) {

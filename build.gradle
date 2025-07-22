@@ -18,6 +18,10 @@ repositories {
 	google()
 }
 
+// QueryDSL 버전 변수 추가
+ext {
+	querydslVersion = '5.0.0'
+}
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -39,6 +43,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.14'
+	implementation 'org.hibernate:hibernate-core:5.6.15.Final'
 	// 구글 OAuth
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'com.google.api-client:google-api-client:2.5.0'
@@ -72,7 +77,13 @@ dependencies {
 
 	// MySQL
 	implementation 'mysql:mysql-connector-java:8.0.33'
-
+	// QueryDSL JPA 모듈 추가
+	implementation "com.querydsl:querydsl-jpa:${querydslVersion}"
+	implementation "com.querydsl:querydsl-apt:${querydslVersion}"
+	// QueryDSL JPA 어노테이션 프로세서 추가
+	annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jpa"
+	implementation 'javax.persistence:javax.persistence-api:2.2'
+	annotationProcessor 'javax.persistence:javax.persistence-api:2.2'
 	//Mockito
 //	testImplementation 'org.mockito:mockito-inline:5.2.0'
 	testImplementation 'org.mockito:mockito-core:4.11.0'
@@ -89,4 +100,21 @@ tasks.named('test') {
 
 jar {
 	enabled = false
+}
+
+// QueryDSL Q타입(메타모델) 소스 디렉토리 추가
+sourceSets {
+	main {
+		java {
+			srcDir("$buildDir/generated/sources/annotationProcessor/java/main")
+		}
+	}
+}
+//Q타입 생성 경로 명시
+tasks.withType(JavaCompile).configureEach { task ->
+	task.options.annotationProcessorGeneratedSourcesDirectory =
+			layout.buildDirectory
+					.dir("generated/sources/annotationProcessor/java/main")
+					.get()
+					.asFile
 }

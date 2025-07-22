@@ -1,8 +1,10 @@
 package com.logbei.be.keyword.entity;
 
-import lombok.*;
+
 import com.logbei.be.audit.BaseEntity;
 import com.logbei.be.member.entity.Member;
+import lombok.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
