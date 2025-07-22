@@ -4,8 +4,8 @@ package com.logbei.be.auth.service;
 
 import com.logbei.be.auth.dto.GoogleTokenResponse;
 import com.logbei.be.auth.jwt.JwtTokenizer;
-import com.logbei.be.exception.exception.BusinessLogicException;
-import com.logbei.be.exception.exception.ExceptionCode;
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.repository.MemberRepository;
 import com.logbei.be.oauth.GoogleInfoDto;

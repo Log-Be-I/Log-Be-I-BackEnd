@@ -2,8 +2,8 @@ package com.logbei.be.category.service;
 
 import com.logbei.be.category.entity.Category;
 import com.logbei.be.category.repository.CategoryRepository;
-import com.logbei.be.exception.exception.BusinessLogicException;
-import com.logbei.be.exception.exception.ExceptionCode;
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
 import com.logbei.be.member.TestDataFactory;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;

@@ -1,8 +1,8 @@
-package com.logbei.be.keyword.keyword.mapper;
+package com.logbei.be.keyword.mapper;
 
-import com.logbei.be.keyword.keyword.dto.KeywordPostDto;
-import com.logbei.be.keyword.keyword.dto.KeywordResponseDto;
-import com.logbei.be.keyword.keyword.entity.Keyword;
+import com.logbei.be.keyword.dto.KeywordPostDto;
+import com.logbei.be.keyword.dto.KeywordResponseDto;
+import com.logbei.be.keyword.entity.Keyword;
 import org.mapstruct.Mapper;
 
 import java.util.List;

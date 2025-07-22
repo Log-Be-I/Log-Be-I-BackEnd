@@ -1,7 +1,7 @@
 package com.logbei.be.auth.utils;
 
-import com.logbei.be.exception.exception.BusinessLogicException;
-import com.logbei.be.exception.exception.ExceptionCode;
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.repository.MemberRepository;
 import org.springframework.security.core.userdetails.UserDetails;

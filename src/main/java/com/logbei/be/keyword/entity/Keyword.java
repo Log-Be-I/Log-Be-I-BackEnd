@@ -1,4 +1,4 @@
-package com.logbei.be.keyword.keyword.entity;
+package com.logbei.be.keyword.entity;
 
 import com.logbei.be.audit.BaseEntity;
 import com.logbei.be.member.entity.Member;

@@ -1,4 +1,4 @@
-package com.logbei.be.keyword.keyword.API;
+package com.logbei.be.keyword.API;
 
 import com.google.gson.*;
 import com.logbei.be.log.service.LogStorageService;

@@ -3,7 +3,7 @@ package com.logbei.be.log;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectResult;
-import com.logbei.be.exception.exception.BusinessLogicException;
+import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.log.service.LogStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

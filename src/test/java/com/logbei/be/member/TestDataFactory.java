@@ -1,7 +1,7 @@
 package com.logbei.be.member;
 
 import com.logbei.be.category.entity.Category;
-import com.logbei.be.keyword.keyword.entity.Keyword;
+import com.logbei.be.keyword.entity.Keyword;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.question.entity.Question;
 

@@ -1,7 +1,7 @@
-package com.logbei.be.dashboard.dashboard.controller;
+package com.logbei.be.dashboard.controller;
 
-import com.logbei.be.dashboard.dashboard.dto.DashBoardResponseDto;
-import com.logbei.be.dashboard.dashboard.service.DashBoardService;
+import com.logbei.be.dashboard.dto.DashBoardResponseDto;
+import com.logbei.be.dashboard.service.DashBoardService;
 import com.logbei.be.swagger.SwaggerErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

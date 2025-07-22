@@ -2,10 +2,9 @@ package com.logbei.be.keyword.controller;
 
 import com.google.gson.Gson;
 import com.logbei.be.auth.utils.CustomPrincipal;
-import com.logbei.be.keyword.keyword.API.NaverNewsApiService;
-import com.logbei.be.keyword.keyword.controller.KeywordController;
-import com.logbei.be.keyword.keyword.entity.Keyword;
-import com.logbei.be.keyword.keyword.service.KeywordService;
+import com.logbei.be.keyword.API.NaverNewsApiService;
+import com.logbei.be.keyword.entity.Keyword;
+import com.logbei.be.keyword.service.KeywordService;
 
 import com.logbei.be.responsedto.ListResponseDto;
 import org.junit.jupiter.api.Test;

@@ -3,7 +3,7 @@ package com.logbei.be.member.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.logbei.be.audit.BaseEntity;
 import com.logbei.be.category.entity.Category;
-import com.logbei.be.keyword.keyword.entity.Keyword;
+import com.logbei.be.keyword.entity.Keyword;
 import com.logbei.be.question.entity.Question;
 import com.logbei.be.record.entity.Record;
 import com.logbei.be.report.entity.Report;

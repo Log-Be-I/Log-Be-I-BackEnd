@@ -1,8 +1,7 @@
 package com.logbei.be.keyword.service;
 
-import com.logbei.be.keyword.keyword.entity.Keyword;
-import com.logbei.be.keyword.keyword.repository.KeywordRepository;
-import com.logbei.be.keyword.keyword.service.KeywordService;
+import com.logbei.be.keyword.entity.Keyword;
+import com.logbei.be.keyword.repository.KeywordRepository;
 import com.logbei.be.member.TestDataFactory;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;

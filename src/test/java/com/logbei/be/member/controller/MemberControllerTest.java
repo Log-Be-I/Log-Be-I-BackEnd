@@ -1,8 +1,8 @@
 package com.logbei.be.member.controller;
 
 import com.logbei.be.auth.utils.CustomPrincipal;
-import com.logbei.be.exception.exception.BusinessLogicException;
-import com.logbei.be.exception.exception.ExceptionCode;
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
 import com.logbei.be.member.dto.MemberPostDto;
 import com.logbei.be.member.dto.MemberResponseDto;
 import com.logbei.be.member.entity.Member;

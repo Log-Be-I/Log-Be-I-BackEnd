@@ -1,7 +1,7 @@
 package com.logbei.be.question.service;
 
-import com.logbei.be.dashboard.dashboard.dto.UnansweredQuestion;
-import com.logbei.be.exception.exception.BusinessLogicException;
+import com.logbei.be.dashboard.dto.UnansweredQuestion;
+import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.question.entity.Question;

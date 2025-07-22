@@ -1,7 +1,7 @@
 package com.logbei.be.advice;
 
 
-import com.logbei.be.exception.exception.BusinessLogicException;
+import com.logbei.be.exception.BusinessLogicException;
 import com.logbei.be.log.service.LogStorageService;
 import com.logbei.be.response.ErrorResponse;
 import io.swagger.v3.oas.annotations.Hidden;

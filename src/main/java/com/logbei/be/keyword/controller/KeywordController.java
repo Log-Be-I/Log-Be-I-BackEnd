@@ -1,13 +1,13 @@
-package com.logbei.be.keyword.keyword.controller;
+package com.logbei.be.keyword.controller;
 
 import com.google.gson.Gson;
 import com.logbei.be.auth.utils.CustomPrincipal;
-import com.logbei.be.keyword.keyword.API.NaverNewsApiService;
-import com.logbei.be.keyword.keyword.dto.KeywordPostDto;
-import com.logbei.be.keyword.keyword.dto.KeywordResponseDto;
-import com.logbei.be.keyword.keyword.entity.Keyword;
-import com.logbei.be.keyword.keyword.mapper.KeywordMapper;
-import com.logbei.be.keyword.keyword.service.KeywordService;
+import com.logbei.be.keyword.API.NaverNewsApiService;
+import com.logbei.be.keyword.dto.KeywordPostDto;
+import com.logbei.be.keyword.dto.KeywordResponseDto;
+import com.logbei.be.keyword.entity.Keyword;
+import com.logbei.be.keyword.mapper.KeywordMapper;
+import com.logbei.be.keyword.service.KeywordService;
 import com.logbei.be.responsedto.ListResponseDto;
 import com.logbei.be.swagger.SwaggerErrorResponse;
 import com.logbei.be.utils.UriCreator;

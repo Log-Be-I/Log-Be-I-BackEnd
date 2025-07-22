@@ -1,8 +1,8 @@
-package com.logbei.be.dashboard.dashboard.service;
+package com.logbei.be.dashboard.service;
 
-import com.logbei.be.dashboard.dashboard.dto.DashBoardResponseDto;
-import com.logbei.be.dashboard.dashboard.dto.RecentNotice;
-import com.logbei.be.dashboard.dashboard.dto.UnansweredQuestion;
+import com.logbei.be.dashboard.dto.DashBoardResponseDto;
+import com.logbei.be.dashboard.dto.RecentNotice;
+import com.logbei.be.dashboard.dto.UnansweredQuestion;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.notice.service.NoticeService;
 import com.logbei.be.question.service.QuestionService;

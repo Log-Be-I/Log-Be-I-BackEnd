@@ -1,7 +1,7 @@
 package com.logbei.be.response;
 
 
-import com.logbei.be.exception.exception.ExceptionCode;
+import com.logbei.be.exception.ExceptionCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;

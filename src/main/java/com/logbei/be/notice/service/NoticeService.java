@@ -1,8 +1,8 @@
 package com.logbei.be.notice.service;
 
-import com.logbei.be.dashboard.dashboard.dto.RecentNotice;
-import com.logbei.be.exception.exception.BusinessLogicException;
-import com.logbei.be.exception.exception.ExceptionCode;
+import com.logbei.be.dashboard.dto.RecentNotice;
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
 import com.logbei.be.member.entity.Member;
 import com.logbei.be.member.service.MemberService;
 import com.logbei.be.notice.entity.Notice;

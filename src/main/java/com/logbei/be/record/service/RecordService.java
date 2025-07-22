@@ -3,8 +3,8 @@ package com.logbei.be.record.service;
 import com.logbei.be.ai.openai.service.OpenAiService;
 import com.logbei.be.category.entity.Category;
 import com.logbei.be.category.service.CategoryService;
-import com.logbei.be.exception.exception.BusinessLogicException;
-import com.logbei.be.exception.exception.ExceptionCode;
+import com.logbei.be.exception.BusinessLogicException;
+import com.logbei.be.exception.ExceptionCode;
 
 import com.logbei.be.log.service.LogStorageService;
 

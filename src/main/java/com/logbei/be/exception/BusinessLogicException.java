@@ -1,4 +1,4 @@
-package com.logbei.be.exception.exception;
+package com.logbei.be.exception;
 
 import lombok.Getter;
 
